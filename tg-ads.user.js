@@ -193,17 +193,17 @@
                 "https://cdn.jsdelivr.net/npm/sweetalert2@11",
                 "https://klao258.github.io/JBADS/autoADSData.js",
             ];
-            const expectedVars = [
-                "window.autoADSData",
-                "window.ajInit",
-                "window.OwnerAds"
-            ];
-            
+
             // 加载 autoADSData
-            const ready = await loadMultipleScriptsAndWaitForAll(scripts, expectedVars);
+            const ready = await loadMultipleScriptsAndWaitForAll(scripts, ['window.autoADSData']);
 
             // 加载 postData
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[user] }.js`], ["window.postData"]);
+            const expectedVars = [
+                "window.ajInit",
+                "window.OwnerAds",
+                "window.postData"
+            ];
+            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[user] }.js`], expectedVars);
             
             // 加载主逻辑
             var postID = [];
