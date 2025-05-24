@@ -1,28 +1,31 @@
-name: Test Auto Version & Deploy
+name: Auto Update Version + Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+
+permissions:
+  contents: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout 代码
+      - name: Checkout 仓库代码
         uses: actions/checkout@v3
 
-      - name: 🕒 注入版本号到脚本
+      - name: 注入动态版本号
         run: |
           VERSION=$(date "+%Y.%m.%d-%H%M")
-          sed -i "s/@version\s\+.*/@version      ${VERSION}/" tg-ads.user.js
-          echo "✅ version = ${VERSION}"
+          echo "✅ 当前版本: ${VERSION}"
+          sed -i "s/^\/\/ @version\s\+.*/\/\/ @version      ${VERSION}/" tg-ads.user.js
           grep "@version" tg-ads.user.js
 
-      - name: 🚀 部署到 GitHub Pages
+      - name: 部署到 GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           publish_branch: gh-pages
+
