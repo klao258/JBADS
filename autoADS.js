@@ -342,7 +342,7 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                 document.head.appendChild(script);
             });
         };
-        await loadAdminData();
+        postData = await loadAdminData();
 
         try {
             postID = Object.keys(postData || {}); // 对应账号所有ads标识
