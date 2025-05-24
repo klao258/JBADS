@@ -297,6 +297,7 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                 script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
                 document.head.appendChild(script);
                 script.onload = () => {
+                    sleep(1000)
                     resolve(true);
                 };
                 script.onerror = () => resolve(false);
