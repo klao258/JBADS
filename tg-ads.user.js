@@ -206,15 +206,15 @@
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[user] }.js`], expectedVars);
             
             // 加载主逻辑
-            var postID = [];
+            window.postID = [];
             if (ready) {
                 console.log("✅ 所有脚本加载成功，postData 可用：");
 
-                postID = Object.keys(window.postData || {}); // 对应账号所有ads标识
+                window.postID = Object.keys(window.postData || {}); // 对应账号所有ads标识
             } else {
                 console.warn("❌ 加载失败或变量未就绪");
                 window.postData = {}
-                postID = []
+                window.postID = []
             }
 
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], []);
