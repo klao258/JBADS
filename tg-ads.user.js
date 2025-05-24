@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.25-02:48:58
+// @version      2025.05.25-02:51:39
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -79,12 +79,12 @@
             script.src = `${url}?t=${Date.now()}`;
             script.async = true;
             script.onload = () => {
-            console.log(`✅ 加载成功：${url}`);
-            resolve(true);
+                // console.log(`✅ 加载成功：${url}`);
+                resolve(true);
             };
             script.onerror = () => {
-            console.error(`❌ 加载失败：${url}`);
-            resolve(false);
+                // console.error(`❌ 加载失败：${url}`);
+                resolve(false);
             };
             document.head.appendChild(script);
         });
