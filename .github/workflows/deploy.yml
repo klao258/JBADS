@@ -1,24 +1,22 @@
-name: 自动版本号 + 部署页面
+name: 自动更新版本号 + 自动部署
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 拉取代码
+      - name: 📥 Checkout 主分支
         uses: actions/checkout@v3
 
-      - name: 🕒 自动更新 tg-ads.user.js 的 @version
+      - name: 🕒 修改 tg-ads.user.js 中的 @version 字段
         run: |
-          FILE="tg-ads.user.js"
           VERSION=$(date "+%Y.%m.%d-%H%M")
-          sed -i "s/@version\s\+.*/@version      ${VERSION}/" "$FILE"
-          echo "✅ Version set to ${VERSION}"
+          sed -i "s/@version\s\+.*/@version      ${VERSION}/" tg-ads.user.js
+          echo "✅ 版本号已设置为 ${VERSION}"
 
       - name: 🚀 部署到 GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
