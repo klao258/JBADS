@@ -1,6 +1,7 @@
 (() => {
     "use strict";
-
+    console.log('不用更新版本')
+    
     const { accountObj, FTChannel, JBChannel, DBChannel, ADSChannels, promoteOpts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
 
     window.isLoad = false;
