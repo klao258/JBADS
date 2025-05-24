@@ -195,7 +195,7 @@
             ];
 
             // 加载 autoADSData
-            const ready = await loadMultipleScriptsAndWaitForAll(scripts, ['window.autoADSData']);
+            const ready = await loadMultipleScriptsAndWaitForAll(scripts, ['autoADSData']);
 
             // 加载 postData
             const expectedVars = [
