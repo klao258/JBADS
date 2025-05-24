@@ -13,7 +13,6 @@ var maxWidth = "100%";
 var loadADSFlag = false;
 var user = '';
 
-let postData = {};
 let postID = []
 
 let db;
@@ -330,18 +329,19 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                 let script = document.createElement("script");
                 script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
                 script.onload = () => {
-                    console.log("postData 加载完成");
+                    console.log("postData 加载完成", `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`, postData);
                     resolve(postData);
                 };
                 script.onerror = () => reject(new Error("postData 加载失败"));
                 document.head.appendChild(script);
             });
         };
-        postData = await loadAdminData();
+        await loadAdminData();
 
         try {
             postID = Object.keys(postData || {}); // 对应账号所有ads标识
         } catch (error) {
+            postData = {}
             postID = []
         }
 
