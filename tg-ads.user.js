@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.25-01:35:54
+// @version      2025.05.25-01:39:53
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -50,6 +50,20 @@
         window.open(REMOTE_URL, "_blank");
         };
     }
+
+    // 等待 jQuery 加载完成
+    async function waitForJQuery(maxTries = 50, interval = 100) {
+        for (let i = 0; i < maxTries; i++) {
+          if (typeof window.$ === 'function') {
+            console.log('✅ jQuery 已加载');
+            return true;
+          }
+          await new Promise(res => setTimeout(res, interval));
+        }
+        console.warn('❌ 等待 jQuery 超时');
+        return false;
+    }
+          
 
     /**
      * 加载多个脚本，并等待多个变量全部定义完成
@@ -172,6 +186,8 @@
                 document.head.appendChild(link);
             };
             loadCSS("https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css");
+
+            await waitForJQuery();
 
             let user =  $(".pr-header-account-name").text()
             const scripts = [
