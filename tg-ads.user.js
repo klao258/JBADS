@@ -79,12 +79,12 @@
             script.src = `${url}?t=${Date.now()}`;
             script.async = true;
             script.onload = () => {
-            console.log(`✅ 加载成功：${url}`);
-            resolve(true);
+                // console.log(`✅ 加载成功：${url}`);
+                resolve(true);
             };
             script.onerror = () => {
-            console.error(`❌ 加载失败：${url}`);
-            resolve(false);
+                // console.error(`❌ 加载失败：${url}`);
+                resolve(false);
             };
             document.head.appendChild(script);
         });
