@@ -13,13 +13,8 @@ var maxWidth = "100%";
 var loadADSFlag = false;
 var user = '';
 
+let postData = {};
 let postID = []
-try {
-    postID = Object.keys(postData || {}); // 对应账号所有ads标识
-} catch (error) {
-    var postData = {}
-    postID = []
-}
 
 let db;
 const cpms_store = "cpms";  // 记录单价
@@ -329,6 +324,31 @@ await interceptBeforeScript("tgsticker.js?31", () => {
         await loadSwal();
         
         user =  $(".pr-header-account-name").text()
+
+        let loadAdminData = async () => {
+            if (typeof postData !== "undefined") {
+                console.log("postData 已加载");
+                return postData;
+            }
+        
+            return new Promise((resolve, reject) => {
+                let script = document.createElement("script");
+                script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
+                script.onload = () => {
+                    console.log("postData 加载完成");
+                    resolve(postData);
+                };
+                script.onerror = () => reject(new Error("postData 加载失败"));
+                document.head.appendChild(script);
+            });
+        };
+        await loadAdminData();
+
+        try {
+            postID = Object.keys(postData || {}); // 对应账号所有ads标识
+        } catch (error) {
+            postID = []
+        }
 
         // 功能界面
         const createView = () => {
