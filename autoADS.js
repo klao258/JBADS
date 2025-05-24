@@ -296,8 +296,12 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                 let script = document.createElement("script");
                 script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
                 document.head.appendChild(script);
-                script.onload = () => {
-                    sleep(1000)
+                script.onload = async () => {
+                    // 等待 window.postData 可用
+                    for (let i = 0; i < 500; i++) {
+                        if (window.postData) break;
+                        await new Promise(res => setTimeout(res, 100));
+                    }
                     resolve(true);
                 };
                 script.onerror = () => resolve(false);
