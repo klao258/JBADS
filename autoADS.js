@@ -298,7 +298,7 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                 script.onload = async () => {
                     // 等待 window.postData 可用
                     for (let i = 0; i < 5000; i++) {
-                        if (window.postData) break;
+                        if (postData) break;
                         await new Promise(res => setTimeout(res, 100));
                     }
                     resolve(true);
