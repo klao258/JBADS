@@ -18,9 +18,7 @@
 
 (function () {
     'use strict';
-  
-    console.log('✅ TG广告脚本已加载，当前版本：' + GM_info.script.version);
-
+    
     // ===== 🔄 检查远程是否有新版本 =====
     const CURRENT_VERSION = GM_info.script.version;
     const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
