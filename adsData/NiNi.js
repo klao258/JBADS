@@ -1,0 +1,23 @@
+var postData = {
+  "ADS-NiNi-7SgShweXZ": "21-2-74.3",
+  "ADS-NiNi-7tQWsj9wD": "32-0-0",
+  "ADS-NiNi-72vuRMYpI": "10-0-0",
+  "ADS-NiNi-7mtmZsyO0": "4-0-0",
+  "ADS-NiNi-7XP9QEajq": "2-0-0",
+  "ADS-NiNi-7doTDcv5m": "66-0-0",
+  "ADS-NiNi-7HHTrJwdd": "5-0-0",
+  "ADS-NiNi-723xDM5lO": "6-0-0",
+  "ADS-NiNi-7GJxQMHaQ": "3-0-0",
+  "ADS-NiNi-76d0xDzkz": "1-0-0",
+  "ADS-NiNi-7llEYZiDO": "10-0-0",
+  "ADS-NiNi-7BUHVx8cf": "7-0-0",
+  "ADS-NiNi-7JPjuX8NU": "11-0-0",
+  "ADS-NiNi-716BtEWsh": "1-0-0",
+  "ADS-NiNi-7jGs8JJXL": "1-0-0",
+  "ADS-NiNi-74CDXtzYr": "2-0-0",
+  "ADS-NiNi-7HWGHb0yn": "15-0-0",
+  "ADS-NiNi-7HxMtupwn": "5-0-0",
+  "ADS-NiNi-7qnbsfkWx": "1-0-0",
+  "ADS-NiNi-7eb4L7g5E": "2-0-0",
+  "ADS-NiNi-7t6zIhdS7": "1-0-0"
+}

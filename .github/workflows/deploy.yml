@@ -1,0 +1,28 @@
+name: 自动版本号 + 部署页面
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 拉取代码
+        uses: actions/checkout@v3
+
+      - name: 🕒 自动更新 tg-ads.user.js 的 @version
+        run: |
+          FILE="tg-ads.user.js"
+          VERSION=$(date "+%Y.%m.%d-%H%M")
+          sed -i "s/@version\s\+.*/@version      ${VERSION}/" "$FILE"
+          echo "✅ Version set to ${VERSION}"
+
+      - name: 🚀 部署到 GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
