@@ -1,0 +1,2 @@
+# JBADS
+JB旗下ADS专用
