@@ -297,8 +297,8 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                 script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
                 script.onload = async () => {
                     // 等待 window.postData 可用
-                    for (let i = 0; i < 5000; i++) {
-                        if (postData) break;
+                    for (let i = 0; i < 500; i++) {
+                        if (window.postData) break;
                         await new Promise(res => setTimeout(res, 100));
                     }
                     resolve(true);
@@ -309,10 +309,10 @@ await interceptBeforeScript("tgsticker.js?31", () => {
         };
         const tmp = await loadAdminData();
         if(tmp) {
-            console.log(`${accountObj[user]}，数据加载成功${postData}`);
-            postID = Object.keys(postData || {}); // 对应账号所有ads标识
+            console.log(`${accountObj[user]}，数据加载成功${window.postData}`);
+            postID = Object.keys(window.postData || {}); // 对应账号所有ads标识
         } else {
-            var postData = {}
+            window.postData = {}
             postID = []
         }
 
@@ -325,7 +325,7 @@ await interceptBeforeScript("tgsticker.js?31", () => {
          *  2.0 ~ 4.5	🌟🌟 待优化广告	可能只有注册或偶尔付费，质量低或素材问题，建议暂停优化方向。
          *  0.0 ~ 2.0	🌟 极低质量广告	几乎无效的投放，建议立刻停掉，别浪费预算。
          */
-        const values = Object.values(postData || {}).map((str) => {
+        const values = Object.values(window.postData || {}).map((str) => {
             const [regs, pays, money] = str.split("-").map(Number);
             return { regs, pays, money };
         });
@@ -1615,7 +1615,7 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                                     `Telegram Ads 已加载分析数据${postID.length}条`
                                 );
                             }
-                            let obj = postData[adsKey]?.split("-") || [];
+                            let obj = window.postData[adsKey]?.split("-") || [];
                             item["pviews"] = (tviews -  pviews) || 0;
                             item["pspent"] = pspent || 0
                             item["qviews"] = (pviews - qviews) || 0;
