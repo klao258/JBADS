@@ -171,39 +171,6 @@ const setDB = (data, store_name = cpms_store) => {
     });
 };
 
-/**
- * 权重得分 = 归一化注册 × 1.5 + 归一化付款人数 × 2.5 + 归一化付款金额 × 5
- * 分数区间	质量评级	文字描述
- *  8.5 ~ 10.0	🌟🌟🌟🌟🌟 极优广告	吸引力非常强，转化率与充值金额均属上乘，大概率为优质素材或投放点，值得放大。
- *  6.5 ~ 8.5	🌟🌟🌟🌟 优秀广告	付款转化表现稳定，ROI 可观，注册和活跃质量也不错，可继续投放或微调提升。
- *  4.5 ~ 6.5	🌟🌟🌟 中规中矩	有人注册也有转化，但金额一般，说明引流还行但没有打到大户，可调整策略。
- *  2.0 ~ 4.5	🌟🌟 待优化广告	可能只有注册或偶尔付费，质量低或素材问题，建议暂停优化方向。
- *  0.0 ~ 2.0	🌟 极低质量广告	几乎无效的投放，建议立刻停掉，别浪费预算。
- */
-const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
-const normalize = (val, min, max) => (val - min) / (max - min || 1); // 归一化函数
-const getWeightedScore = (ad, stats, weight) => {
-    const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
-    const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
-    const moneyScore = normalize(ad.money, stats.minMoney, stats.maxMoney);
-
-    return (
-        regScore * weight.regs + paysScore * weight.pays + moneyScore * weight.money
-    );
-};
-const values = Object.values(postData || {}).map((str) => {
-    const [regs, pays, money] = str.split("-").map(Number);
-    return { regs, pays, money };
-});
-const stats = {
-    minRegs: 0, //  Math.min(...values.map(v => v.regs)),
-    maxRegs: Math.max(...values.map((v) => v.regs)),
-    minPays: 0, //  Math.min(...values.map(v => v.pays)),
-    maxPays: Math.max(...values.map((v) => v.pays)),
-    minMoney: 0, //  Math.min(...values.map(v => v.money)),
-    maxMoney: Math.max(...values.map((v) => v.money)),
-};
-
 // 获取html
 const getHTML = (url, key, isParse = true) => {
     return new Promise((relove, reject) => {
@@ -346,6 +313,39 @@ await interceptBeforeScript("tgsticker.js?31", () => {
             postData = {}
             postID = []
         }
+
+        /**
+         * 权重得分 = 归一化注册 × 1.5 + 归一化付款人数 × 2.5 + 归一化付款金额 × 5
+         * 分数区间	质量评级	文字描述
+         *  8.5 ~ 10.0	🌟🌟🌟🌟🌟 极优广告	吸引力非常强，转化率与充值金额均属上乘，大概率为优质素材或投放点，值得放大。
+         *  6.5 ~ 8.5	🌟🌟🌟🌟 优秀广告	付款转化表现稳定，ROI 可观，注册和活跃质量也不错，可继续投放或微调提升。
+         *  4.5 ~ 6.5	🌟🌟🌟 中规中矩	有人注册也有转化，但金额一般，说明引流还行但没有打到大户，可调整策略。
+         *  2.0 ~ 4.5	🌟🌟 待优化广告	可能只有注册或偶尔付费，质量低或素材问题，建议暂停优化方向。
+         *  0.0 ~ 2.0	🌟 极低质量广告	几乎无效的投放，建议立刻停掉，别浪费预算。
+         */
+        const values = Object.values(postData || {}).map((str) => {
+            const [regs, pays, money] = str.split("-").map(Number);
+            return { regs, pays, money };
+        });
+        const stats = {
+            minRegs: 0, //  Math.min(...values.map(v => v.regs)),
+            maxRegs: Math.max(...values.map((v) => v.regs)),
+            minPays: 0, //  Math.min(...values.map(v => v.pays)),
+            maxPays: Math.max(...values.map((v) => v.pays)),
+            minMoney: 0, //  Math.min(...values.map(v => v.money)),
+            maxMoney: Math.max(...values.map((v) => v.money)),
+        };
+        const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
+        const normalize = (val, min, max) => (val - min) / (max - min || 1); // 归一化函数
+        const getWeightedScore = (ad, stats, weight) => {
+            const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
+            const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
+            const moneyScore = normalize(ad.money, stats.minMoney, stats.maxMoney);
+
+            return (
+                regScore * weight.regs + paysScore * weight.pays + moneyScore * weight.money
+            );
+        };
 
         // 功能界面
         const createView = () => {
