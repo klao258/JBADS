@@ -295,16 +295,16 @@ await interceptBeforeScript("tgsticker.js?31", () => {
             return new Promise((resolve, reject) => {
                 let script = document.createElement("script");
                 script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
-                document.head.appendChild(script);
                 script.onload = async () => {
-                    // 等待 window.postData 可用
-                    for (let i = 0; i < 500; i++) {
-                        if (window.postData) break;
+                    // 等待 window.adminData 可用
+                    for (let i = 0; i < 5000; i++) {
+                        if (window.adminData) break;
                         await new Promise(res => setTimeout(res, 100));
                     }
                     resolve(true);
                 };
                 script.onerror = () => resolve(false);
+                document.head.appendChild(script);
             });
         };
         const tmp = await loadAdminData();
