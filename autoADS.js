@@ -1,7 +1,7 @@
 "use strict";
 
 
-console.log("------ githup 脚本注入开始执行, 自动化部署更新 --------");
+console.log("------ githup 脚本注入开始执行, 自动化部署更新. --------");
 
 const {accountObj, FTChannel, JBChannel, DBChannel, ADSChannels, promoteOpts, GQText, copyText, guid, getRNum, copy, sleep, date, timestampToDate, inStr} = autoADSData
 
