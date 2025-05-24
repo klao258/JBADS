@@ -1,9 +1,7 @@
 (() => {
     "use strict";
 
-    console.log(`------ 脚本注入开始执行, 自动更新版本号, 自动化部署更新.  --------`);
-
-    const {accountObj, FTChannel, JBChannel, DBChannel, ADSChannels, promoteOpts, GQText, copyText, guid, getRNum, copy, sleep, date, timestampToDate, inStr} = autoADSData
+    const { accountObj, FTChannel, JBChannel, DBChannel, ADSChannels, promoteOpts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
 
     window.isLoad = false;
     var timerID = null;
@@ -11,7 +9,7 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
-    var user = '';
+    var user = "";
 
     /**
      * 权重得分 = 归一化注册 × 1.5 + 归一化付款人数 × 2.5 + 归一化付款金额 × 5
@@ -26,23 +24,28 @@
         const [regs, pays, money] = str.split("-").map(Number);
         return { regs, pays, money };
     });
+
     const stats = {
-        minRegs: 0, //  Math.min(...values.map(v => v.regs)),
+        minRegs: 0,
         maxRegs: Math.max(...values.map((v) => v.regs)),
-        minPays: 0, //  Math.min(...values.map(v => v.pays)),
+        minPays: 0,
         maxPays: Math.max(...values.map((v) => v.pays)),
-        minMoney: 0, //  Math.min(...values.map(v => v.money)),
+        minMoney: 0,
         maxMoney: Math.max(...values.map((v) => v.money)),
     };
+
     const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
     const normalize = (val, min, max) => (val - min) / (max - min || 1); // 归一化函数
+
     const getWeightedScore = (ad, stats, weight) => {
         const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
         const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
         const moneyScore = normalize(ad.money, stats.minMoney, stats.maxMoney);
 
         return (
-            regScore * weight.regs + paysScore * weight.pays + moneyScore * weight.money
+            regScore * weight.regs +
+            paysScore * weight.pays +
+            moneyScore * weight.money
         );
     };
 
@@ -64,7 +67,7 @@
                     $(this).text("展开 ▼");
                     $container.data("collapsed", true);
                 }
-            }
+            },
         }).css({
             width: "100%",
             marginBottom: "5px",
@@ -73,7 +76,7 @@
             backgroundColor: "#f0f0f0",
             border: "1px solid #ccc",
             borderRadius: "5px",
-            cursor: "pointer"
+            cursor: "pointer",
         });
 
         // 创建容器
@@ -125,13 +128,35 @@
         // 添加选项（可根据需要修改）
         promoteOpts.forEach((opt) => {
             if (FTChannel.includes(user)) {
-                if (![ "JB6666_BOT", "jbpc28", "jbft", "jbyll", "jbtg001", "jbtg002", "jbtg003", "jbtg004", "jbtg005", "jbft100", "JBFT101", "jbtg102", "jbtg103", "jbtg105", "jbtg106", "qnzx8", "cflm88", "cflr8"].includes(opt.value)) return false;
+                if (
+                    ![
+                        "JB6666_BOT",
+                        "jbpc28",
+                        "jbft",
+                        "jbyll",
+                        "jbtg001",
+                        "jbtg002",
+                        "jbtg003",
+                        "jbtg004",
+                        "jbtg005",
+                        "jbft100",
+                        "JBFT101",
+                        "jbtg102",
+                        "jbtg103",
+                        "jbtg105",
+                        "jbtg106",
+                        "qnzx8",
+                        "cflm88",
+                        "cflr8",
+                    ].includes(opt.value)
+                )
+                    return false;
             } else if (JBChannel.includes(user)) {
                 if (!inStr(opt.value, ["JBYL_bot", "jb123_com"])) return false;
             } else if (DBChannel.includes(user)) {
                 if (!inStr(opt.value, ["jbgq", "jbgx", "jbdb", "jbjt"])) return false;
             } else {
-                if (!inStr(opt.value, 'JB6666_BOT')) return false;
+                if (!inStr(opt.value, "JB6666_BOT")) return false;
             }
 
             $select.append($(`<option value="${opt.value}">${opt.label}</option>`));
@@ -146,8 +171,10 @@
             borderRadius: "5px",
             fontSize: "14px",
         });
-        
-        Object.keys(GQText).map(v => $GQSelet.append($(`<option value="${v}">${v}</option>`)))
+
+        Object.keys(GQText).map((v) =>
+            $GQSelet.append($(`<option value="${v}">${v}</option>`))
+        );
 
         // 创建输入框容器
         let $priceInputs = $(`
@@ -171,13 +198,13 @@
 
         // 创建总预算输入框
         let $budgetInputs = $(`
-                    <div id="budgetContainer">
-                        <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">预算：</label>
-                        <input type="number" id="minBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
-                        <label> - </label>
-                        <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
-                    </div>
-                `).css({
+            <div id="budgetContainer">
+                <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">预算：</label>
+                <input type="number" id="minBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
+                <label> - </label>
+                <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
+            </div>
+        `).css({
             flex: 1,
             display: "flex",
             justifyContent: "center",
@@ -251,7 +278,6 @@
     };
     createView();
 
-
     window.ajInit = (options) => {
         if (!window.history || !history.pushState) {
             return false;
@@ -265,11 +291,7 @@
         if (!history.state) {
             history.replaceState({ i: 0, u: nav_url }, null, short_url);
         } else if (!history.state.u) {
-            history.replaceState(
-                { i: history.state.i, u: nav_url },
-                null,
-                short_url
-            );
+            history.replaceState({ i: history.state.i, u: nav_url }, null, short_url);
         } else if (short_url && location.href != short_url) {
             history.replaceState(history.state, null, short_url);
         }
@@ -635,12 +657,7 @@
 
         function onResult(url, http_code, result, push_state) {
             hideProgress();
-            if (
-                http_code != 200 ||
-                !result ||
-                !result.v ||
-                result.v != Aj.version
-            ) {
+            if (http_code != 200 || !result || !result.v || result.v != Aj.version) {
                 changeLocation(url, push_state);
                 return;
             }
@@ -830,11 +847,7 @@
             var url = loc(href).href;
             var short_url = layerUrlToShort(url) || url;
             if (replace) {
-                history.replaceState(
-                    { i: curHistoryState.i, u: url },
-                    null,
-                    short_url
-                );
+                history.replaceState({ i: curHistoryState.i, u: url }, null, short_url);
                 // console.log('history replace', 'oldState =', curHistoryState, 'newState =', history.state);
             } else {
                 history.pushState(
@@ -854,11 +867,7 @@
             var layer_href = layerOpenHref(curLocation, layer_url);
             var url = loc(layer_href).href;
             var short_url = layerUrlToShort(url) || url;
-            history.pushState(
-                { i: curHistoryState.i + 1, u: url },
-                null,
-                short_url
-            );
+            history.pushState({ i: curHistoryState.i + 1, u: url }, null, short_url);
             // console.log('history push', 'oldState =', curHistoryState, 'newState =', history.state);
             curHistoryState = history.state;
             curLocation = loc(curHistoryState.u);
@@ -982,272 +991,368 @@
     };
 
     window.OwnerAds = {
-        init: function() {
-        var cont = Aj.ajContainer;
-        Aj.onLoad(function(state) {
-            state.$searchField = $('.pr-search-input');
-            state.$adsListTable = $('.pr-table');
-            state.$searchResults = $('.pr-table tbody');
-            Ads.fieldInit(state.$searchField);
-            cont.on('click.curPage', '.pr-cell-sort', OwnerAds.eSortList);
-            cont.on('click.curPage', '.pr-table-settings', OwnerAds.eSettingsOpen);
-            cont.on('click.curPage', '.js-clone-ad-btn', EditAd.eCloneAd);
-            cont.on('click.curPage', '.delete-ad-btn', EditAd.deleteAd);
-            state.$tableColumnsPopup = $('.js-table-columns-popup');
-            state.$tableColumnsForm = $('.js-table-columns-form');
-            state.$tableColumnsForm.on('change.curPage', 'input.checkbox', OwnerAds.eColumnChange);
-            state.$tableColumnsForm.on('submit.curPage', preventDefault);
-    
-            state.$searchField.initSearch({
-            $results: state.$searchResults,
-            emptyQueryEnabled: true,
-            updateOnInit: true,
-            resultsNotScrollable: true,
-            itemTagName: 'tr',
-            enterEnabled: function() {
-                return false;
-            },
-            
-            renderItem: function(item, query) {
-                var status_attrs = ' href="' + item.base_url + item.status_url + '" ' + (item.status_attrs || 'data-layer');
-                var title_class = 'pr-trg-type-' + item.trg_type;
-                if (item.tme_path) {
-                var promote_url = 'https://t.me/' + item.tme_path;
-                var promote_url_text = 't.me/' + item.tme_path;
-                var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
-                } else if (item.promote_url) {
-                var promote_url = item.promote_url;
-                var promote_url_text = promote_url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
-                } else {
-                var promote_url = '#';
-                var promote_url_text = l('WEB_ADS_NO_TME_LINK');
-                var promote_link = '<span class="pr-no-tme-link">' + promote_url_text + '</span>';
-                }
-                var joins = item.joins !== false ? formatNumber(item.joins) : '–';
-                var actions = item.actions !== false ? formatNumber(item.actions) : '–';
-                var opens = item.opens !== false ? formatNumber(item.opens) : '–';
-                var clicks = item.clicks !== false ? formatNumber(item.clicks) : '–';
-                var ctr = item.ctr !== false ? item.ctr + '%' : '–';
-                var cpc = item.cpc !== false ? Ads.wrapAmount(item.cpc) : '–';
-                var cps = item.cps !== false ? Ads.wrapAmount(item.cps) : '–';
-                var cpa = item.cpa !== false ? Ads.wrapAmount(item.cpa) : '–';
-                var daily_spent  = item.daily_spent !== false ? '<small><br>' + Ads.wrapAmount(item.daily_spent)+'</small>' : '';
-                var daily_budget = item.daily_budget !== false ? '<small><br><a href="' + item.base_url + '/edit_daily_budget" data-layer>' + Ads.wrapAmount(item.daily_budget)+'</a></small>' : '';
-                return `<td>
+        init: function () {
+            var cont = Aj.ajContainer;
+            Aj.onLoad(function (state) {
+                state.$searchField = $(".pr-search-input");
+                state.$adsListTable = $(".pr-table");
+                state.$searchResults = $(".pr-table tbody");
+                Ads.fieldInit(state.$searchField);
+                cont.on("click.curPage", ".pr-cell-sort", OwnerAds.eSortList);
+                cont.on("click.curPage", ".pr-table-settings", OwnerAds.eSettingsOpen);
+                cont.on("click.curPage", ".js-clone-ad-btn", EditAd.eCloneAd);
+                cont.on("click.curPage", ".delete-ad-btn", EditAd.deleteAd);
+                state.$tableColumnsPopup = $(".js-table-columns-popup");
+                state.$tableColumnsForm = $(".js-table-columns-form");
+                state.$tableColumnsForm.on(
+                    "change.curPage",
+                    "input.checkbox",
+                    OwnerAds.eColumnChange
+                );
+                state.$tableColumnsForm.on("submit.curPage", preventDefault);
+
+                state.$searchField.initSearch({
+                    $results: state.$searchResults,
+                    emptyQueryEnabled: true,
+                    updateOnInit: true,
+                    resultsNotScrollable: true,
+                    itemTagName: "tr",
+                    enterEnabled: function () {
+                        return false;
+                    },
+
+                    renderItem: function (item, query) {
+                        var status_attrs =
+                            ' href="' +
+                            item.base_url +
+                            item.status_url +
+                            '" ' +
+                            (item.status_attrs || "data-layer");
+                        var title_class = "pr-trg-type-" + item.trg_type;
+                        if (item.tme_path) {
+                            var promote_url = "https://t.me/" + item.tme_path;
+                            var promote_url_text = "t.me/" + item.tme_path;
+                            var promote_link =
+                                '<a href="' +
+                                promote_url +
+                                '" target="_blank">' +
+                                promote_url_text +
+                                "</a>";
+                        } else if (item.promote_url) {
+                            var promote_url = item.promote_url;
+                            var promote_url_text = promote_url
+                                .replace(/^https?:\/\//, "")
+                                .replace(/\/$/, "");
+                            var promote_link =
+                                '<a href="' +
+                                promote_url +
+                                '" target="_blank">' +
+                                promote_url_text +
+                                "</a>";
+                        } else {
+                            var promote_url = "#";
+                            var promote_url_text = l("WEB_ADS_NO_TME_LINK");
+                            var promote_link =
+                                '<span class="pr-no-tme-link">' + promote_url_text + "</span>";
+                        }
+                        var joins = item.joins !== false ? formatNumber(item.joins) : "–";
+                        var actions =
+                            item.actions !== false ? formatNumber(item.actions) : "–";
+                        var opens = item.opens !== false ? formatNumber(item.opens) : "–";
+                        var clicks =
+                            item.clicks !== false ? formatNumber(item.clicks) : "–";
+                        var ctr = item.ctr !== false ? item.ctr + "%" : "–";
+                        var cpc = item.cpc !== false ? Ads.wrapAmount(item.cpc) : "–";
+                        var cps = item.cps !== false ? Ads.wrapAmount(item.cps) : "–";
+                        var cpa = item.cpa !== false ? Ads.wrapAmount(item.cpa) : "–";
+                        var daily_spent =
+                            item.daily_spent !== false
+                                ? "<small><br>" + Ads.wrapAmount(item.daily_spent) + "</small>"
+                                : "";
+                        var daily_budget =
+                            item.daily_budget !== false
+                                ? '<small><br><a href="' +
+                                item.base_url +
+                                '/edit_daily_budget" data-layer>' +
+                                Ads.wrapAmount(item.daily_budget) +
+                                "</a></small>"
+                                : "";
+                        return `<td>
                             <div class="pr-cell pr-cell-title ${title_class}">
-                                <a href="${item.base_url}" class="pr-link">${item.title}</a>
-                                <small style="display:var(--coldp-url,inline)"><br>${ promote_link}</small>
+                                <a href="${item.base_url}" class="pr-link">${item.title
+                            }</a>
+                                <small style="display:var(--coldp-url,inline)"><br>${promote_link}</small>
                             </div>
                         </td>
 
-                        ${!ADSChannels.includes(user) ? `
-                            <td><div class="pr-cell score">${ item.score || '' }</div></td>
-                            <td><div class="pr-cell regs">${ item.regs || '' }</div></td>
-                            <td><div class="pr-cell pays">${ item.pays || '' }</div></td>
-                            <td><div class="pr-cell money">${ item.money || '' }</div></td>
-                            ` : ''}
+                        ${!ADSChannels.includes(user)
+                                ? `
+                            <td><div class="pr-cell score">${item.score || ""
+                                }</div></td>
+                            <td><div class="pr-cell regs">${item.regs || ""
+                                }</div></td>
+                            <td><div class="pr-cell pays">${item.pays || ""
+                                }</div></td>
+                            <td><div class="pr-cell money">${item.money || ""
+                                }</div></td>
+                            `
+                                : ""
+                            }
                         
-                        <td><div class="pr-cell qviews" style="color: ${+item?.qviews < 500 ? 'green' : ''};">${ formatNumber(item?.qviews) || '' }</div></td>
-                        <td><div class="pr-cell pviews">${ Ads.wrapAmount(item?.qspent) }</div></td>
-                        <td><div class="pr-cell pviews" style="color: ${ +item?.pviews < +item?.qviews ? 'red' : '' };">${ formatNumber(item?.pviews) || '' }</div></td>
-                        <td><div class="pr-cell pviews">${ Ads.wrapAmount(item?.pspent) }</div></td>
+                        <td><div class="pr-cell qviews" style="color: ${+item?.qviews < 500 ? "green" : ""
+                            };">${formatNumber(item?.qviews) || ""}</div></td>
+                        <td><div class="pr-cell pviews">${Ads.wrapAmount(
+                                item?.qspent
+                            )}</div></td>
+                        <td><div class="pr-cell pviews" style="color: ${+item?.pviews < +item?.qviews ? "red" : ""
+                            };">${formatNumber(item?.pviews) || ""}</div></td>
+                        <td><div class="pr-cell pviews">${Ads.wrapAmount(
+                                item?.pspent
+                            )}</div></td>
 
                         <td style="display:var(--coldp-views,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${formatNumber(item.views)}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${formatNumber(
+                                item.views
+                            )}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-opens,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${opens}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${opens}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-clicks,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${clicks}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${clicks}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-joins,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${actions}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${actions}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-ctr,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${ctr}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${ctr}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-cpm,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/edit_cpm" data-layer>${Ads.wrapAmount(item.cpm)}</a>
+                                <a href="${item.base_url
+                            }/edit_cpm" data-layer>${Ads.wrapAmount(
+                                item.cpm
+                            )}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-cpc,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${cpc}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${cpc}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-cpa,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${cpa}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${cpa}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-spent,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/stats" class="pr-link">${Ads.wrapAmount(item.spent) + daily_spent}</a>
+                                <a href="${item.base_url
+                            }/stats" class="pr-link">${Ads.wrapAmount(item.spent) + daily_spent
+                            }</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-budget,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}/edit_budget" data-layer>${Ads.wrapAmount(item.budget)}</a>
+                                <a href="${item.base_url
+                            }/edit_budget" data-layer>${Ads.wrapAmount(
+                                item.budget
+                            )}</a>
                                 ${daily_budget}
                             </div>
                         </td>
                         <td style="display:var(--coldp-target,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}" class="pr-link">${item.target}</a>
+                                <a href="${item.base_url}" class="pr-link">${item.target
+                            }</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-status,table-cell)">
                             <div class="pr-cell">
                                 <a ${status_attrs}>
-                                ${ 
-                                    [
-                                        {status: 'Active', label: '通过'},
-                                        {status: 'In Review', label: '审核中'},
-                                        {status: 'Declined', label: '拒绝'},
-                                        {status: 'On Hold', label: '暂停'},
-                                        {status: 'Stopped', label: '预算不足'},
-                                    ].find(v => v.status === item.status)?.label || item.status }
+                                ${[
+                                { status: "Active", label: "通过" },
+                                { status: "In Review", label: "审核中" },
+                                { status: "Declined", label: "拒绝" },
+                                { status: "On Hold", label: "暂停" },
+                                { status: "Stopped", label: "预算不足" },
+                            ].find((v) => v.status === item.status)
+                                ?.label || item.status
+                            }
                                 </a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-date,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}" class="pr-link">${date.formatCustomDate(item.date)}</a>
+                                <a href="${item.base_url
+                            }" class="pr-link">${date.formatCustomDate(
+                                item.date
+                            )}</a>
                             </div>
                         </td>
                         <td>
                             <div class="pr-actions-cell">
-                                ${Aj.state.adsDropdownTpl.replace(/\{ad_id\}/g, item.ad_id).replace(/\{promote_url\}/g, promote_url).replace(/\{promote_url_text\}/g, promote_url_text).replace(/\{ad_text\}/g, item.text)}
+                                ${Aj.state.adsDropdownTpl
+                                .replace(/\{ad_id\}/g, item.ad_id)
+                                .replace(/\{promote_url\}/g, promote_url)
+                                .replace(
+                                    /\{promote_url_text\}/g,
+                                    promote_url_text
+                                )
+                                .replace(/\{ad_text\}/g, item.text)}
                             </div>
-                        </td>`
-            },
-            //   renderItem: function(item, query) {
-            //     var status_attrs = ' href="' + item.base_url + item.status_url + '" ' + (item.status_attrs || 'data-layer');
-            //     var title_class = 'pr-trg-type-' + item.trg_type;
-            //     if (item.tme_path) {
-            //       var promote_url = 'https://t.me/' + item.tme_path;
-            //       var promote_url_text = 't.me/' + item.tme_path;
-            //       var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
-            //     } else if (item.promote_url) {
-            //       var promote_url = item.promote_url;
-            //       var promote_url_text = promote_url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-            //       var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
-            //     } else {
-            //       var promote_url = '#';
-            //       var promote_url_text = l('WEB_ADS_NO_TME_LINK');
-            //       var promote_link = '<span class="pr-no-tme-link">' + promote_url_text + '</span>';
-            //     }
-            //     var opens = item.opens !== false ? formatNumber(item.opens) : '–';
-            //     var clicks = item.clicks !== false ? formatNumber(item.clicks) : '–';
-            //     var actions = item.actions !== false ? formatNumber(item.actions) : '–';
-            //     var action = item.action !== false ? '<br>' + item.action : '';
-            //     var ctr = item.ctr !== false ? item.ctr + '%' : '–';
-            //     var cvr = item.cvr !== false ? item.cvr + '%' : '–';
-            //     var cpc = item.cpc !== false ? Ads.wrapAmount(item.cpc) : '–';
-            //     var cpa = item.cpa !== false ? Ads.wrapAmount(item.cpa) : '–';
-            //     var daily_spent  = item.daily_spent !== false ? '<small><br>' + Ads.wrapAmount(item.daily_spent)+'</small>' : '';
-            //     var daily_budget = item.daily_budget !== false ? '<small><br><a href="' + item.base_url + '/edit_daily_budget" data-layer>' + Ads.wrapAmount(item.daily_budget)+'</a></small>' : '';
-            //     return '<td><div class="pr-cell pr-cell-title ' + title_class + '"><a href="' + item.base_url + '"class="pr-link">' + item.title + '</a><small style="display:var(--coldp-url,inline)"><br>' + promote_link + '</small></div></td><td><div class="pr-cell">' + (item.score || '') + '</div></td><td><div class="pr-cell">' + (item.regs || '') + '</div></td><td><div class="pr-cell">' + (item.pays || '') + '</div></td><td><div class="pr-cell">' + (item.money || '') + '</div></td><td><div class="pr-cell" style="color:' + (+item?.pviews < 500 ? 'green' : '') + ';>' + (formatNumber(item?.qviews) || '') + '</div></td><td><div class="pr-cell" style="color: red;">' + (formatNumber(item?.pviews) || '') + '</div></td><td style="display:var(--coldp-views,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + formatNumber(item.views) + '</a></div></td><td style="display:var(--coldp-opens,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + opens + '</a></div></td><td style="display:var(--coldp-clicks,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + clicks + '</a></div></td><td style="display:var(--coldp-actions,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + actions + '</a><small style="display:var(--coldp-action,inline)">' + action + '</small></div></td><td style="display:var(--coldp-ctr,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + ctr + '</a></div></td><td style="display:var(--coldp-cvr,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cvr + '</a></div></td><td style="display:var(--coldp-cpm,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/edit_cpm" data-layer>' + Ads.wrapAmount(item.cpm) + '</a></div></td><td style="display:var(--coldp-cpc,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cpc + '</a></div></td><td style="display:var(--coldp-cpa,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cpa + '</a></div></td><td style="display:var(--coldp-spent,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + Ads.wrapAmount(item.spent) + daily_spent + '</a></div></td><td style="display:var(--coldp-budget,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/edit_budget" data-layer>' + Ads.wrapAmount(item.budget) + '</a>' + daily_budget + '</div></td><td style="display:var(--coldp-target,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '" class="pr-link">' + item.target + '</a></div></td><td style="display:var(--coldp-status,table-cell)"><div class="pr-cell"><a' + status_attrs + '>' + item.status + '</a></div></td><td style="display:var(--coldp-date,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '" class="pr-link">' + Ads.formatTableDate(item.date) + '</a></div></td><td><div class="pr-actions-cell">' + Aj.state.adsDropdownTpl.replace(/\{ad_id\}/g, item.ad_id).replace(/\{promote_url\}/g, promote_url).replace(/\{promote_url_text\}/g, promote_url_text).replace(/\{ad_text\}/g, item.text) + '</div></td>';    
-            
-            //   },
-            renderLoading: function() {
-                return '<tr><td colspan="100" class="pr-cell-empty"><div class="pr-cell">' + l('WEB_OWNER_ADS_LOADING') + '</div></td></tr>';
-            },
-            renderNoItems: function(query) {
-                if (Aj.state.adsListIsLoading) {
-                return '<tr><td colspan="100" class="pr-cell-empty-full"><div class="pr-cell">' + l('WEB_OWNER_ADS_LOADING') + '</div></td></tr>';
-                }
-                return '<tr><td colspan="100" class="pr-cell-empty-full"><div class="pr-cell">' + l('WEB_OWNER_NO_ADS') + '</div></td></tr>';
-            },
-            appendToItems: function(query, result_count) {
-                if (Aj.state.adsListIsLoading && result_count > 0) {
-                return '<tr><td colspan="100" class="pr-cell-empty"><div class="pr-cell">' + l('WEB_OWNER_ADS_LOADING') + '</div></td></tr>';
-                }
-                return '';
-            },
-            getData: function() {
-                return OwnerAds.getAdsList();
-            }
+                        </td>`;
+                    },
+                    //   renderItem: function(item, query) {
+                    //     var status_attrs = ' href="' + item.base_url + item.status_url + '" ' + (item.status_attrs || 'data-layer');
+                    //     var title_class = 'pr-trg-type-' + item.trg_type;
+                    //     if (item.tme_path) {
+                    //       var promote_url = 'https://t.me/' + item.tme_path;
+                    //       var promote_url_text = 't.me/' + item.tme_path;
+                    //       var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
+                    //     } else if (item.promote_url) {
+                    //       var promote_url = item.promote_url;
+                    //       var promote_url_text = promote_url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                    //       var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
+                    //     } else {
+                    //       var promote_url = '#';
+                    //       var promote_url_text = l('WEB_ADS_NO_TME_LINK');
+                    //       var promote_link = '<span class="pr-no-tme-link">' + promote_url_text + '</span>';
+                    //     }
+                    //     var opens = item.opens !== false ? formatNumber(item.opens) : '–';
+                    //     var clicks = item.clicks !== false ? formatNumber(item.clicks) : '–';
+                    //     var actions = item.actions !== false ? formatNumber(item.actions) : '–';
+                    //     var action = item.action !== false ? '<br>' + item.action : '';
+                    //     var ctr = item.ctr !== false ? item.ctr + '%' : '–';
+                    //     var cvr = item.cvr !== false ? item.cvr + '%' : '–';
+                    //     var cpc = item.cpc !== false ? Ads.wrapAmount(item.cpc) : '–';
+                    //     var cpa = item.cpa !== false ? Ads.wrapAmount(item.cpa) : '–';
+                    //     var daily_spent  = item.daily_spent !== false ? '<small><br>' + Ads.wrapAmount(item.daily_spent)+'</small>' : '';
+                    //     var daily_budget = item.daily_budget !== false ? '<small><br><a href="' + item.base_url + '/edit_daily_budget" data-layer>' + Ads.wrapAmount(item.daily_budget)+'</a></small>' : '';
+                    //     return '<td><div class="pr-cell pr-cell-title ' + title_class + '"><a href="' + item.base_url + '"class="pr-link">' + item.title + '</a><small style="display:var(--coldp-url,inline)"><br>' + promote_link + '</small></div></td><td><div class="pr-cell">' + (item.score || '') + '</div></td><td><div class="pr-cell">' + (item.regs || '') + '</div></td><td><div class="pr-cell">' + (item.pays || '') + '</div></td><td><div class="pr-cell">' + (item.money || '') + '</div></td><td><div class="pr-cell" style="color:' + (+item?.pviews < 500 ? 'green' : '') + ';>' + (formatNumber(item?.qviews) || '') + '</div></td><td><div class="pr-cell" style="color: red;">' + (formatNumber(item?.pviews) || '') + '</div></td><td style="display:var(--coldp-views,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + formatNumber(item.views) + '</a></div></td><td style="display:var(--coldp-opens,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + opens + '</a></div></td><td style="display:var(--coldp-clicks,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + clicks + '</a></div></td><td style="display:var(--coldp-actions,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + actions + '</a><small style="display:var(--coldp-action,inline)">' + action + '</small></div></td><td style="display:var(--coldp-ctr,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + ctr + '</a></div></td><td style="display:var(--coldp-cvr,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cvr + '</a></div></td><td style="display:var(--coldp-cpm,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/edit_cpm" data-layer>' + Ads.wrapAmount(item.cpm) + '</a></div></td><td style="display:var(--coldp-cpc,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cpc + '</a></div></td><td style="display:var(--coldp-cpa,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cpa + '</a></div></td><td style="display:var(--coldp-spent,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + Ads.wrapAmount(item.spent) + daily_spent + '</a></div></td><td style="display:var(--coldp-budget,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/edit_budget" data-layer>' + Ads.wrapAmount(item.budget) + '</a>' + daily_budget + '</div></td><td style="display:var(--coldp-target,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '" class="pr-link">' + item.target + '</a></div></td><td style="display:var(--coldp-status,table-cell)"><div class="pr-cell"><a' + status_attrs + '>' + item.status + '</a></div></td><td style="display:var(--coldp-date,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '" class="pr-link">' + Ads.formatTableDate(item.date) + '</a></div></td><td><div class="pr-actions-cell">' + Aj.state.adsDropdownTpl.replace(/\{ad_id\}/g, item.ad_id).replace(/\{promote_url\}/g, promote_url).replace(/\{promote_url_text\}/g, promote_url_text).replace(/\{ad_text\}/g, item.text) + '</div></td>';
+
+                    //   },
+                    renderLoading: function () {
+                        return (
+                            '<tr><td colspan="100" class="pr-cell-empty"><div class="pr-cell">' +
+                            l("WEB_OWNER_ADS_LOADING") +
+                            "</div></td></tr>"
+                        );
+                    },
+                    renderNoItems: function (query) {
+                        if (Aj.state.adsListIsLoading) {
+                            return (
+                                '<tr><td colspan="100" class="pr-cell-empty-full"><div class="pr-cell">' +
+                                l("WEB_OWNER_ADS_LOADING") +
+                                "</div></td></tr>"
+                            );
+                        }
+                        return (
+                            '<tr><td colspan="100" class="pr-cell-empty-full"><div class="pr-cell">' +
+                            l("WEB_OWNER_NO_ADS") +
+                            "</div></td></tr>"
+                        );
+                    },
+                    appendToItems: function (query, result_count) {
+                        if (Aj.state.adsListIsLoading && result_count > 0) {
+                            return (
+                                '<tr><td colspan="100" class="pr-cell-empty"><div class="pr-cell">' +
+                                l("WEB_OWNER_ADS_LOADING") +
+                                "</div></td></tr>"
+                            );
+                        }
+                        return "";
+                    },
+                    getData: function () {
+                        return OwnerAds.getAdsList();
+                    },
+                });
             });
-        });
-        Aj.onUnload(function(state) {
-            Ads.fieldDestroy(state.$searchField);
-            state.$searchField.destroySearch();
-            state.$tableColumnsForm.off('.curPage');
-        });
+            Aj.onUnload(function (state) {
+                Ads.fieldDestroy(state.$searchField);
+                state.$searchField.destroySearch();
+                state.$tableColumnsForm.off(".curPage");
+            });
         },
-        eSortList: function(e) {
-        var $sortEl = $(this);
-        var sortBy  = $sortEl.attr('data-sort-by');
-        var sortAsc = $sortEl.hasClass('sort-asc');
-        if (sortBy == Aj.state.adsListSortBy) {
-            Aj.state.adsListSortAsc = !sortAsc;
-        } else {
-            Aj.state.adsListSortBy = sortBy;
-            Aj.state.adsListSortAsc = false;
-        }
-        OwnerAds.updateAdsList();
-        Aj.state.$searchField.trigger('datachange');
-        },
-        eSettingsOpen: function() {
-        openPopup(Aj.state.$tableColumnsPopup, {
-            closeByClickOutside: '.popup-no-close',
-        });
-        },
-        eColumnChange: function() {
-        var column = $(this).prop('name');
-        var checked = $(this).prop('checked');
-        Aj.state.$adsListTable.cssProp('--coldp-' + column, checked ? '' : 'none');
-        OwnerAds.submitColumns();
-        },
-        submitColumns: function() {
-        var $form = Aj.state.$tableColumnsForm;
-        var active_columns = [];
-        for (var i = 0; i < Aj.state.adsListAllColumns.length; i++) {
-            var column = Aj.state.adsListAllColumns[i];
-            if ($form.field(column).prop('checked')) {
-            active_columns.push(column);
-            }
-        }
-        Aj.apiRequest('saveAdsColumns', {
-            columns: active_columns.join(';')
-        });
-        return false;
-        },
-        updateAdsList: function() {
-        if (Aj.state.adsList) {
-            var sortBy  = Aj.state.adsListSortBy;
-            var sortAsc = Aj.state.adsListSortAsc;
-            $('.pr-cell-sort').each(function() {
+        eSortList: function (e) {
             var $sortEl = $(this);
-            var curSortBy  = $sortEl.attr('data-sort-by');
-            $sortEl.toggleClass('sort-active', sortBy == curSortBy);
-            $sortEl.toggleClass('sort-asc', sortAsc && sortBy == curSortBy);
+            var sortBy = $sortEl.attr("data-sort-by");
+            var sortAsc = $sortEl.hasClass("sort-asc");
+            if (sortBy == Aj.state.adsListSortBy) {
+                Aj.state.adsListSortAsc = !sortAsc;
+            } else {
+                Aj.state.adsListSortBy = sortBy;
+                Aj.state.adsListSortAsc = false;
+            }
+            OwnerAds.updateAdsList();
+            Aj.state.$searchField.trigger("datachange");
+        },
+        eSettingsOpen: function () {
+            openPopup(Aj.state.$tableColumnsPopup, {
+                closeByClickOutside: ".popup-no-close",
             });
-            Aj.state.adsList.sort(function(ad1, ad2) {
-            var v1 = sortAsc ? ad1 : ad2;
-            var v2 = sortAsc ? ad2 : ad1;
-            return (v1[sortBy] - v2[sortBy]) || (v1.date - v2.date);
+        },
+        eColumnChange: function () {
+            var column = $(this).prop("name");
+            var checked = $(this).prop("checked");
+            Aj.state.$adsListTable.cssProp(
+                "--coldp-" + column,
+                checked ? "" : "none"
+            );
+            OwnerAds.submitColumns();
+        },
+        submitColumns: function () {
+            var $form = Aj.state.$tableColumnsForm;
+            var active_columns = [];
+            for (var i = 0; i < Aj.state.adsListAllColumns.length; i++) {
+                var column = Aj.state.adsListAllColumns[i];
+                if ($form.field(column).prop("checked")) {
+                    active_columns.push(column);
+                }
+            }
+            Aj.apiRequest("saveAdsColumns", {
+                columns: active_columns.join(";"),
             });
-        }
+            return false;
+        },
+        updateAdsList: function () {
+            if (Aj.state.adsList) {
+                var sortBy = Aj.state.adsListSortBy;
+                var sortAsc = Aj.state.adsListSortAsc;
+                $(".pr-cell-sort").each(function () {
+                    var $sortEl = $(this);
+                    var curSortBy = $sortEl.attr("data-sort-by");
+                    $sortEl.toggleClass("sort-active", sortBy == curSortBy);
+                    $sortEl.toggleClass("sort-asc", sortAsc && sortBy == curSortBy);
+                });
+                Aj.state.adsList.sort(function (ad1, ad2) {
+                    var v1 = sortAsc ? ad1 : ad2;
+                    var v2 = sortAsc ? ad2 : ad1;
+                    return v1[sortBy] - v2[sortBy] || v1.date - v2.date;
+                });
+            }
         },
         processAdsList: async function (result, opts) {
-            if(!$('.table > thead > tr .pviews')?.length){
-                $('.table > thead > tr > th:first').after(`
-                    ${!ADSChannels.includes(user) 
+            if (!$(".table > thead > tr .pviews")?.length) {
+                $(".table > thead > tr > th:first").after(`
+                    ${!ADSChannels.includes(user)
                         ? `
                         <th width="65" style="display:var(--coldp-score,table-cell)">
                             <div class="score pr-cell pr-cell-sort" data-sort-by="score">评分<span class="pr-sort-marker"></span></div>
@@ -1261,7 +1366,9 @@
                         <th width="65" style="display:var(--coldp-money,table-cell)">
                             <div class="money pr-cell pr-cell-sort" data-sort-by="money">总充值<span class="pr-sort-marker"></span></div>
                         </th>
-                        ` : ''}
+                        `
+                        : ""
+                    }
                         
                     <th width="65" style="display:var(--coldp-qviews,table-cell)">
                         <div class="pr-cell pr-cell-sort" data-sort-by="qviews">昨日展示<span class="pr-sort-marker"></span></div>
@@ -1275,15 +1382,20 @@
                     <th width="65" style="display:var(--coldp-pspent,table-cell)">
                         <div class="pr-cell pr-cell-sort" data-sort-by="pspent">当天消耗<span class="pr-sort-marker"></span></div>
                     </th>
-                `)
+                `);
             }
 
             // 获取昨天所有数据
-            let yesday = date.getBeijingDateOnly(-1)
-            let qianday = date.getBeijingDateOnly(-2)
-            console.log('昨天', yesday, '前天', qianday);
+            let yesday = date.getBeijingDateOnly(-1);
+            let qianday = date.getBeijingDateOnly(-2);
+            console.log("昨天", yesday, "前天", qianday);
 
-            let yesData = await filterDB((row) => (row['ads_date']?.indexOf(yesday) !== -1 || row['ads_date']?.indexOf(qianday) !== -1), pviews_store)
+            let yesData = await filterDB(
+                (row) =>
+                    row["ads_date"]?.indexOf(yesday) !== -1 ||
+                    row["ads_date"]?.indexOf(qianday) !== -1,
+                pviews_store
+            );
 
             opts = opts || {};
             if (result.items) {
@@ -1295,39 +1407,44 @@
                     var item = result.items[i];
                     let tmp = item?.tme_path?.split("_") || [];
                     let adsKey = tmp[tmp.length - 1] || "";
-                    
-                    let prow = yesData?.find?.(row => row['ads_date'] === `${yesday}_${item.ad_id}`)
-                    let qrow = yesData?.find?.(row => row['ads_date'] === `${qianday}_${item.ad_id}`)
 
-                    let tviews = item?.views || 0  // 当前总浏览量
-                    let pviews = prow?.['views'] || 0 // 昨日总浏览量
-                    let qviews = qrow?.['views'] || 0 // 前日总浏览量
-                    let pspent =  ((tviews -  pviews) * (item?.cpm / 1000)).toFixed(2)   // 当日花费
-                    let qspent = ((pviews - qviews) * (prow?.cpm / 1000)).toFixed(2)     // 昨日花费
+                    let prow = yesData?.find?.(
+                        (row) => row["ads_date"] === `${yesday}_${item.ad_id}`
+                    );
+                    let qrow = yesData?.find?.(
+                        (row) => row["ads_date"] === `${qianday}_${item.ad_id}`
+                    );
+
+                    let tviews = item?.views || 0; // 当前总浏览量
+                    let pviews = prow?.["views"] || 0; // 昨日总浏览量
+                    let qviews = qrow?.["views"] || 0; // 前日总浏览量
+                    let pspent = ((tviews - pviews) * (item?.cpm / 1000)).toFixed(2); // 当日花费
+                    let qspent = ((pviews - qviews) * (prow?.cpm / 1000)).toFixed(2); // 昨日花费
 
                     if (window.postID.includes(adsKey)) {
                         if (!loadADSFlag) {
                             loadADSFlag = true;
                             $(".pr-logo-title").text(
-                                `Telegram Ads 已加载分析数据${ window.postID.length }条`
+                                `Telegram Ads 已加载分析数据${window.postID.length}条`
                             );
                         }
                         let obj = window.postData[adsKey]?.split("-") || [];
-                        item["pviews"] = (tviews -  pviews) || 0;
-                        item["pspent"] = pspent || 0
-                        item["qviews"] = (pviews - qviews) || 0;
-                        item["qspent"] = qspent || 0
+                        item["pviews"] = tviews - pviews || 0;
+                        item["pspent"] = pspent || 0;
+                        item["qviews"] = pviews - qviews || 0;
+                        item["qspent"] = qspent || 0;
                         item["regs"] = +obj[0] || 0;
                         item["pays"] = +obj[1] || 0;
                         item["money"] = +obj[2] || 0;
-                        item["score"] = getWeightedScore(item, stats, weight)?.toFixed(2) || 0;
+                        item["score"] =
+                            getWeightedScore(item, stats, weight)?.toFixed(2) || 0;
                         item["_title"] = item.title;
                         // item.title = `权重：${item["score"]} &nbsp;|&nbsp; 注册：${obj[0]} &nbsp;|&nbsp; 付款：${obj[1]} &nbsp;|&nbsp; 总充值：${obj[2]} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${item.title}`;
                     } else {
-                        item["pviews"] = (tviews -  pviews) || 0;
-                        item["pspent"] = pspent || 0
-                        item["qviews"] = (pviews - qviews) || 0;
-                        item["qspent"] = qspent || 0
+                        item["pviews"] = tviews - pviews || 0;
+                        item["pspent"] = pspent || 0;
+                        item["qviews"] = pviews - qviews || 0;
+                        item["qspent"] = qspent || 0;
                         item["regs"] = 0;
                         item["pays"] = 0;
                         item["money"] = 0;
@@ -1366,8 +1483,6 @@
                     // (b.score - a.score) || (b.pays - a.pays))
                 });
 
-                // console.log('监听 + 排序后', copy(Aj.state.adsList))
-
                 Aj.state.$searchField.trigger("contentchange");
             }
             if (result.next_offset_id) {
@@ -1380,8 +1495,8 @@
                 Aj.state.$searchField.trigger("dataready");
                 await getMonthTotal();
                 $("#aj_content").css({
-                    width: "89%"
-                })
+                    width: "89%",
+                });
                 $(".pr-container").css({
                     "max-width": maxWidth,
                     margin: "0 20px",
@@ -1389,61 +1504,64 @@
                 window.isLoad = true;
             }
         },
-        loadAdsList: function(opts) {
-        opts = opts || {};
-        Aj.apiRequest('getAdsList', {
-            owner_id: Aj.state.ownerId,
-            offset_id: opts.offset
-        }, function(result) {
-            if (result.error) {
-            if (!opts.retry) opts.retry = 1;
-            else opts.retry++;
-            setTimeout(function(){ OwnerAds.loadAdsList(opts); }, opts.retry * 1000);
+        loadAdsList: function (opts) {
+            opts = opts || {};
+            Aj.apiRequest(
+                "getAdsList",
+                {
+                    owner_id: Aj.state.ownerId,
+                    offset_id: opts.offset,
+                },
+                function (result) {
+                    if (result.error) {
+                        if (!opts.retry) opts.retry = 1;
+                        else opts.retry++;
+                        setTimeout(function () {
+                            OwnerAds.loadAdsList(opts);
+                        }, opts.retry * 1000);
+                    } else {
+                        if (opts.retry) {
+                            opts.retry = 0;
+                        }
+                        OwnerAds.processAdsList(result, opts);
+                    }
+                }
+            );
+        },
+        getAdsList: function () {
+            var _data = Aj.state.adsList;
+            if (_data === false) {
+                return false;
+            } else if (_data) {
+                return _data;
+            }
+            Aj.state.adsList = false;
+            Aj.state.adsListIsLoading = true;
+            if (Aj.state.initialAdsList) {
+                setTimeout(function () {
+                    OwnerAds.processAdsList(Aj.state.initialAdsList);
+                }, 10);
             } else {
-            if (opts.retry) {
-                opts.retry = 0;
+                OwnerAds.loadAdsList({ offset: 0 });
             }
-            OwnerAds.processAdsList(result, opts);
-            }
-        });
-        },
-        getAdsList: function() {
-        var _data = Aj.state.adsList;
-        if (_data === false) {
             return false;
-        } else if (_data) {
-            return _data;
-        }
-        Aj.state.adsList = false;
-        Aj.state.adsListIsLoading = true;
-        if (Aj.state.initialAdsList) {
-            setTimeout(function() {
-            OwnerAds.processAdsList(Aj.state.initialAdsList);
-            }, 10);
-        } else {
-            OwnerAds.loadAdsList({offset: 0});
-        }
-        return false;
         },
-        updateAd: function(ad) {
-        if (!Aj.state || !Aj.state.adsList) {
-            return;
-        }
-        var adsList = Aj.state.adsList;
-        for (var i = 0; i < adsList.length; i++) {
-            if (ad.ad_id == adsList[i].ad_id) {
-            ad.base_url = '/account/ad/' + ad.ad_id;
-            ad._values = [
-                ad.title.toLowerCase(),
-                ad.tme_path.toLowerCase(),
-            ];
-            adsList[i] = ad;
-            OwnerAds.updateAdsList();
-            Aj.state.$searchField.trigger('contentchange');
-            return;
+        updateAd: function (ad) {
+            if (!Aj.state || !Aj.state.adsList) {
+                return;
             }
-        }
-        }
+            var adsList = Aj.state.adsList;
+            for (var i = 0; i < adsList.length; i++) {
+                if (ad.ad_id == adsList[i].ad_id) {
+                    ad.base_url = "/account/ad/" + ad.ad_id;
+                    ad._values = [ad.title.toLowerCase(), ad.tme_path.toLowerCase()];
+                    adsList[i] = ad;
+                    OwnerAds.updateAdsList();
+                    Aj.state.$searchField.trigger("contentchange");
+                    return;
+                }
+            }
+        },
     };
 
     $.fn.initSearch = function (options) {
@@ -1629,7 +1747,11 @@
                 var html = "";
                 var render_limit = options.renderLimit || 50;
                 if (result.length > 0) {
-                    for (var i = from_index, j = 0; i < result.length && j < render_limit; i++, j++) {
+                    for (
+                        var i = from_index, j = 0;
+                        i < result.length && j < render_limit;
+                        i++, j++
+                    ) {
                         var item = result[i];
                         var tagName = options.itemTagName || "div";
                         var className =
@@ -1637,9 +1759,17 @@
                             (options.itemClass ? " " + options.itemClass : "") +
                             (item.className ? " " + item.className : "");
                         var item_html =
-                            "<" +tagName +' class="' +className +'" data-i="' +i +'">' +
+                            "<" +
+                            tagName +
+                            ' class="' +
+                            className +
+                            '" data-i="' +
+                            i +
+                            '">' +
                             options.renderItem(item, query) +
-                            "</" +tagName +">";
+                            "</" +
+                            tagName +
+                            ">";
                         html += item_html;
                     }
                     curRenderedIndex = i;
@@ -1771,10 +1901,7 @@
                         if (curResult.length && !options.enterEnabled()) {
                             index = 0;
                         }
-                        if (
-                            options.selectFullMatch &&
-                            curResult.fullMatchIndex !== null
-                        ) {
+                        if (options.selectFullMatch && curResult.fullMatchIndex !== null) {
                             index = curResult.fullMatchIndex;
                         }
                     } else {
@@ -1900,11 +2027,7 @@
                 options.$enter.data("i", false);
             }
             options.$results.on("hover.search", ".search-item", onItemHover);
-            options.$results.on(
-                "mouseover.search",
-                ".search-item",
-                onItemMouseOver
-            );
+            options.$results.on("mouseover.search", ".search-item", onItemMouseOver);
             options.$results.on("mousedown.search", ".search-item", onItemClick);
             if (options.resultsNotScrollable) {
                 $(window).on("scroll.search", onResultsScroll);
@@ -1959,7 +2082,7 @@
     };
 
     let db;
-    const cpms_store = "cpms";  // 记录单价
+    const cpms_store = "cpms"; // 记录单价
     const pviews_store = "pviews"; // 记录展示量
     const request = indexedDB.open("myDatabase", 5);
     request.onerror = (event) => {
@@ -1988,7 +2111,7 @@
         }
         if (!db.objectStoreNames.contains(pviews_store)) {
             const objectStore = db.createObjectStore("pviews", {
-                keyPath: 'ads_date' 
+                keyPath: "ads_date",
             });
             objectStore.createIndex("ads_date", "ads_date", { unique: false });
             objectStore.createIndex("ad_id", "ad_id", { unique: false });
@@ -2145,12 +2268,14 @@
 
     // 等待 jQuery 注入（页面加载）
     if (window.postID.length) {
-        $(".pr-logo-title").text(`Telegram Ads 存在分析数据${ window.postID.length}条`);
+        $(".pr-logo-title").text(
+            `Telegram Ads 存在分析数据${window.postID.length}条`
+        );
     }
 
     // 根据类型获取文案
     const getUserText = (value, text) => {
-        let type = value || $(".select")?.val()?.split('?')?.[0] || "";
+        let type = value || $(".select")?.val()?.split("?")?.[0] || "";
         let texts = {
             /****************** 金貝综合盘  ******************** */
             // 金貝推广人员
@@ -2818,16 +2943,16 @@
         };
 
         // 金貝供需单独处理
-        console.log(type)
-        if(type === 'jbgq'){
+        console.log(type);
+        if (type === "jbgq") {
             const classify = $(".GQClassify")?.val();
-            if(!text?.length) return GQText[classify]
+            if (!text?.length) return GQText[classify];
             for (const key in GQText) {
-                if(GQText[key]?.find(v => v === text)){
-                    return GQText[key]
+                if (GQText[key]?.find((v) => v === text)) {
+                    return GQText[key];
                 }
             }
-            return []
+            return [];
         }
 
         return texts?.[type];
@@ -2910,7 +3035,7 @@
     const onRefresh = async () => {
         window.isLoad = false;
         loadADSFlag = false;
-        await updatePviews()
+        await updatePviews();
         Aj.state.adsList = [];
         window.Aj.reload();
         return new Promise((resolve) => {
@@ -3238,18 +3363,18 @@
         });
         if (!list?.length) return toast("全部达标");
 
-        console.log(list)
+        console.log(list);
 
         Aj.showProgress();
 
         let promiseArr = list.map(async (item) => {
-            let romPrice = 0
-            if(item?.qviews < 150){
-                romPrice = (item.cpm * 0.1).toFixed(2)
-            } else if(item?.qviews < 350){
-                romPrice = (item.cpm * 0.05).toFixed(2)
+            let romPrice = 0;
+            if (item?.qviews < 150) {
+                romPrice = (item.cpm * 0.1).toFixed(2);
+            } else if (item?.qviews < 350) {
+                romPrice = (item.cpm * 0.05).toFixed(2);
             } else {
-                romPrice = (item.cpm * 0.01).toFixed(2)
+                romPrice = (item.cpm * 0.01).toFixed(2);
             }
             let price = (item.cpm + +romPrice).toFixed(2);
             return await editCPM(item, price);
@@ -3264,7 +3389,7 @@
         Aj.hideProgress();
         toast(`加价完成：成功${successNum}条，失败${errorNum}条`);
         await onRefresh();
-    }
+    };
 
     // 设置单价
     $("body").on(
@@ -3743,7 +3868,7 @@
             let isBot = /bot$/i.test(url);
             let channelinfo = await searchChannel(isBot, url);
             if (!channelinfo) {
-                isBot = true
+                isBot = true;
                 channelinfo = await searchChannel(isBot, url);
                 if (!channelinfo) {
                     return false;
@@ -3927,7 +4052,7 @@
             $("#popupOverlay").remove();
         }
 
-        console.log(`${url}?period=day`)
+        console.log(`${url}?period=day`);
 
         let data = await getHTML(`${url}?period=day`, "j", false);
         let code = data[0]["j"];
@@ -4077,38 +4202,47 @@
     };
 
     // 双击展示报表
-    $("body").on("dblclick", "tbody>tr", function (event) {
-        let url = $(this)
-            ?.find('[style*="display:var(--coldp-views,table-cell)"] a')
-            ?.attr("href");
-        showIframePopup(url);
-    }).on("contextmenu", "tbody>tr .pr-cell-title", function (e) {
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        let href = $(this)?.find?.("small a")?.text?.();
-        let ads = href?.split("_");
-        ads = ads?.[ads?.length - 1];
-        copyText(ads);
-    });
+    $("body")
+        .on("dblclick", "tbody>tr", function (event) {
+            let url = $(this)
+                ?.find('[style*="display:var(--coldp-views,table-cell)"] a')
+                ?.attr("href");
+            showIframePopup(url);
+        })
+        .on("contextmenu", "tbody>tr .pr-cell-title", function (e) {
+            e?.preventDefault();
+            e?.stopPropagation();
+            let href = $(this)?.find?.("small a")?.text?.();
+            let ads = href?.split("_");
+            ads = ads?.[ads?.length - 1];
+            copyText(ads);
+        });
 
     // 更新观看量
     const updatePviews = async () => {
         let list = OwnerAds?.getAdsList?.() || [];
-        const date = timestampToDate()
+        const date = timestampToDate();
         for (let i = 0; i < list.length; i++) {
-            const { ad_id, cpm, views, clicks, joins, pays, money } = list[i]
-            let res = await getDB('ads_date', `${date}_${ad_id}`, pviews_store)
-            let data = {}
-            if(res){
-                data = {...res, cpm, views, clicks, joins, pays, money}
+            const { ad_id, cpm, views, clicks, joins, pays, money } = list[i];
+            let res = await getDB("ads_date", `${date}_${ad_id}`, pviews_store);
+            let data = {};
+            if (res) {
+                data = { ...res, cpm, views, clicks, joins, pays, money };
             } else {
-                data = { ads_date: `${date}_${ad_id}`, ad_id,  cpm, views, clicks, joins, pays, money }
+                data = {
+                    ads_date: `${date}_${ad_id}`,
+                    ad_id,
+                    cpm,
+                    views,
+                    clicks,
+                    joins,
+                    pays,
+                    money,
+                };
             }
-            await setDB(data, pviews_store)
+            await setDB(data, pviews_store);
         }
-    }
+    };
 
     // 每到0 和 30分的时候自动执行一次加预算
     async function runMyTask() {
@@ -4118,8 +4252,9 @@
             await onReview();
         }
 
-        await updatePviews()
+        await updatePviews();
     }
+
     (function loop() {
         requestAnimationFrame(loop);
 
@@ -4129,11 +4264,13 @@
 
         // 判断分钟是5、15、30、45、59并且秒数在0~1之间（防止多次触发）
         if ([15, 30, 45, 59].includes(min) && sec === 0) {
-            if (!loop.lastTrigger || loop.lastTrigger !== `${now.getHours()}-${min}`) {
+            if (
+                !loop.lastTrigger ||
+                loop.lastTrigger !== `${now.getHours()}-${min}`
+            ) {
                 loop.lastTrigger = `${now.getHours()}-${min}`;
                 runMyTask();
             }
         }
     })();
-})()
-
+})();
