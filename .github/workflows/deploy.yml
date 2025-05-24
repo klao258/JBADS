@@ -1,4 +1,4 @@
-name: Conditional Version Injection + Pages Deploy
+name: Auto Update Version + Deploy
 
 on:
   push:
@@ -8,32 +8,30 @@ permissions:
   contents: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout 源代码
+      - name: Checkout 仓库代码
         uses: actions/checkout@v3
-
+      
       - name: 🔍 检查是否改动 tg-ads.user.js
         id: check
         run: |
           CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'tg-ads\.user\.js' || true)
           echo "changed=${CHANGED}" >> $GITHUB_OUTPUT
 
-      - name: ✏️ 注入版本号（仅 tg-ads.user.js 改动时执行）
+      - name: 注入动态版本号（年.月.日-时分秒）
         if: steps.check.outputs.changed != ''
         run: |
           VERSION=$(TZ=Asia/Shanghai date "+%Y.%m.%d-%H:%M:%S")
-          echo "✅ 生成版本号：${VERSION}"
+          echo "✅ 当前版本（北京时间）：${VERSION}"
           sed -i "s/^\/\/ @version\s\+.*/\/\/ @version      ${VERSION}/" tg-ads.user.js
           grep "@version" tg-ads.user.js
 
-      - name: 🚀 部署到 GitHub Pages
+      - name: 部署到 GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           publish_branch: gh-pages
-
-
