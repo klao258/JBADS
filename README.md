@@ -1,2 +1,2 @@
 # JBADS
-JB旗下ADS专用
+JB旗下ADS专用，油猴脚本
