@@ -304,6 +304,7 @@ await interceptBeforeScript("tgsticker.js?31", () => {
         };
         const tmp = await loadAdminData();
         if(tmp) {
+            console.log(`数据加载成功${postData}`);
             postID = Object.keys(postData || {}); // 对应账号所有ads标识
         } else {
             var postData = {}
