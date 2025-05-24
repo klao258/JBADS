@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.24-21:39:31
+// @version      2025.05.24-21:43:54
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -18,9 +18,7 @@
 
 (function () {
     'use strict';
-  
-    console.log('✅ TG广告脚本已加载，当前版本：' + GM_info.script.version);
-
+    
     // ===== 🔄 检查远程是否有新版本 =====
     const CURRENT_VERSION = GM_info.script.version;
     const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
