@@ -325,6 +325,8 @@ await interceptBeforeScript("tgsticker.js?31", () => {
         user =  $(".pr-header-account-name").text()
 
         let loadAdminData = async () => {
+            console.log("调试", `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`);
+
             return new Promise((resolve, reject) => {
                 let script = document.createElement("script");
                 script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
