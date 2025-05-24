@@ -295,16 +295,16 @@ await interceptBeforeScript("tgsticker.js?31", () => {
             return new Promise((resolve, reject) => {
                 let script = document.createElement("script");
                 script.src = `https://klao258.github.io/JBADS/adsData/${ accountObj[user] }.js`;
+                document.head.appendChild(script);
                 script.onload = () => {
                     resolve(true);
                 };
                 script.onerror = () => resolve(false);
-                document.head.appendChild(script);
             });
         };
         const tmp = await loadAdminData();
         if(tmp) {
-            console.log(`数据加载成功${postData}`);
+            console.log(`${accountObj[user]}，数据加载成功${postData}`);
             postID = Object.keys(postData || {}); // 对应账号所有ads标识
         } else {
             var postData = {}
