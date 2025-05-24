@@ -15,9 +15,9 @@ jobs:
       - name: Checkout 仓库代码
         uses: actions/checkout@v3
 
-      - name: 注入动态版本号
+      - name: 注入动态版本号（年.月.日-时分秒）
         run: |
-          VERSION=$(date "+%Y.%m.%d-%H%M")
+          VERSION=$(date "+%Y.%m.%d-%H%M%S")
           echo "✅ 当前版本: ${VERSION}"
           sed -i "s/^\/\/ @version\s\+.*/\/\/ @version      ${VERSION}/" tg-ads.user.js
           grep "@version" tg-ads.user.js
