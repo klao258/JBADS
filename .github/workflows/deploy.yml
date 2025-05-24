@@ -17,8 +17,8 @@ jobs:
 
       - name: 注入动态版本号（年.月.日-时分秒）
         run: |
-          VERSION=$(date "+%Y.%m.%d-%H%M%S")
-          echo "✅ 当前版本: ${VERSION}"
+          VERSION=$(TZ=Asia/Shanghai date "+%Y.%m.%d-%H:%M:%S")
+          echo "✅ 当前版本（北京时间）：${VERSION}"
           sed -i "s/^\/\/ @version\s\+.*/\/\/ @version      ${VERSION}/" tg-ads.user.js
           grep "@version" tg-ads.user.js
 
