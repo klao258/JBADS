@@ -26,6 +26,7 @@
         const [regs, pays, money] = str.split("-").map(Number);
         return { regs, pays, money };
     });
+
     const stats = {
         minRegs: 0, //  Math.min(...values.map(v => v.regs)),
         maxRegs: Math.max(...values.map((v) => v.regs)),
@@ -34,8 +35,10 @@
         minMoney: 0, //  Math.min(...values.map(v => v.money)),
         maxMoney: Math.max(...values.map((v) => v.money)),
     };
+
     const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
     const normalize = (val, min, max) => (val - min) / (max - min || 1); // 归一化函数
+
     const getWeightedScore = (ad, stats, weight) => {
         const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
         const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
@@ -100,17 +103,15 @@
         // 创建文本域
         let $textArea = $("<textarea>", {
             class: "urls",
-        })
-            .attr("placeholder", "请输入频道/机器人链接, 多个链接需要换行")
-            .css({
-                width: "100%",
-                height: "100px",
-                border: "1px solid #ccc",
-                padding: "5px",
-                borderRadius: "5px",
-                fontSize: "14px",
-                resize: "none",
-            });
+        }).attr("placeholder", "请输入频道/机器人链接, 多个链接需要换行").css({
+            width: "100%",
+            height: "100px",
+            border: "1px solid #ccc",
+            padding: "5px",
+            borderRadius: "5px",
+            fontSize: "14px",
+            resize: "none",
+        });
 
         // 创建推广链接下拉框
         const $select = $("<select>", {
@@ -171,13 +172,13 @@
 
         // 创建总预算输入框
         let $budgetInputs = $(`
-                    <div id="budgetContainer">
-                        <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">预算：</label>
-                        <input type="number" id="minBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
-                        <label> - </label>
-                        <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
-                    </div>
-                `).css({
+            <div id="budgetContainer">
+                <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">预算：</label>
+                <input type="number" id="minBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
+                <label> - </label>
+                <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
+            </div>
+        `).css({
             flex: 1,
             display: "flex",
             justifyContent: "center",
@@ -191,15 +192,9 @@
 
         // 所有按钮封装函数
         const createButton = (text, className, clickFn) => {
-            if (
-                [...FTChannel, ...JBChannel, ...DBChannel].includes(user) &&
-                ["textTeviewBtn"].includes(className)
-            ) {
+            if ([...FTChannel, ...JBChannel, ...DBChannel].includes(user) &&["textTeviewBtn"].includes(className)) {
                 return null;
-            } else if (
-                ![...FTChannel, ...JBChannel, ...DBChannel].includes(user) &&
-                ["searchADSBtn"].includes(className)
-            ) {
+            } else if ( ![...FTChannel, ...JBChannel, ...DBChannel].includes(user) && ["searchADSBtn"].includes(className)) {
                 return null;
             } else {
                 return $("<button>", {
