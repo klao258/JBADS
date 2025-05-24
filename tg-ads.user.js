@@ -8,8 +8,6 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=telegram.org
 // @updateURL    https://klao258.github.io/JBADS/tg-ads.user.js
 // @downloadURL  https://klao258.github.io/JBADS/tg-ads.user.js
-// @require      https://klao258.github.io/JBADS/autoADSData.js
-// @require      https://klao258.github.io/JBADS/autoADS.js
 // @grant        GM_addStyle
 // @grant        none
 // @run-at       document-start
