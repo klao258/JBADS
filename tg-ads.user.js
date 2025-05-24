@@ -217,7 +217,7 @@
                 postID = []
             }
 
-            await loadMultipleScriptsAndWaitForAll(['"https://klao258.github.io/JBADS/autoADS.js"'], []);
+            await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], []);
 
             resolve(true);
         });
