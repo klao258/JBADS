@@ -203,7 +203,7 @@
             const ready = await loadMultipleScriptsAndWaitForAll(scripts, expectedVars);
 
             // 加载 postData
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData[accountObj[user]] }.js`], ["window.postData"]);
+            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[user] }.js`], ["window.postData"]);
             
             // 加载主逻辑
             var postID = [];
