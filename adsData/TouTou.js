@@ -2,7 +2,7 @@ var postData = {
   "ADS-TouTou-4ctlau2h8": "1-0-0",
   "ADS-TouTou-4XQ7dJsxr": "268-9-1406.3",
   "ADS-TouTou-4OK58pag0": "3-0-0",
-  "ADS-TouTou-4r1tIHZg9": "9-1-69.2",
+  "ADS-TouTou-4r1tIHZg9": "10-2-99.2",
   "ADS-TouTou-4oFbbV1N0": "8-0-0",
   "ADS-TouTou-4lSIadoN6": "7-0-0",
   "ADS-TouTou-4XiMDCsab": "3-0-0",
