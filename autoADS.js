@@ -298,16 +298,15 @@ await interceptBeforeScript("tgsticker.js?31", () => {
                 script.onload = () => {
                     resolve(postData);
                 };
-                script.onerror = () => reject(new Error("postData 加载失败"));
+                script.onerror = () => resolve(false);
                 document.head.appendChild(script);
             });
         };
-        await loadAdminData();
-
-        try {
+        const tmp = await loadAdminData();
+        if(tmp) {
             postID = Object.keys(postData || {}); // 对应账号所有ads标识
-        } catch (error) {
-            postData = {}
+        } else {
+            var postData = {}
             postID = []
         }
 
