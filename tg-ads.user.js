@@ -217,7 +217,7 @@
                 window.postID = []
             }
 
-            await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], []);
+            await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], ["window.isLoad "]);
 
             resolve(true);
         });
