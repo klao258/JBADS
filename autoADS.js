@@ -456,35 +456,6 @@
                             </div>
                         </td>`;
                     },
-                    //   renderItem: function(item, query) {
-                    //     var status_attrs = ' href="' + item.base_url + item.status_url + '" ' + (item.status_attrs || 'data-layer');
-                    //     var title_class = 'pr-trg-type-' + item.trg_type;
-                    //     if (item.tme_path) {
-                    //       var promote_url = 'https://t.me/' + item.tme_path;
-                    //       var promote_url_text = 't.me/' + item.tme_path;
-                    //       var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
-                    //     } else if (item.promote_url) {
-                    //       var promote_url = item.promote_url;
-                    //       var promote_url_text = promote_url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                    //       var promote_link = '<a href="' + promote_url + '" target="_blank">' + promote_url_text + '</a>';
-                    //     } else {
-                    //       var promote_url = '#';
-                    //       var promote_url_text = l('WEB_ADS_NO_TME_LINK');
-                    //       var promote_link = '<span class="pr-no-tme-link">' + promote_url_text + '</span>';
-                    //     }
-                    //     var opens = item.opens !== false ? formatNumber(item.opens) : '–';
-                    //     var clicks = item.clicks !== false ? formatNumber(item.clicks) : '–';
-                    //     var actions = item.actions !== false ? formatNumber(item.actions) : '–';
-                    //     var action = item.action !== false ? '<br>' + item.action : '';
-                    //     var ctr = item.ctr !== false ? item.ctr + '%' : '–';
-                    //     var cvr = item.cvr !== false ? item.cvr + '%' : '–';
-                    //     var cpc = item.cpc !== false ? Ads.wrapAmount(item.cpc) : '–';
-                    //     var cpa = item.cpa !== false ? Ads.wrapAmount(item.cpa) : '–';
-                    //     var daily_spent  = item.daily_spent !== false ? '<small><br>' + Ads.wrapAmount(item.daily_spent)+'</small>' : '';
-                    //     var daily_budget = item.daily_budget !== false ? '<small><br><a href="' + item.base_url + '/edit_daily_budget" data-layer>' + Ads.wrapAmount(item.daily_budget)+'</a></small>' : '';
-                    //     return '<td><div class="pr-cell pr-cell-title ' + title_class + '"><a href="' + item.base_url + '"class="pr-link">' + item.title + '</a><small style="display:var(--coldp-url,inline)"><br>' + promote_link + '</small></div></td><td><div class="pr-cell">' + (item.score || '') + '</div></td><td><div class="pr-cell">' + (item.regs || '') + '</div></td><td><div class="pr-cell">' + (item.pays || '') + '</div></td><td><div class="pr-cell">' + (item.money || '') + '</div></td><td><div class="pr-cell" style="color:' + (+item?.pviews < 500 ? 'green' : '') + ';>' + (formatNumber(item?.qviews) || '') + '</div></td><td><div class="pr-cell" style="color: red;">' + (formatNumber(item?.pviews) || '') + '</div></td><td style="display:var(--coldp-views,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + formatNumber(item.views) + '</a></div></td><td style="display:var(--coldp-opens,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + opens + '</a></div></td><td style="display:var(--coldp-clicks,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + clicks + '</a></div></td><td style="display:var(--coldp-actions,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + actions + '</a><small style="display:var(--coldp-action,inline)">' + action + '</small></div></td><td style="display:var(--coldp-ctr,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + ctr + '</a></div></td><td style="display:var(--coldp-cvr,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cvr + '</a></div></td><td style="display:var(--coldp-cpm,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/edit_cpm" data-layer>' + Ads.wrapAmount(item.cpm) + '</a></div></td><td style="display:var(--coldp-cpc,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cpc + '</a></div></td><td style="display:var(--coldp-cpa,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + cpa + '</a></div></td><td style="display:var(--coldp-spent,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/stats" class="pr-link">' + Ads.wrapAmount(item.spent) + daily_spent + '</a></div></td><td style="display:var(--coldp-budget,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '/edit_budget" data-layer>' + Ads.wrapAmount(item.budget) + '</a>' + daily_budget + '</div></td><td style="display:var(--coldp-target,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '" class="pr-link">' + item.target + '</a></div></td><td style="display:var(--coldp-status,table-cell)"><div class="pr-cell"><a' + status_attrs + '>' + item.status + '</a></div></td><td style="display:var(--coldp-date,table-cell)"><div class="pr-cell"><a href="' + item.base_url + '" class="pr-link">' + Ads.formatTableDate(item.date) + '</a></div></td><td><div class="pr-actions-cell">' + Aj.state.adsDropdownTpl.replace(/\{ad_id\}/g, item.ad_id).replace(/\{promote_url\}/g, promote_url).replace(/\{promote_url_text\}/g, promote_url_text).replace(/\{ad_text\}/g, item.text) + '</div></td>';
-
-                    //   },
                     renderLoading: function () {
                         return (
                             '<tr><td colspan="100" class="pr-cell-empty"><div class="pr-cell">' +
@@ -586,7 +557,6 @@
             }
         },
         processAdsList: async function (result, opts) {
-            console.time(1)
             if (!$(".table > thead > tr .pviews")?.length) {
                 $(".table > thead > tr > th:first").after(`
                     ${accountAll?.[window.user]?.options?.length === 1
@@ -731,7 +701,6 @@
                 
                 window.isLoad = true;
             }
-            console.timeEnd(1)
         },
         loadAdsList: function (opts) {
             opts = opts || {};
