@@ -198,7 +198,7 @@
             const ready = await loadMultipleScriptsAndWaitForAll(scripts, ['autoADSData']);
 
             // 加载 postData
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[window.user] }.js`], ["window.postData"]);
+            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["window.postData"]);
             
             // 加载主逻辑
             window.postID = [];
