@@ -51,16 +51,21 @@ jobs:
           FILES=$(find adsData -name "*.js"; ls autoADS.js autoADSData.js 2>/dev/null)
           for file in $FILES; do
             echo "🔒 正在处理：$file"
-            javascript-obfuscator "$file" \
-              --output "$file" \
+            javascript-obfuscator "$file" --output "$file" \
               --compact true \
               --self-defending true \
               --control-flow-flattening true \
+              --control-flow-flattening-threshold 1 \
               --dead-code-injection true \
+              --dead-code-injection-threshold 1 \
               --string-array true \
               --string-array-encoding rc4 \
-              --string-array-threshold 0.75 \
-              --rename-globals false
+              --string-array-threshold 1 \
+              --split-strings true \
+              --split-strings-chunk-length 5 \
+              --rename-globals true \
+              --identifier-names-generator mangled \
+              --disable-console-output true
           done
 
       - name: 部署到 GitHub Pages
