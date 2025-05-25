@@ -203,8 +203,6 @@
             // 加载主逻辑
             window.postID = [];
             if (ready) {
-                console.log("✅ 所有脚本加载成功, 准备执行主逻辑！");
-
                 window.postID = Object.keys(window.postData || {}); // 对应账号所有ads标识
             } else {
                 console.warn("❌ 加载失败或变量未就绪");
@@ -218,6 +216,8 @@
                 "window.Aj",
                 "window.isLoad"
             ];
+
+            console.log("✅ 所有脚本加载成功, 准备执行主逻辑！");
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
 
             resolve(true);
