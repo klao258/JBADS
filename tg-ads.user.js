@@ -198,12 +198,7 @@
             const ready = await loadMultipleScriptsAndWaitForAll(scripts, ['autoADSData']);
 
             // 加载 postData
-            const expectedVars = [
-                "window.ajInit",
-                "window.OwnerAds",
-                "window.postData"
-            ];
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[window.user] }.js`], expectedVars);
+            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[window.user] }.js`], ["window.postData"]);
             
             // 加载主逻辑
             window.postID = [];
@@ -217,7 +212,13 @@
                 window.postID = []
             }
 
-            await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], ["window.isLoad "]);
+            const expectedVars = [
+                "window.ajInit",
+                "window.OwnerAds",
+                "window.Aj",
+                "window.isLoad"
+            ];
+            await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
 
             resolve(true);
         });
