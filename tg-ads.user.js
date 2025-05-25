@@ -100,9 +100,8 @@
                 if (!eval(varName)) {
                     allReady = false;
                     break;
-                } else {
-                    console.log('变量准备好:', varName)
                 }
+                console.log('变量准备好:', varName)
             } catch {
                 allReady = false;
                 break;
