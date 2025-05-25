@@ -188,7 +188,7 @@
             // 等待 jQuery 加载完成
             await waitForJQuery();
 
-            let user =  $(".pr-header-account-name").text()
+            window.user =  $(".pr-header-account-name").text()
             const scripts = [
                 "https://cdn.jsdelivr.net/npm/sweetalert2@11",
                 "https://klao258.github.io/JBADS/autoADSData.js",
@@ -203,7 +203,7 @@
                 "window.OwnerAds",
                 "window.postData"
             ];
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[user] }.js`], expectedVars);
+            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountObj']?.[window.user] }.js`], expectedVars);
             
             // 加载主逻辑
             window.postID = [];
