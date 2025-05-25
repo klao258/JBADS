@@ -34,6 +34,15 @@ jobs:
           sed -i "s/^\/\/ @version\s\+.*/\/\/ @version      ${VERSION}/" tg-ads.user.js
           grep "@version" tg-ads.user.js
 
+      - name: 提交修改版本号回 main 分支（仅当 tg-ads.user.js 改动）
+        if: steps.check.outputs.changed != ''
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add tg-ads.user.js
+          git commit -m "🔄 自动注入版本号"
+          git push origin main
+
       - name: 部署到 GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
