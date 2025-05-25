@@ -2,6 +2,8 @@
     "use strict";
     const { accountObj, FTChannel, JBChannel, DBChannel, ADSChannels, promoteOpts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
 
+    console.log('静态数据', autoADSData)
+    
     window.isLoad = false;
 
     var timerID = null;
