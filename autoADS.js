@@ -3,7 +3,7 @@
     const { accountObj, FTChannel, JBChannel, DBChannel, ADSChannels, promoteOpts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
 
     console.log('静态数据', autoADSData)
-    
+
     window.isLoad = false;
 
     var timerID = null;
@@ -1352,6 +1352,7 @@
             }
         },
         processAdsList: async function (result, opts) {
+            console.log('频道单独处理', ADSChannels, user, !ADSChannels.includes(user));
             if (!$(".table > thead > tr .pviews")?.length) {
                 $(".table > thead > tr > th:first").after(`
                     ${!ADSChannels.includes(user)
