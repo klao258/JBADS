@@ -1423,10 +1423,10 @@
                     }
 
                     // 分数都为0，用 pays 字段排序（升序）
-                    const aPviews = a?.pviews || 0;
-                    const bPviews= b?.pviews || 0;
+                    const aqviews = a?.qviews || 0;
+                    const bqviews= b?.qviews || 0;
 
-                    return bPviews - aPviews;
+                    return bqviews - aqviews;
 
                     // (b.score - a.score) || (b.pays - a.pays))
                 });
@@ -1664,10 +1664,10 @@
                     }
 
                     // 分数都为0，用 pays 字段排序（升序）
-                    const aPviews = a?.pviews || 0;
-                    const bPviews = b?.pviews || 0;
+                    const aqviews = a?.qviews || 0;
+                    const bqviews = b?.qviews || 0;
 
-                    return bPviews - aPviews;
+                    return bqviews - aqviews;
 
                     // return (item2?.score - item1?.score) || (item2?.pays - item1?.pays);
                 });
