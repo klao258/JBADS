@@ -15,23 +15,20 @@
     // 评分函数
     const getWeightedScore = (ad) => {
         const normalize = (val, min, max) => (val - min) / (max - min || 1) // 归一化函数
-        const values = () => {
-            Object.values(window.postData || {}).map((str) => {
-                const [regs, pays, money] = str.split("-").map(Number);
-                return { regs, pays, money };
-            })
-        }
+        const values = Object.values(window.postData || {}).map((str) => {
+            const [regs, pays, money] = str.split("-").map(Number);
+            return { regs, pays, money };
+        });
 
         const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
         const stats = {
             minRegs: 0,
-            maxRegs: Math.max(values()?.regs),
+            maxRegs: Math.max(...values.map((v) => v.regs)),
             minPays: 0,
-            maxPays: Math.max(values()?.pays),
+            maxPays: Math.max(...values.map((v) => v.pays)),
             minMoney: 0,
-            maxMoney: Math.max(values()?.money),
+            maxMoney: Math.max(...values.map((v) => v.money)),
         }
-        
 
         const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
         const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
