@@ -1664,10 +1664,10 @@
                     }
 
                     // 分数都为0，用 pays 字段排序（升序）
-                    const aJonins = a?.joins || 0;
-                    const bJonins = b?.joins || 0;
+                    const aPviews = a?.pviews || 0;
+                    const bPviews = b?.pviews || 0;
 
-                    return bJonins - aJonins;
+                    return bPviews - aPviews;
 
                     // return (item2?.score - item1?.score) || (item2?.pays - item1?.pays);
                 });
