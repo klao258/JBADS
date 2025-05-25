@@ -1351,7 +1351,6 @@
             }
         },
         processAdsList: async function (result, opts) {
-            console.log('频道单独处理', ADSChannels, window.user, !ADSChannels.includes(window.user));
             if (!$(".table > thead > tr .pviews")?.length) {
                 $(".table > thead > tr > th:first").after(`
                     ${!ADSChannels.includes(window.user)
