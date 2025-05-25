@@ -586,6 +586,7 @@
             }
         },
         processAdsList: async function (result, opts) {
+            console.time(1)
             if (!$(".table > thead > tr .pviews")?.length) {
                 $(".table > thead > tr > th:first").after(`
                     ${accountAll?.[window.user]?.options?.length === 1
@@ -730,6 +731,7 @@
                 
                 window.isLoad = true;
             }
+            console.timeEnd(1)
         },
         loadAdsList: function (opts) {
             opts = opts || {};
