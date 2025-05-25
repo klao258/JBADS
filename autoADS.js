@@ -1,6 +1,5 @@
 (() => {
     "use strict";
-    console.time(1)
     const { accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
 
     console.log('静态数据', autoADSData)
@@ -2755,6 +2754,4 @@
             }
         }
     })();
-
-    console.timeEnd(1)
 })();
