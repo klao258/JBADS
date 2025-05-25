@@ -18,7 +18,7 @@ jobs:
       - name: 🔍 检查是否改动 tg-ads.user.js
         id: check
         run: |
-          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'tg-ads\.user\.js' || true)
+          CHANGED=$(git diff --name-only HEAD^ HEAD | grep 'tg-ads\.user\.js' || true)
           echo "changed=${CHANGED}" >> $GITHUB_OUTPUT
 
       - name: 注入动态版本号（年.月.日-时分秒）
