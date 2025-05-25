@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-01:33:50
+// @version      2025.05.26-02:27:00
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -74,20 +74,20 @@
     async function loadMultipleScriptsAndWaitForAll(urls, waitVars, maxTries = 50, interval = 100) {
         // 1. 并行加载所有脚本
         const loadScript = (url) =>
-        new Promise((resolve) => {
-            const script = document.createElement("script");
-            script.src = `${url}?t=${Date.now()}`;
-            script.async = true;
-            script.onload = () => {
-                // console.log(`✅ 加载成功：${url}`);
-                resolve(true);
-            };
-            script.onerror = () => {
-                // console.error(`❌ 加载失败：${url}`);
-                resolve(false);
-            };
-            document.head.appendChild(script);
-        });
+            new Promise((resolve) => {
+                const script = document.createElement("script");
+                script.src = `${url}?t=${Date.now()}`;
+                script.async = true;
+                script.onload = () => {
+                    // console.log(`✅ 加载成功：${url}`);
+                    resolve(true);
+                };
+                script.onerror = () => {
+                    // console.error(`❌ 加载失败：${url}`);
+                    resolve(false);
+                };
+                document.head.appendChild(script);
+            });
     
         const results = await Promise.all(urls.map(loadScript));
         if (!results.every(r => r)) return false;
@@ -183,23 +183,29 @@
                 link.href = url;
                 document.head.appendChild(link);
             };
-            loadCSS("https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css");
+
+            // 空闲时处理
+            requestIdleCallback((deadline) => {
+                loadCSS("https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css");
+                loadMultipleScriptsAndWaitForAll(["https://cdn.jsdelivr.net/npm/sweetalert2@11"], []);
+            }, { timeout: 5000 });
+            
 
             // 等待 jQuery 加载完成
             await waitForJQuery();
 
             window.user =  $(".pr-header-account-name").text()
-            const scripts = [
-                "https://cdn.jsdelivr.net/npm/sweetalert2@11",
-                "https://klao258.github.io/JBADS/autoADSData.js",
-            ];
 
             // 加载 autoADSData
-            const ready = await loadMultipleScriptsAndWaitForAll(scripts, ['autoADSData']);
+            console.time('加载autoADSData')
+            const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData']);
+            console.timeEnd('加载autoADSData')
 
             // 加载 postData
+            console.time('加载postData')
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["window.postData"]);
-            
+            console.timeEnd('加载postData')
+
             // 加载主逻辑
             window.postID = [];
             if (ready) {
@@ -218,7 +224,9 @@
             ];
 
             console.log("✅ 所有脚本加载成功, 准备执行主逻辑！");
+            console.time('加载主逻辑')
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
+            console.timeEnd('加载主逻辑')
 
             resolve(true);
         });
