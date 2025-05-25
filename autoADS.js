@@ -11,7 +11,6 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
-    var user = "";
 
     /**
      * 权重得分 = 归一化注册 × 1.5 + 归一化付款人数 × 2.5 + 归一化付款金额 × 5
@@ -129,7 +128,7 @@
 
         // 添加选项（可根据需要修改）
         promoteOpts.forEach((opt) => {
-            if (FTChannel.includes(user)) {
+            if (FTChannel.includes(window.user)) {
                 if (
                     ![
                         "JB6666_BOT",
@@ -153,9 +152,9 @@
                     ].includes(opt.value)
                 )
                     return false;
-            } else if (JBChannel.includes(user)) {
+            } else if (JBChannel.includes(window.user)) {
                 if (!inStr(opt.value, ["JBYL_bot", "jb123_com"])) return false;
-            } else if (DBChannel.includes(user)) {
+            } else if (DBChannel.includes(window.user)) {
                 if (!inStr(opt.value, ["jbgq", "jbgx", "jbdb", "jbjt"])) return false;
             } else {
                 if (!inStr(opt.value, "JB6666_BOT")) return false;
@@ -221,12 +220,12 @@
         // 所有按钮封装函数
         const createButton = (text, className, clickFn) => {
             if (
-                [...FTChannel, ...JBChannel, ...DBChannel].includes(user) &&
+                [...FTChannel, ...JBChannel, ...DBChannel].includes(window.user) &&
                 ["textTeviewBtn"].includes(className)
             ) {
                 return null;
             } else if (
-                ![...FTChannel, ...JBChannel, ...DBChannel].includes(user) &&
+                ![...FTChannel, ...JBChannel, ...DBChannel].includes(window.user) &&
                 ["searchADSBtn"].includes(className)
             ) {
                 return null;
@@ -269,7 +268,7 @@
         $container.append(
             $textArea,
             $select,
-            DBChannel.includes(user) ? $GQSelet : null,
+            DBChannel.includes(window.user) ? $GQSelet : null,
             $priceInputs,
             $budgetInputs,
             ...buttons
@@ -1087,7 +1086,7 @@
                             </div>
                         </td>
 
-                        ${!ADSChannels.includes(user)
+                        ${!ADSChannels.includes(window.user)
                                 ? `
                             <td><div class="pr-cell score">${item.score || ""
                                 }</div></td>
@@ -1352,10 +1351,10 @@
             }
         },
         processAdsList: async function (result, opts) {
-            console.log('频道单独处理', ADSChannels, user, !ADSChannels.includes(user));
+            console.log('频道单独处理', ADSChannels, window.user, !ADSChannels.includes(window.user));
             if (!$(".table > thead > tr .pviews")?.length) {
                 $(".table > thead > tr > th:first").after(`
-                    ${!ADSChannels.includes(user)
+                    ${!ADSChannels.includes(window.user)
                         ? `
                         <th width="65" style="display:var(--coldp-score,table-cell)">
                             <div class="score pr-cell pr-cell-sort" data-sort-by="score">评分<span class="pr-sort-marker"></span></div>
@@ -2963,7 +2962,6 @@
 
     // 根据类型获取推广链接
     const getUserUrl = () => {
-        let user = $(".pr-header-account-name").text();
         let type = $(".select")?.val();
 
         // 推广码
@@ -3017,12 +3015,12 @@
         };
 
         // 先区分账号, 在区分下拉框选项
-        if (![...FTChannel, ...JBChannel, ...DBChannel].includes(user)) {
+        if (![...FTChannel, ...JBChannel, ...DBChannel].includes(window.user)) {
             // 正常推广金貝链接
-            const code = users[user] ?? 53377; // 推广码
+            const code = users[window.user] ?? 53377; // 推广码
             const source = "ADS"; // 来源
-            const browserNum = browserObj[user] ?? "N"; // 浏览器编号 没有为N代替
-            const accountEN = accountObj[user] ?? "null"; // 推广账号
+            const browserNum = browserObj[window.user] ?? "N"; // 浏览器编号 没有为N代替
+            const accountEN = accountObj[window.user] ?? "null"; // 推广账号
             const postID = guid(); // 推广ID
             return `t.me/JB6666_BOT?start=${code}_${source}-${accountEN}-${browserNum}${postID}`;
         } else {
@@ -4251,7 +4249,7 @@
     async function runMyTask() {
         await addMountFn();
 
-        if (![...FTChannel, ...JBChannel, ...DBChannel].includes(user)) {
+        if (![...FTChannel, ...JBChannel, ...DBChannel].includes(window.user)) {
             await onReview();
         }
 
