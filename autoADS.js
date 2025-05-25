@@ -1293,7 +1293,7 @@
                 Aj.state.adsList.sort(function (ad1, ad2) {
                     var v1 = sortAsc ? ad1 : ad2;
                     var v2 = sortAsc ? ad2 : ad1;
-                    return v1[sortBy] - v2[sortBy] || v1.date - v2.date;
+                    return v1[sortBy] - v2[sortBy] || v2?.score - v1?.score || v2?.qviews - v1?.qviews || v1.date - v2.date;
                 });
             }
         },
