@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-02:51:31
+// @version      2025.05.26-02:27:00
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -61,10 +61,7 @@
         console.warn('❌ 等待 jQuery 超时');
         return false;
     }
-
-    function getValueByPath(path) {
-        return path.split('.').reduce((obj, key) => obj?.[key], window);
-    } 
+          
 
     /**
      * 加载多个脚本，并等待多个变量全部定义完成
@@ -96,34 +93,26 @@
         if (!results.every(r => r)) return false;
     
         // 2. 所有脚本加载完成后开始轮询变量
-        const readyStatus = {}; // 记录每个变量的就绪轮次
         for (let i = 0; i < maxTries; i++) {
             let allReady = true;
-
             for (let varName of waitVars) {
-                const value = getValueByPath(varName);
-                if (value) {
-                    if (!(varName in readyStatus)) {
-                        readyStatus[varName] = i; // 第一次成功的轮次
-                        console.log(`✅ 变量 "${varName}" 在第 ${i + 1} 次检测时准备好`);
+                try {
+                    if (!eval(varName)) {
+                        allReady = false;
+                        break;
                     }
-                } else {
+                } catch {
                     allReady = false;
+                    break;
                 }
             }
-
             if (allReady) {
-                // 找出“最后一个准备好的变量”
-                const sorted = Object.entries(readyStatus).sort((a, b) => b[1] - a[1]);
-                const lastReady = sorted[0];
-                console.log(`🚩 最后一个加载完成的是 "${lastReady[0]}"，第 ${lastReady[1] + 1} 次`);
                 return true;
             }
-
-            await new Promise(res => setTimeout(res, interval));
+            await new Promise((res) => setTimeout(res, interval));
         }
-
-        console.warn('部分变量始终未准备好:', waitVars.filter(v => !(v in readyStatus)));
+    
+        // console.warn(`⚠️ 超时，未检测到所有变量：${waitVars.join(", ")}`);
         return false;
     }
 
