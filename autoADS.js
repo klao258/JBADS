@@ -120,7 +120,7 @@
 
         // 添加选项（可根据需要修改）
         accountAll?.[window.user]?.options?.map?.(v => {
-            $select.append($(`<option value="${opt.tgname}">${opt.label}</option>`))
+            $select.append($(`<option value="${v.tgname}">${v.label}</option>`))
         })
 
         // 创建行业下拉框
