@@ -25,11 +25,11 @@
         const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
         const stats = {
             minRegs: 0,
-            maxRegs: Math.max(...values.map((v) => v.regs)),
+            maxRegs: Math.max(values()?.regs),
             minPays: 0,
-            maxPays: Math.max(...values.map((v) => v.pays)),
+            maxPays: Math.max(values()?.pays),
             minMoney: 0,
-            maxMoney: Math.max(...values.map((v) => v.money)),
+            maxMoney: Math.max(values()?.money),
         }
         
 
