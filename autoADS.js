@@ -626,12 +626,9 @@
             let qianday = date.getBeijingDateOnly(-2);
             console.log("昨天", yesday, "前天", qianday);
 
-            let yesData = await filterDB(
-                (row) =>
-                    row["ads_date"]?.indexOf(yesday) !== -1 ||
-                    row["ads_date"]?.indexOf(qianday) !== -1,
-                pviews_store
-            );
+            console.time(1)
+            let yesData = await filterDB((row) => row["ads_date"]?.indexOf(yesday) !== -1 || row["ads_date"]?.indexOf(qianday) !== -1, pviews_store);
+            console.timeEnd(1)
 
             opts = opts || {};
             if (result.items) {
@@ -699,6 +696,8 @@
                 Aj.state.adsList = [...Aj.state.adsList, ...list];
 
                 // OwnerAds.updateAdsList();
+
+                console.time('排序')
                 Aj.state.adsList.sort((a, b) => {
                     const aScore = a?.score || 0;
                     const bScore = b?.score || 0;
@@ -718,6 +717,7 @@
 
                     // (b.score - a.score) || (b.pays - a.pays))
                 });
+                console.timeEnd("排序")
 
                 Aj.state.$searchField.trigger("contentchange");
             }
@@ -729,6 +729,8 @@
             } else {
                 Aj.state.adsListIsLoading = false;
                 Aj.state.$searchField.trigger("dataready");
+
+                console.time("获取花费")
                 await getMonthTotal();
                 $("#aj_content").css({
                     width: "89%",
@@ -738,6 +740,7 @@
                     margin: "0 20px",
                 });
                 window.isLoad = true;
+                console.timeEnd("获取花费")
             }
         },
         loadAdsList: function (opts) {
