@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-02:27:00
+// @version      2025.05.26-02:35:47
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -97,17 +97,18 @@
         let allReady = true;
         for (let varName of waitVars) {
             try {
-            if (!eval(varName)) {
+                if (!eval(varName)) {
+                    allReady = false;
+                    break;
+                } else {
+                    console.log('变量准备好:', varName)
+                }
+            } catch {
                 allReady = false;
                 break;
             }
-            } catch {
-            allReady = false;
-            break;
-            }
         }
         if (allReady) {
-            // console.log(`✅ 所有变量就绪：${waitVars.join(", ")}`);
             return true;
         }
         await new Promise((res) => setTimeout(res, interval));
@@ -155,16 +156,11 @@
             });
 
             window.addEventListener("load", async () => {
-                // console.log("✅ 页面加载完成，开始执行自定义逻辑");
-
                 if (typeof callback === "function") {
                     await callback();
                 }
-                // console.log("✅ 自定义逻辑执行完毕，恢复脚本加载");
-
                 for (const script of SCRIPT_QUEUE) {
                     document.head.appendChild(script);
-                    // console.log("▶️ 恢复脚本:", script.src || "inline");
                 }
 
                 observer.disconnect();
@@ -197,14 +193,10 @@
             window.user =  $(".pr-header-account-name").text()
 
             // 加载 autoADSData
-            console.time('加载autoADSData')
             const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData']);
-            console.timeEnd('加载autoADSData')
 
             // 加载 postData
-            console.time('加载postData')
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["window.postData"]);
-            console.timeEnd('加载postData')
 
             // 加载主逻辑
             window.postID = [];
@@ -223,10 +215,9 @@
                 "window.isLoad"
             ];
 
-            console.log("✅ 所有脚本加载成功, 准备执行主逻辑！");
-            console.time('加载主逻辑')
+            console.time("✅ 所有脚本加载成功, 准备执行主逻辑！");
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
-            console.timeEnd('加载主逻辑')
+            console.timeEnd("✅ 所有脚本加载成功, 准备执行主逻辑！");
 
             resolve(true);
         });
