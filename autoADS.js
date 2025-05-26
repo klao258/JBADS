@@ -230,6 +230,669 @@
     };
     createView();
 
+    window.ajInit = (options) => {
+        if (!window.history || !history.pushState) {
+          return false;
+        }
+      
+        var nav_url   = location.href;
+        var short_url = layerUrlToShort(nav_url);
+        if (options.layer && !short_url) {
+          nav_url = layerUrlToNav(nav_url, options.layerUnderUrl);
+        }
+        if (!history.state) {
+          history.replaceState({i: 0, u: nav_url}, null, short_url);
+        } else if (!history.state.u) {
+          history.replaceState({i: history.state.i, u: nav_url}, null, short_url);
+        } else if (short_url && location.href != short_url) {
+          history.replaceState(history.state, null, short_url);
+        }
+      
+        var $progress = $('#aj_progress'),
+            progressBoxShadow = 'inset 0 2px 0 var(--accent-color, #39ade7)',
+            progressNoBoxShadow = 'inset 0 0 0 var(--accent-color, #39ade7)',
+            progressTransition = 'width .3s linear, box-shadow .2s ease',
+            progressTo,
+            progressVal = 0;
+        $progress.css({
+          width: 0,
+          transition: progressTransition,
+          position: 'fixed',
+          zIndex: 1000,
+          top: 0,
+          height: 3
+        });
+      
+        var skipPopState = false;
+        var curHistoryState = history.state;
+        var curLocation = loc(curHistoryState.u);
+        var layerCloseLocation = layerCloseLoc(curHistoryState.u);
+        var underLayerTitle = document.title;
+        var curOnLoad = [], curOnUnload = [];
+        var curOnLayerLoad = [], curOnLayerUnload = [];
+        var curBeforeUnload = false, curBeforeLayerUnload = false;
+        var ajContainer = $('#aj_content');
+      
+        console.log('history init', 'curState =', curHistoryState);
+      
+        window.Aj = {
+          apiUrl: options.apiUrl,
+          version: options.version,
+          unauth: options.unauth || false,
+          onLoad: onLoad,
+          onUnload: onUnload,
+          onLayerLoad: onLayerLoad,
+          onLayerUnload: onLayerUnload,
+          pageLoaded: pageLoaded,
+          layerLoaded: layerLoaded,
+          showProgress: showProgress,
+          hideProgress: hideProgress,
+          onBeforeUnload: onBeforeUnload,
+          onBeforeLayerUnload: onBeforeLayerUnload,
+          linkHandler: linkHandler,
+          location: _location,
+          layerLocation: layerLocation,
+          setLocation: setLocation,
+          setLayerLocation: setLayerLocation,
+          reload: reload,
+          apiRequest: apiRequest,
+          uploadRequest: uploadRequest,
+          needAuth: needAuth,
+          ajContainer: ajContainer,
+          state: options.state || {},
+          layerState: {},
+          globalState: {},
+          layer: false
+        };
+      
+        if (options.layer) {
+          Aj.layer = $('#layer-popup-container');
+          Aj.layerState = options.layerState || {};
+          if (options.layerTitle) {
+            document.title = options.layerTitle;
+          }
+        }
+      
+        function showProgress() {
+          clearTimeout(progressTo);
+          if (!progressVal) {
+            $progress.css({width: 0, transition: 'none'});
+            progressTo = setTimeout(function() {
+              $progress.css({transition: progressTransition});
+              showProgress();
+            }, 50);
+          } else {
+            progressTo = setTimeout(showProgress, 300);
+          }
+          $progress.css({width: progressVal + '%', boxShadow: progressBoxShadow});
+          progressVal = progressVal + (99 - progressVal) / 4;
+        }
+      
+        function hideProgress(cancel) {
+          clearTimeout(progressTo);
+          progressTo = false;
+          progressVal = 0;
+          $progress.css({width: cancel ? '0%' : '100%'});
+          setTimeout(function() {
+            $progress.css({boxShadow: progressNoBoxShadow});
+          }, 300);
+        }
+      
+        function apiRequest(method, data, onSuccess) {
+          return $.ajax(Aj.apiUrl, {
+            type: 'POST',
+            data: $.extend(data, {method: method}),
+            dataType: 'json',
+            xhrFields: {
+              withCredentials: true
+            },
+            success: function(result) {
+              if (result._dlog) {
+                $('#dlog').append(result._dlog);
+              }
+              onSuccess && onSuccess(result);
+            },
+            error: function(xhr) {
+              if (!xhr.readyState && !xhr.status) {
+                // was aborted
+              } else if (xhr.status == 401) {
+                location.href = '/auth';
+              } else if (xhr.readyState > 0) {
+                location.reload();
+              }
+            }
+          });
+        }
+      
+        function uploadRequest(method, file, params, onSuccess, onProgress) {
+          var data = new FormData();
+          data.append('file', file, file.name);
+          data.append('method', method);
+          for (var key in params) {
+            data.append(key, params[key]);
+          }
+          return $.ajax(Aj.apiUrl, {
+            type: 'POST',
+            data: data,
+            cache: false,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            xhrFields: {
+              withCredentials: true
+            },
+            xhr: function() {
+              var xhr = new XMLHttpRequest();
+              xhr.upload.addEventListener('progress', function(event) {
+                if (event.lengthComputable) {
+                  onProgress && onProgress(event.loaded, event.total);
+                }
+              });
+              return xhr;
+            },
+            beforeSend: function(xhr) {
+              onProgress && onProgress(0, 1);
+            },
+            success: function(result) {
+              if (result._dlog) {
+                $('#dlog').append(result._dlog);
+              }
+              onSuccess && onSuccess(result);
+            },
+            error: function(xhr) {
+              if (xhr.status == 401) {
+                location.href = '/auth';
+              } else if (xhr.readyState > 0) {
+                onSuccess && onSuccess({error: 'Network error'});
+              }
+            }
+          });
+        }
+      
+        function loc(href) {
+          var url = document.createElement('a');
+          url.href = href;
+          return url;
+        }
+      
+        function layerHref(href) {
+          var url = document.createElement('a');
+          url.href = href;
+          var search = url.search;
+          if (search.substr(0, 1) == '?') {
+            search = search.substr(1);
+          }
+          var params = search.split('&');
+          for (var i = 0; i < params.length; i++) {
+            var kv = params[i].split('=');
+            if (kv[0] == 'l') {
+              return decodeURIComponent(kv[1] || '');
+            }
+          }
+          return null;
+        }
+      
+        function layerOpenHref(href, l) {
+          var url = document.createElement('a');
+          url.href = href;
+          url.search = url.search.replace(/&l=[^&]*/g, '', url.search);
+          url.search = url.search.replace(/(\?)l=[^&]*&|\?l=[^&]*$/g, '$1', url.search);
+          url.search += (url.search ? '&' : '?') + 'l=' + encodeURIComponent(l);
+          return url.href;
+        }
+      
+        function layerCloseLoc(href) {
+          var url = document.createElement('a');
+          url.href = href;
+          url.search = url.search.replace(/&l=[^&]*/g, '', url.search);
+          url.search = url.search.replace(/(\?)l=[^&]*&|\?l=[^&]*$/g, '$1', url.search);
+          return url;
+        }
+      
+        function layerUrlToShort(href) {
+          var url = document.createElement('a');
+          url.href = href;
+          var match = url.search.match(/(\?|&)l=([^&]*)/);
+          if (match) {
+            return '/' + decodeURIComponent(match[2]);
+          }
+          return null;
+        }
+      
+        function layerUrlToNav(href, cur_loc) {
+          if (layerUrlToShort(href)) {
+            return href;
+          }
+          var url = document.createElement('a');
+          url.href = href;
+          var layer_url = url.pathname.replace(/^\/+|\/+$/g, '');
+          return layerOpenHref(cur_loc || '/', layer_url);
+        }
+      
+        function changeLocation(url, push_state) {
+          if (push_state) {
+            location.href = url;
+          } else {
+            location.replace(url);
+          }
+        }
+      
+        function scrollToEl(elem) {
+          $(window).scrollTop($(elem).offset().top);
+        }
+      
+        function scrollToHash(hash) {
+          hash = hash || curLocation.hash;
+          if (hash[0] == '#') hash = hash.substr(1);
+          if (!hash) return;
+          var elem = document.getElementById(hash);
+          if (elem) {
+            return scrollToEl(elem);
+          }
+          elem = $('a[name]').filter(function() {
+            return $(this).attr('name') == hash;
+          }).eq(0);
+          if (elem.length) {
+            scrollToEl(elem);
+          }
+        }
+      
+        function onLoad(func) {
+          curOnLoad.push(func);
+        }
+      
+        function onUnload(func) {
+          curOnUnload.push(func);
+        }
+      
+        function onLayerLoad(func) {
+          curOnLayerLoad.push(func);
+        }
+      
+        function onLayerUnload(func) {
+          curOnLayerUnload.push(func);
+        }
+      
+        function onBeforeUnload(func) {
+          curBeforeUnload = func;
+        }
+      
+        function onBeforeLayerUnload(func) {
+          curBeforeLayerUnload = func;
+        }
+      
+        function pageLoaded() {
+          if (curOnLoad.length) {
+            for (var i = 0; i < curOnLoad.length; i++) {
+              curOnLoad[i](Aj.state);
+            }
+          }
+          onUnload(function() {
+            $(ajContainer).off('.curPage');
+            $(document).off('.curPage');
+          });
+          $(ajContainer).trigger('page:load');
+          if (Aj.layer) {
+            layerLoaded();
+          }
+        }
+      
+        function layerLoaded() {
+          if (curOnLayerLoad.length) {
+            for (var i = 0; i < curOnLayerLoad.length; i++) {
+              curOnLayerLoad[i](Aj.layerState);
+            }
+          }
+          onLayerUnload(function() {
+            Aj.layer.off('.curLayer');
+          });
+          Aj.layer.one('popup:close', function() {
+            if (curOnLayerUnload.length) {
+              for (var i = 0; i < curOnLayerUnload.length; i++) {
+                curOnLayerUnload[i](Aj.layerState);
+              }
+            }
+            Aj.layer.remove();
+            if (underLayerTitle) {
+              document.title = underLayerTitle;
+            }
+            if (layerCloseLocation) {
+              setLocation(layerCloseLocation.href);
+              layerCloseLocation = false;
+            }
+            Aj.layer = false;
+            Aj.layerState = {};
+            curOnLayerLoad = [];
+            curOnLayerUnload = [];
+          });
+          Aj.layer.on('click.curLayer', 'a[data-layer-close]', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            closePopup(Aj.layer);
+          });
+          openPopup(Aj.layer, {
+            closeByClickOutside: '.popup-no-close',
+            onBeforeClose: function($popup) {
+              var unloaded = checkBeforeUnload(function() {
+                var options = $popup.data('options');
+                options.onBeforeClose = null;
+                closePopup($popup);
+              });
+              return unloaded;
+            }
+          });
+          $(ajContainer).trigger('layer:load');
+        }
+      
+        function onResult(url, http_code, result, push_state) {
+          hideProgress();
+          if (http_code != 200 || !result || !result.v || result.v != Aj.version) {
+            changeLocation(url, push_state);
+            return;
+          }
+          var url_hash = loc(url).hash;
+          if (result.r) {
+            var redirect_url = result.r;
+            if (url_hash) {
+              redirect_url = redirect_url.split('#')[0] + url_hash;
+            }
+            if (result.hr || !loadPage(loc(redirect_url), push_state)) {
+              changeLocation(redirect_url, push_state);
+            }
+            return;
+          }
+          var saved_ult = underLayerTitle;
+          var saved_lcl = (!Aj.layer || !push_state) ? layerCloseLocation : false;
+          underLayerTitle = false;
+          layerCloseLocation = false;
+          closeAllPopups();
+          underLayerTitle = saved_ult;
+          layerCloseLocation = saved_lcl;
+      
+          if (result.h) {
+            if (curOnUnload.length) {
+              for (var i = 0; i < curOnUnload.length; i++) {
+                curOnUnload[i](Aj.state);
+              }
+            }
+            if (push_state) {
+              if (result.l) {
+                url = layerUrlToNav(url);
+              }
+              setLocation(url);
+            }
+            Aj.state = {};
+            curOnLoad = [];
+            curOnUnload = [];
+            if (result.t) {
+              document.title = result.t;
+              underLayerTitle = document.title;
+            }
+            if (result.h) {
+              ajContainer.html(result.h);
+            }
+            if (result.s) {
+              $.extend(Aj.state, result.s);
+            }
+            document.documentElement.className = result.rc || '';
+            if (result._dlog) {
+              $('#dlog').html(result._dlog);
+            }
+            if (push_state || !Aj._useScrollHack) {
+              $(window).scrollTop(0);
+            }
+            unfreezeBody();
+            if (url_hash) {
+              scrollToHash();
+            }
+            if (result.l) {
+              Aj.layer = $('<div class="popup-container hide" id="layer-popup-container"></div>');
+              Aj.layerState = {};
+              curOnLayerLoad = [];
+              curOnLayerUnload = [];
+              if (result.lt) {
+                document.title = result.lt;
+              }
+              if (result.ls) {
+                $.extend(Aj.layerState, result.ls);
+              }
+              Aj.layer.html(result.l).appendTo(document.body);
+            }
+            if (result.j) {
+              window.execScript ? window.execScript(result.j) : eval(result.j);
+            }
+            pageLoaded();
+            return;
+          } else if (result.l) {
+            if (push_state) {
+              url = layerUrlToNav(url);
+              setLocation(url);
+            }
+            if (result.s) {
+              $.extend(Aj.state, result.s);
+            }
+            if (result._dlog) {
+              $('#dlog').html(result._dlog);
+            }
+            Aj.layer = $('<div class="popup-container hide" id="layer-popup-container"></div>');
+            Aj.layerState = {};
+            curOnLayerLoad = [];
+            curOnLayerUnload = [];
+            if (result.lt) {
+              document.title = result.lt;
+            }
+            if (result.ls) {
+              $.extend(Aj.layerState, result.ls);
+            }
+            Aj.layer.html(result.l).appendTo(document.body);
+            if (result.j) {
+              window.execScript ? window.execScript(result.j) : eval(result.j);
+            }
+            layerLoaded();
+            return;
+          }
+          return changeLocation(url, push_state);
+        }
+      
+        function loadPage(link, push_state, state_go) {
+          var url = link.href;
+          var cur_url = curLocation.href;
+          var cur_ref = curLocation.origin + curLocation.pathname + curLocation.search;
+          if (link.origin != curLocation.origin) {
+            return false;
+          }
+          if (link.pathname == curLocation.pathname &&
+              link.search == curLocation.search &&
+              link.hash != curLocation.hash) {
+            return false;
+          }
+          if (url == cur_url) {
+            push_state = false;
+          }
+          var load_fn, interrupted = false;
+          load_fn = function() {
+            if (!push_state) {
+              if (interrupted) {
+                historyJump(state_go);
+              }
+              curLocation = loc(url);
+              layerCloseLocation = layerCloseLoc(url);
+            }
+            if (interrupted && Aj.layer) {
+              var options = Aj.layer.data('options');
+              options.onBeforeClose = null;
+            }
+            showProgress();
+            $.ajax(url, {
+              dataType: 'json',
+              xhrFields: {withCredentials: true},
+              headers: {'X-Aj-Referer': cur_ref},
+              success: function(result, t, xhr) {
+                onResult(url, xhr.status, result, push_state);
+              },
+              error: function(xhr) {
+                onResult(url, xhr.status, false, push_state);
+              }
+            });
+          };
+          interrupted = !checkBeforeUnload(load_fn);
+          if (interrupted && !push_state) {
+            historyJump(-state_go);
+          }
+          return true;
+        }
+      
+        function _location(href, replace) {
+          if (typeof href !== 'undefined') {
+            var url = loc(href);
+            var push_state = !replace;
+            if (!loadPage(url, push_state)) {
+              changeLocation(url, push_state);
+            }
+          } else {
+            return loc(curLocation.href);
+          }
+        }
+      
+        function layerLocation(layer_url) {
+          if (typeof layer_url !== 'undefined') {
+            var layer_href = layerOpenHref(curLocation, layer_url);
+            loadPage(loc(layer_href), true);
+          } else {
+            return layerHref(curLocation.href);
+          }
+        }
+      
+        function setLocation(href, replace = false) {
+          var url = loc(href).href;
+          var short_url = layerUrlToShort(url) || url;
+          if (replace) {
+            history.replaceState({i: curHistoryState.i, u: url}, null, short_url);
+          } else {
+            history.pushState({i: curHistoryState.i + 1, u: url}, null, short_url);
+          }
+          curHistoryState = history.state;
+          curLocation = loc(curHistoryState.u);
+          layerCloseLocation = layerCloseLoc(curHistoryState.u);
+        }
+      
+        function setLayerLocation(layer_url) {
+          layer_url = layer_url.toString().replace(/^\/+|\/+$/g, '');
+          var layer_href = layerOpenHref(curLocation, layer_url);
+          var url = loc(layer_href).href;
+          var short_url = layerUrlToShort(url) || url;
+          history.pushState({i: curHistoryState.i + 1, u: url}, null, short_url);
+          curHistoryState = history.state;
+          curLocation = loc(curHistoryState.u);
+        }
+      
+        function reload() {
+          _location(_location(), true);
+        }
+      
+        function historyJump(delta) {
+          if (delta) {
+            skipPopState = true;
+            history.go(delta);
+          }
+        }
+      
+        function needAuth() {
+          if (Aj.unauth) {
+            openPopup('#login-popup-container');
+            return true;
+          }
+          return false;
+        }
+      
+        function linkHandler(e) {
+          if (e.metaKey || e.ctrlKey) return true;
+          var href = this.href;
+          if (this.hasAttribute('data-unsafe') &&
+              href != $(this).text()) {
+            var $confirm = showConfirm(l('WEB_OPEN_LINK_CONFIRM', {url: cleanHTML(href)}, 'Do you want to open <b>{url}</b>?'), null, l('WEB_OPEN_LINK', 'Open'));
+            $('.popup-primary-btn', $confirm).attr({
+              href: href,
+              target: $(this).attr('target'),
+              rel: $(this).attr('rel')
+            });
+            return false;
+          }
+          if ($(this).attr('target') == '_blank') return true;
+          if (this.hasAttribute('data-layer')) {
+            href = layerUrlToNav(href, curLocation);
+          }
+          if ($(this).hasClass('need-auth') && needAuth() ||
+              loadPage(loc(href), true)) {
+            e.preventDefault();
+          }
+        }
+      
+        function beforeUnloadHandler(e) {
+          var message = null;
+          if (Aj.layer && curBeforeLayerUnload) {
+            message = curBeforeLayerUnload();
+          }
+          if (!message && curBeforeUnload) {
+            message = curBeforeUnload();
+          }
+          if (message) {
+            if (typeof e === 'undefined') e = window.e;
+            if (e) e.returnValue = message;
+            return message;
+          }
+        }
+        function checkBeforeUnload(load_fn) {
+          var message = null;
+          if (Aj.layer && curBeforeLayerUnload) {
+            message = curBeforeLayerUnload();
+          }
+          if (!message && curBeforeUnload) {
+            message = curBeforeUnload();
+          }
+          var load_func = function() {
+            curBeforeLayerUnload = false;
+            curBeforeUnload = false;
+            load_fn();
+          };
+          if (message) {
+            var message_html = $('<div>').text(message).html();
+            showConfirm(message_html, load_func, l('WEB_LEAVE_PAGE', 'Leave'));
+            return false;
+          } else {
+            load_func();
+            return true;
+          }
+        }
+      
+        $(document).on('click', 'a[href]', linkHandler);
+        $(document.body).removeClass('no-transition');
+      
+        $(window).on('popstate', function(e) {
+          var popstate = e.originalEvent.state;
+          var state_go = popstate ? (popstate.i - curHistoryState.i) : 0;
+          if (!popstate) {
+            popstate = {i: 0, u: location.href};
+          } else if (!popstate.u) {
+            popstate.u = location.href;
+          }
+          curHistoryState = popstate;
+          if (skipPopState) {
+            skipPopState = false;
+            return;
+          }
+          if (Aj._useScrollHack) {
+            freezeBody();
+          }
+          var link = loc(curHistoryState.u);
+          var loaded = loadPage(link, false, state_go);
+          if (!loaded && Aj._useScrollHack) {
+            unfreezeBody();
+          }
+        });
+        window.onbeforeunload = beforeUnloadHandler;
+    }
+      
     window.OwnerAds = {
         init: function () {
             var cont = window.Aj.ajContainer;
