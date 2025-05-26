@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-17:31:56
+// @version      2025.05.26-17:37:49
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -98,7 +98,12 @@
         
             for (let name of waitVars) {
                 let isWindow = name in window
-                let isLet = typeof eval(name) !== 'undefined'
+                let isLet 
+                try {
+                    isLet = typeof eval(name) !== 'undefined' // 尝试访问变量，捕获未定义错误
+                } catch (e) {
+                    isLet = false; // 如果抛出错误，则说明变量未定义
+                }
 
                 if (!isWindow && !isLet) {
                     allReady = false;
