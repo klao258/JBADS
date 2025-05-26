@@ -212,7 +212,7 @@
                 window.postID = []
             }
 
-            const expectedVars = [ "ajInit", "OwnerAds", "Aj" ];
+            const expectedVars = [ "ajInit", "OwnerAds" ];
 
             console.time("✅ 所有脚本加载成功, 准备执行主逻辑！");
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
