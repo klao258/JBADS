@@ -1,4 +1,4 @@
-(() => {
+(async () => {
     "use strict";
     const { accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
 
@@ -11,6 +11,57 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
+
+    let db;
+    const cpms_store = "cpms"; // 记录单价
+    const pviews_store = "pviews"; // 记录展示量
+    const initDB = async () => {
+        if (db) return db;
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open("myDatabase", 5);
+            request.onerror = (event) => {
+                console.error("数据库打开失败:", event.target.errorCode);
+                resolve(false)
+            };
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                console.log("数据库打开成功");
+                resolve(db);
+            };
+            request.onupgradeneeded = (event) => {
+                db = event.target.result;
+                if (!db.objectStoreNames.contains(cpms_store)) {
+                    const objectStore = db.createObjectStore("cpms", {
+                        autoIncrement: true,
+                    });
+                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
+                    objectStore.createIndex("ads", "ads", { unique: false });
+                    objectStore.createIndex("cpm", "cpm", { unique: false });
+                    objectStore.createIndex("float", "float", { unique: false });
+                    objectStore.createIndex("views", "views", { unique: false });
+                    objectStore.createIndex("clicks", "clicks", { unique: false });
+                    objectStore.createIndex("joins", "joins", { unique: false });
+                    objectStore.createIndex("pays", "pays", { unique: false });
+                    objectStore.createIndex("money", "money", { unique: false });
+                    objectStore.createIndex("createDate", "createDate", { unique: false });
+                }
+                if (!db.objectStoreNames.contains(pviews_store)) {
+                    const objectStore = db.createObjectStore("pviews", {
+                        keyPath: "ads_date",
+                    });
+                    objectStore.createIndex("ads_date", "ads_date", { unique: false });
+                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
+                    objectStore.createIndex("cpm", "cpm", { unique: false });
+                    objectStore.createIndex("views", "views", { unique: false });
+                    objectStore.createIndex("clicks", "clicks", { unique: false });
+                    objectStore.createIndex("joins", "joins", { unique: false });
+                    objectStore.createIndex("pays", "pays", { unique: false });
+                    objectStore.createIndex("money", "money", { unique: false });
+                }
+            };
+        })
+    }
+    await initDB()
 
     // 评分函数
     const getWeightedScore = (ad) => {
@@ -1940,49 +1991,6 @@
             }
             return this;
         });
-    };
-
-    let db;
-    const cpms_store = "cpms"; // 记录单价
-    const pviews_store = "pviews"; // 记录展示量
-    const request = indexedDB.open("myDatabase", 5);
-    request.onerror = (event) => {
-        console.error("数据库打开失败:", event.target.errorCode);
-    };
-    request.onsuccess = (event) => {
-        db = event.target.result;
-        console.log("数据库打开成功");
-    };
-    request.onupgradeneeded = (event) => {
-        db = event.target.result;
-        if (!db.objectStoreNames.contains(cpms_store)) {
-            const objectStore = db.createObjectStore("cpms", {
-                autoIncrement: true,
-            });
-            objectStore.createIndex("ad_id", "ad_id", { unique: false });
-            objectStore.createIndex("ads", "ads", { unique: false });
-            objectStore.createIndex("cpm", "cpm", { unique: false });
-            objectStore.createIndex("float", "float", { unique: false });
-            objectStore.createIndex("views", "views", { unique: false });
-            objectStore.createIndex("clicks", "clicks", { unique: false });
-            objectStore.createIndex("joins", "joins", { unique: false });
-            objectStore.createIndex("pays", "pays", { unique: false });
-            objectStore.createIndex("money", "money", { unique: false });
-            objectStore.createIndex("createDate", "createDate", { unique: false });
-        }
-        if (!db.objectStoreNames.contains(pviews_store)) {
-            const objectStore = db.createObjectStore("pviews", {
-                keyPath: "ads_date",
-            });
-            objectStore.createIndex("ads_date", "ads_date", { unique: false });
-            objectStore.createIndex("ad_id", "ad_id", { unique: false });
-            objectStore.createIndex("cpm", "cpm", { unique: false });
-            objectStore.createIndex("views", "views", { unique: false });
-            objectStore.createIndex("clicks", "clicks", { unique: false });
-            objectStore.createIndex("joins", "joins", { unique: false });
-            objectStore.createIndex("pays", "pays", { unique: false });
-            objectStore.createIndex("money", "money", { unique: false });
-        }
     };
 
     // 获取DB数据 返回obj
