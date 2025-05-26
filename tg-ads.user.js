@@ -111,7 +111,8 @@
             }
             await new Promise((res) => setTimeout(res, interval));
         }
-        console.warn(`⚠️ 超时，未检测到所有变量：${waitVars.join(", ")}, 全局对象:${window}`);
+        console.warn(`⚠️ 超时，未检测到所有变量：${waitVars.join(", ")}`);
+        console.log(`全局对象:${window}`);
         return false;
     }
 
