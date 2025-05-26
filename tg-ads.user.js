@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-18:14:57
+// @version      2025.05.26-18:19:58
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -15,9 +15,9 @@
 
 (async function () {
     'use strict';
-  
-    console.log(`✅ TG广告脚本已加载，当前版本： ${ GM_info.script.version }`);
 
+    console.log(`✅ TG广告脚本已加载，当前版本： ${ GM_info.script.version }`);
+    
     // ===== 🔄 检查远程是否有新版本 =====
     const CURRENT_VERSION = GM_info.script.version;
     const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
@@ -53,7 +53,6 @@
     async function waitForJQuery(maxTries = 50, interval = 100) {
         for (let i = 0; i < maxTries; i++) {
           if (typeof window.$ === 'function') {
-            console.log('✅ jQuery 已加载');
             return true;
           }
           await new Promise(res => setTimeout(res, interval));
@@ -263,10 +262,8 @@
 
             await initDB()
 
-            console.time("✅ 所有脚本加载成功, 准备执行主逻辑！");
             const expectedVars = [ "ajInit", "OwnerAds" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
-            console.timeEnd("✅ 所有脚本加载成功, 准备执行主逻辑！");
 
             resolve(true);
         });
