@@ -72,6 +72,7 @@
      * @returns {Promise<boolean>} 是否全部加载成功并变量可用
      */
     async function loadMultipleScriptsAndWaitForAll(urls, waitVars, maxTries = 50, interval = 100) {
+        console.time("✅ 开始加载脚本：", urls.join(", "));
         // 1. 并行加载所有脚本
         const loadScript = (url) =>
             new Promise((resolve) => {
@@ -107,6 +108,7 @@
                 }
             }
             if (allReady) {
+                console.timeEnd("✅ 开始加载脚本：", urls.join(", "));
                 return true;
             }
             await new Promise((res) => setTimeout(res, interval));
