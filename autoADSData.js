@@ -68,6 +68,8 @@ const autoADSData = {
 
         /** 金貝担保、供需、公群 */
         "金貝担保1": { en: "JBDB1", browser: 22, code: "", options: [...DBChannel, ...DB] },
+        "金貝担保2": { en: "JBDB1", browser: 23, code: "", options: [...DBChannel, ...DB] },
+        "金貝担保3": { en: "JBDB1", browser: 24, code: "", options: [...DBChannel, ...DB] },
         "金貝推广-小虎": { en: "GZXiaoHu", browser: 12, code: "", options: [...DBChannel, ...DB] },
         "金貝推广-花花": { en: "GZHuaHua", browser: 17, code: "", options: [...DBChannel, ...DB] },
 
