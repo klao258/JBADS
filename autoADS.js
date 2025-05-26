@@ -1,6 +1,6 @@
 (() => {
     "use strict";
-    const { accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
+    const { accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, minViews } = autoADSData;
     const db = window.db;
     const cpms_store = window.cpms_store; // 记录单价
     const pviews_store = window.pviews_store; // 记录展示量
@@ -999,7 +999,7 @@
                                 : ""
                             }
                         
-                        <td><div class="pr-cell qviews" style="color: ${+item?.qviews < 500 ? "green" : ""
+                        <td><div class="pr-cell qviews" style="color: ${+item?.qviews < +minViews ? "green" : ""
                             };">${formatNumber(item?.qviews) || ""}</div></td>
                         <td><div class="pr-cell pviews">${Ads.wrapAmount(
                                 item?.qspent
@@ -2452,7 +2452,7 @@
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
             // if (v?.tme_path?.indexOf("?") === -1) return false;
-            if (v.status === "Active" && v.qviews < 500) {
+            if (v.status === "Active" && v.qviews < +minViews) {
                 $(`a[href="/account/ad/${v.ad_id}"]`)
                     .first()
                     .parents("tr")
@@ -2470,9 +2470,9 @@
 
         let promiseArr = list.map(async (item) => {
             let romPrice = 0;
-            if (item?.qviews < 150) {
+            if (item?.qviews < (+minViews * 0.3)) {
                 romPrice = (item.cpm * 0.1).toFixed(2);
-            } else if (item?.qviews < 350) {
+            } else if (item?.qviews < (+minViews * 0.5)) {
                 romPrice = (item.cpm * 0.05).toFixed(2);
             } else {
                 romPrice = (item.cpm * 0.01).toFixed(2);

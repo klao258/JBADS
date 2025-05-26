@@ -40,6 +40,8 @@ const JBChannel = [
 ]
 
 const autoADSData = {
+    minViews: 300, // 最小浏览量
+    
     // 账号信息
     accountAll: {
         /** 金貝推广 */
