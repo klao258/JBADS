@@ -2851,8 +2851,6 @@
         keys = keys.filter((item) => regex.test(item));
 
         if (!keys.length) return toast("已剔除不符合的关键词，剩余0条符合");
-        if ($(".select").val() === "jbtg")
-            return toast("搜索广告只能发频道，请切换类型");
 
         keys = keys.length > 10 ? keys.slice(0, 10) : keys;
         let keyPromise = keys.map(async (key) => await onTargetQuerySearch(key));
@@ -2871,6 +2869,8 @@
         searchArr.map((v) => {
             ids.push(v.val);
         });
+
+        console.log('搜索查询', keys, searchArr)
 
         // 准备参数
         let params = {
@@ -2893,6 +2893,8 @@
             search_queries: ids.join(";"),
             method: "createAd",
         };
+
+        return false
 
         let createAd = async (params) => {
             return new Promise((resolve) => {
