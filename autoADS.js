@@ -2873,7 +2873,7 @@
             ids.push(v.val);
         });
 
-        title = title.join("·");
+        title = title.join("，");
         if (title.length > 32) {
             title = title.slice(0, 32);
         }
