@@ -64,7 +64,7 @@ const autoADSData = {
         "ads 妮妮": { en: "NiNi", browser: 7, code: "64782", options: [...FB] },
         
         /** 金貝机器人、频道 */
-        "金貝推广-贝贝": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, FBChannel] },
+        "金貝推广-贝贝": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
 
         /** 金貝担保、供需、公群 */
         "金貝担保1": { en: "JBDB1", browser: 22, code: "", options: [...DBChannel, ...DB] },
