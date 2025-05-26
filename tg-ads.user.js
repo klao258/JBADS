@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-15:56:32
+// @version      2025.05.26-16:02:20
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -111,7 +111,7 @@
             }
             await new Promise((res) => setTimeout(res, interval));
         }
-        console.warn(`⚠️ 超时，未检测到所有变量：${waitVars.join(", ")}, ${window.ajInit}, ${window.OwnerAds}, ${window.Aj}`);
+        console.warn(`⚠️ 超时，未检测到所有变量：${waitVars.join(", ")}, ${window}`);
         return false;
     }
 
