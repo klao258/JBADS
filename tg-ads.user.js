@@ -209,8 +209,7 @@
             const expectedVars = [
                 "window.ajInit",
                 "window.OwnerAds",
-                "window.Aj",
-                "window.isLoad"
+                "window.Aj"
             ];
 
             console.time("✅ 所有脚本加载成功, 准备执行主逻辑！");
