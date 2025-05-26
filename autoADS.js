@@ -2856,6 +2856,8 @@
         let keyPromise = keys.map(async (key) => await onTargetQuerySearch(key));
         let searchArr = await Promise.all(keyPromise); // 查询所有的关键词
 
+        if(!searchArr.length) return toast("没有符合的关键词");
+
         // 随机设置单价
         let minPrice = parseFloat($("#minPrice").val());
         let maxPrice = parseFloat($("#maxPrice").val());
@@ -2864,13 +2866,19 @@
         let minBudget = parseFloat($("#minBudget").val());
         let maxBudget = parseFloat($("#maxBudget").val());
 
-        let title = keys[0];
+        let title = [];
         let ids = [];
         searchArr.map((v) => {
+            title.push(v.name)
             ids.push(v.val);
         });
 
-        console.log('搜索查询', keys, searchArr)
+        title = title.join(" | ");
+        if (title.length > 32) {
+            title = title.slice(0, 32);
+        }
+
+        console.log('搜索查询', title)
 
         // 准备参数
         let params = {
