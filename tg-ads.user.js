@@ -98,7 +98,12 @@
         
             for (let name of waitVars) {
                 let isWindow = name in window
-                let isLet = typeof eval(name) !== 'undefined'
+                let isLet 
+                try {
+                    isLet = typeof eval(name) !== 'undefined' // 尝试访问变量，捕获未定义错误
+                } catch (e) {
+                    isLet = false; // 如果抛出错误，则说明变量未定义
+                }
 
                 if (!isWindow && !isLet) {
                     allReady = false;
