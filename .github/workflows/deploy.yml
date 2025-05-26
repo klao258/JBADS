@@ -43,26 +43,6 @@ jobs:
           git commit -m "🔄 自动注入版本号"
           git push origin main
 
-      # - name: 安装 JavaScript 混淆器
-      #   run: npm install -g javascript-obfuscator
-
-      # - name: 混淆 adsData 和 autoADS*.js 文件
-      #   run: |
-      #     FILES=$(find adsData -name "*.js"; ls autoADS.js autoADSData.js 2>/dev/null)
-      #     for file in $FILES; do
-      #       echo "🔒 正在处理：$file"
-      #       javascript-obfuscator "$file" \
-      #         --output "$file" \
-      #         --compact true \
-      #         --self-defending true \
-      #         --control-flow-flattening true \
-      #         --dead-code-injection true \
-      #         --string-array true \
-      #         --string-array-encoding rc4 \
-      #         --string-array-threshold 0.75 \
-      #         --rename-globals false
-      #     done
-
       - name: 部署到 GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
