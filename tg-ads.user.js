@@ -97,14 +97,16 @@
             let allReady = true;
         
             for (let name of waitVars) {
-              if (!(name in window)) {
-                allReady = false;
-                break;
-              }
+                let isWindow = name in window
+                let isLet = typeof eval(name) !== 'undefined'
+
+                if (!isWindow && !isLet) {
+                    allReady = false;
+                    break;
+                }
             }
         
             if (allReady) {
-                // console.log(`✅ 所有变量已准备好: ${waitVars.join(', ')}`);
               return true;
             }
         
@@ -193,7 +195,7 @@
             const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData']);
 
             // 加载 postData
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["window.postData"]);
+            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
 
             // 加载主逻辑
             window.postID = [];
@@ -205,11 +207,7 @@
                 window.postID = []
             }
 
-            const expectedVars = [
-                "window.ajInit",
-                "window.OwnerAds",
-                "window.Aj"
-            ];
+            const expectedVars = [ "ajInit", "OwnerAds", "Aj" ];
 
             console.time("✅ 所有脚本加载成功, 准备执行主逻辑！");
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
