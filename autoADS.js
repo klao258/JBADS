@@ -1,7 +1,10 @@
-(async () => {
+(() => {
     "use strict";
     const { accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, inStr } = autoADSData;
-
+    const db = window.db;
+    const cpms_store = window.cpms_store; // 记录单价
+    const pviews_store = window.pviews_store; // 记录展示量
+    
     console.log('静态数据', autoADSData)
 
     window.isLoad = false;
@@ -11,6 +14,224 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
+
+    // 评分函数
+    const getWeightedScore = (ad) => {
+        const normalize = (val, min, max) => (val - min) / (max - min || 1) // 归一化函数
+        const values = Object.values(window.postData || {}).map((str) => {
+            const [regs, pays, money] = str.split("-").map(Number);
+            return { regs, pays, money };
+        });
+
+        const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
+        const stats = {
+            minRegs: 0,
+            maxRegs: Math.max(...values.map((v) => v.regs)),
+            minPays: 0,
+            maxPays: Math.max(...values.map((v) => v.pays)),
+            minMoney: 0,
+            maxMoney: Math.max(...values.map((v) => v.money)),
+        }
+
+        const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
+        const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
+        const moneyScore = normalize(ad.money, stats.minMoney, stats.maxMoney);
+
+        return (
+            regScore * weight.regs +
+            paysScore * weight.pays +
+            moneyScore * weight.money
+        );
+    }
+
+    // 功能界面
+    const createView = () => {
+        const $toggleBtn = $("<button>", {
+            text: "收起 ▲",
+            class: "toggle-btn",
+            click: function () {
+                const isCollapsed = $container.data("collapsed");
+                if (isCollapsed) {
+                    // 展开
+                    $container.children().not(".toggle-btn").show();
+                    $(this).text("收起 ▲");
+                    $container.data("collapsed", false);
+                } else {
+                    // 收起
+                    $container.children().not(".toggle-btn").hide();
+                    $(this).text("展开 ▼");
+                    $container.data("collapsed", true);
+                }
+            },
+        }).css({
+            width: "100%",
+            marginBottom: "5px",
+            padding: "5px",
+            fontSize: "12px",
+            backgroundColor: "#f0f0f0",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            cursor: "pointer",
+        });
+
+        // 创建容器
+        const $container = $("<div>", {
+            id: "buttonContainer",
+        }).css({
+            position: "fixed",
+            top: "0",
+            right: "0",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "2px 5px",
+            width: "140px",
+            zIndex: 1,
+            background: "#fff",
+            padding: "5px",
+            borderRadius: "5px",
+            boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+        });
+
+        $container.data("collapsed", false); // 默认展开状态
+        $container.append($toggleBtn); // 添加按钮到容器顶部
+
+        // 创建文本域
+        let $textArea = $("<textarea>", {
+            class: "urls",
+        }).attr("placeholder", "请输入频道/机器人链接, 多个链接需要换行").css({
+                width: "100%",
+                height: "100px",
+                border: "1px solid #ccc",
+                padding: "5px",
+                borderRadius: "5px",
+                fontSize: "14px",
+                resize: "none",
+        });
+
+        // 创建推广链接下拉框
+        const $select = $("<select>", {
+            class: "select",
+        }).css({
+            flex: 1,
+            padding: "5px",
+            borderRadius: "5px",
+            fontSize: "14px",
+        });
+
+        // 添加选项（可根据需要修改）
+        accountAll?.[window.user]?.options?.map?.(v => {
+            $select.append($(`<option value="${v.tgname}">${v.label}</option>`))
+        })
+
+        // 创建行业下拉框
+        const $GQSelet = $("<select>", {
+            class: "GQClassify",
+        }).css({
+            flex: 1,
+            padding: "5px",
+            borderRadius: "5px",
+            fontSize: "14px",
+        });
+
+        Object.keys(GQText).map((v) =>
+            $GQSelet.append($(`<option value="${v}">${v}</option>`))
+        );
+
+        // 创建输入框容器
+        let $priceInputs = $(`
+            <div id="priceContainer">
+                <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">单价：</label>
+                <input type="number" id="minPrice" class="price-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="3" min="0.1" max="50" step="0.1">
+                <label> - </label>
+                <input type="number" id="maxPrice" class="price-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="5" min="0.1" max="50" step="0.1">
+            </div>
+        `).css({
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "160px",
+            background: "rgba(255, 255, 255, 0.9)",
+            // padding: "2px 5px",
+            // border: "1px solid rgb(204, 204, 204)",
+            // borderRadius: "5px",
+        });
+
+        // 创建总预算输入框
+        let $budgetInputs = $(`
+            <div id="budgetContainer">
+                <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">预算：</label>
+                <input type="number" id="minBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
+                <label> - </label>
+                <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
+            </div>
+        `).css({
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "180px",
+            background: "rgba(255, 255, 255, 0.9)",
+            // padding: "2px 5px",
+            // border: "1px solid rgb(204, 204, 204)",
+            // borderRadius: "5px",
+        });
+
+        // 所有按钮封装函数
+        const createButton = (text, className, clickFn) => {
+            if (accountAll[window.user]?.options?.length > 1 && ["textTeviewBtn"].includes(className)) {
+                return null;
+            } else if (accountAll[window.user]?.options?.length === 1 && ["searchADSBtn"].includes(className)) {
+                return null;
+            } else {
+                return $("<button>", {
+                    text,
+                    class: className,
+                    click: clickFn,
+                }).css({
+                    padding: "4px 6px",
+                    backgroundColor: "#007bff",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    whiteSpace: "nowrap",
+                    flex: 1,
+                });
+            }
+        };
+
+        // 添加按钮
+        const buttons = [
+            createButton("单链发布", "newADBtn", () => sendChannel()),
+            createButton("多链发布", "sendMoreUrl", () => sendMoreChannel()),
+            createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
+            createButton("一键重审", "reviewBtn", async () => onReview()),
+            // createButton("跑动提价", "addPrice", async () => addPriceActiveFn()),
+            // createButton("未跑动提价", "addPrice", async () => addPriceFn()),
+            createButton("加预算", "addMount", async () => addMountFn()),
+            createButton("文案替换", "textTeviewBtn", async () => onReplace()),
+            // createButton("删除15天无浏览量", "delBtn", async () => onDelsViews()),
+            createButton("删除0评分审核失败", "delBtn", async () => onDels()),
+            createButton("提价", "proPrice", async () => onProPrice()),
+            createButton("刷新页面", "refreshBtn", async () => onRefresh()),
+        ];
+
+        // 添加元素到容器
+        $container.append(
+            $textArea,
+            $select,
+            accountAll?.[window.user]?.options?.find?.(v => v?.tgname === 'jbgq') ? $GQSelet : null, // 公群添加行业
+            $priceInputs,
+            $budgetInputs,
+            ...buttons
+        );
+
+        // 添加到页面
+        $("body").append($container);
+    };
+    createView();
 
     window.ajInit = (options) => {
         if (!window.history || !history.pushState) {
@@ -54,9 +275,7 @@
         var curOnLayerLoad = [], curOnLayerUnload = [];
         var curBeforeUnload = false, curBeforeLayerUnload = false;
         var ajContainer = $('#aj_content');
-      
-        console.log('history init', 'curState =', curHistoryState);
-      
+
         window.Aj = {
           apiUrl: options.apiUrl,
           version: options.version,
@@ -674,275 +893,6 @@
         });
         window.onbeforeunload = beforeUnloadHandler;
     }
-
-    let db;
-    const cpms_store = "cpms"; // 记录单价
-    const pviews_store = "pviews"; // 记录展示量
-    const initDB = async () => {
-        if (db) return db;
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open("myDatabase", 5);
-            request.onerror = (event) => {
-                console.error("数据库打开失败:", event.target.errorCode);
-                resolve(false)
-            };
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                console.log("数据库打开成功");
-                resolve(db);
-            };
-            request.onupgradeneeded = (event) => {
-                db = event.target.result;
-                if (!db.objectStoreNames.contains(cpms_store)) {
-                    const objectStore = db.createObjectStore("cpms", {
-                        autoIncrement: true,
-                    });
-                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
-                    objectStore.createIndex("ads", "ads", { unique: false });
-                    objectStore.createIndex("cpm", "cpm", { unique: false });
-                    objectStore.createIndex("float", "float", { unique: false });
-                    objectStore.createIndex("views", "views", { unique: false });
-                    objectStore.createIndex("clicks", "clicks", { unique: false });
-                    objectStore.createIndex("joins", "joins", { unique: false });
-                    objectStore.createIndex("pays", "pays", { unique: false });
-                    objectStore.createIndex("money", "money", { unique: false });
-                    objectStore.createIndex("createDate", "createDate", { unique: false });
-                }
-                if (!db.objectStoreNames.contains(pviews_store)) {
-                    const objectStore = db.createObjectStore("pviews", {
-                        keyPath: "ads_date",
-                    });
-                    objectStore.createIndex("ads_date", "ads_date", { unique: false });
-                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
-                    objectStore.createIndex("cpm", "cpm", { unique: false });
-                    objectStore.createIndex("views", "views", { unique: false });
-                    objectStore.createIndex("clicks", "clicks", { unique: false });
-                    objectStore.createIndex("joins", "joins", { unique: false });
-                    objectStore.createIndex("pays", "pays", { unique: false });
-                    objectStore.createIndex("money", "money", { unique: false });
-                }
-            };
-        })
-    }
-    await initDB()
-
-    // 评分函数
-    const getWeightedScore = (ad) => {
-        const normalize = (val, min, max) => (val - min) / (max - min || 1) // 归一化函数
-        const values = Object.values(window.postData || {}).map((str) => {
-            const [regs, pays, money] = str.split("-").map(Number);
-            return { regs, pays, money };
-        });
-
-        const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
-        const stats = {
-            minRegs: 0,
-            maxRegs: Math.max(...values.map((v) => v.regs)),
-            minPays: 0,
-            maxPays: Math.max(...values.map((v) => v.pays)),
-            minMoney: 0,
-            maxMoney: Math.max(...values.map((v) => v.money)),
-        }
-
-        const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
-        const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
-        const moneyScore = normalize(ad.money, stats.minMoney, stats.maxMoney);
-
-        return (
-            regScore * weight.regs +
-            paysScore * weight.pays +
-            moneyScore * weight.money
-        );
-    }
-
-    // 功能界面
-    const createView = () => {
-        const $toggleBtn = $("<button>", {
-            text: "收起 ▲",
-            class: "toggle-btn",
-            click: function () {
-                const isCollapsed = $container.data("collapsed");
-                if (isCollapsed) {
-                    // 展开
-                    $container.children().not(".toggle-btn").show();
-                    $(this).text("收起 ▲");
-                    $container.data("collapsed", false);
-                } else {
-                    // 收起
-                    $container.children().not(".toggle-btn").hide();
-                    $(this).text("展开 ▼");
-                    $container.data("collapsed", true);
-                }
-            },
-        }).css({
-            width: "100%",
-            marginBottom: "5px",
-            padding: "5px",
-            fontSize: "12px",
-            backgroundColor: "#f0f0f0",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            cursor: "pointer",
-        });
-
-        // 创建容器
-        const $container = $("<div>", {
-            id: "buttonContainer",
-        }).css({
-            position: "fixed",
-            top: "0",
-            right: "0",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "2px 5px",
-            width: "140px",
-            zIndex: 1,
-            background: "#fff",
-            padding: "5px",
-            borderRadius: "5px",
-            boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-        });
-
-        $container.data("collapsed", false); // 默认展开状态
-        $container.append($toggleBtn); // 添加按钮到容器顶部
-
-        // 创建文本域
-        let $textArea = $("<textarea>", {
-            class: "urls",
-        }).attr("placeholder", "请输入频道/机器人链接, 多个链接需要换行").css({
-                width: "100%",
-                height: "100px",
-                border: "1px solid #ccc",
-                padding: "5px",
-                borderRadius: "5px",
-                fontSize: "14px",
-                resize: "none",
-        });
-
-        // 创建推广链接下拉框
-        const $select = $("<select>", {
-            class: "select",
-        }).css({
-            flex: 1,
-            padding: "5px",
-            borderRadius: "5px",
-            fontSize: "14px",
-        });
-
-        // 添加选项（可根据需要修改）
-        accountAll?.[window.user]?.options?.map?.(v => {
-            $select.append($(`<option value="${v.tgname}">${v.label}</option>`))
-        })
-
-        // 创建行业下拉框
-        const $GQSelet = $("<select>", {
-            class: "GQClassify",
-        }).css({
-            flex: 1,
-            padding: "5px",
-            borderRadius: "5px",
-            fontSize: "14px",
-        });
-
-        Object.keys(GQText).map((v) =>
-            $GQSelet.append($(`<option value="${v}">${v}</option>`))
-        );
-
-        // 创建输入框容器
-        let $priceInputs = $(`
-            <div id="priceContainer">
-                <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">单价：</label>
-                <input type="number" id="minPrice" class="price-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="3" min="0.1" max="50" step="0.1">
-                <label> - </label>
-                <input type="number" id="maxPrice" class="price-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="5" min="0.1" max="50" step="0.1">
-            </div>
-        `).css({
-            flex: 1,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "160px",
-            background: "rgba(255, 255, 255, 0.9)",
-            // padding: "2px 5px",
-            // border: "1px solid rgb(204, 204, 204)",
-            // borderRadius: "5px",
-        });
-
-        // 创建总预算输入框
-        let $budgetInputs = $(`
-            <div id="budgetContainer">
-                <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">预算：</label>
-                <input type="number" id="minBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
-                <label> - </label>
-                <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
-            </div>
-        `).css({
-            flex: 1,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "180px",
-            background: "rgba(255, 255, 255, 0.9)",
-            // padding: "2px 5px",
-            // border: "1px solid rgb(204, 204, 204)",
-            // borderRadius: "5px",
-        });
-
-        // 所有按钮封装函数
-        const createButton = (text, className, clickFn) => {
-            if (accountAll[window.user]?.options?.length > 1 && ["textTeviewBtn"].includes(className)) {
-                return null;
-            } else if (accountAll[window.user]?.options?.length === 1 && ["searchADSBtn"].includes(className)) {
-                return null;
-            } else {
-                return $("<button>", {
-                    text,
-                    class: className,
-                    click: clickFn,
-                }).css({
-                    padding: "4px 6px",
-                    backgroundColor: "#007bff",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    whiteSpace: "nowrap",
-                    flex: 1,
-                });
-            }
-        };
-
-        // 添加按钮
-        const buttons = [
-            createButton("单链发布", "newADBtn", () => sendChannel()),
-            createButton("多链发布", "sendMoreUrl", () => sendMoreChannel()),
-            createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
-            createButton("一键重审", "reviewBtn", async () => onReview()),
-            // createButton("跑动提价", "addPrice", async () => addPriceActiveFn()),
-            // createButton("未跑动提价", "addPrice", async () => addPriceFn()),
-            createButton("加预算", "addMount", async () => addMountFn()),
-            createButton("文案替换", "textTeviewBtn", async () => onReplace()),
-            // createButton("删除15天无浏览量", "delBtn", async () => onDelsViews()),
-            createButton("删除0评分审核失败", "delBtn", async () => onDels()),
-            createButton("提价", "proPrice", async () => onProPrice()),
-            createButton("刷新页面", "refreshBtn", async () => onRefresh()),
-        ];
-
-        // 添加元素到容器
-        $container.append(
-            $textArea,
-            $select,
-            accountAll?.[window.user]?.options?.find?.(v => v?.tgname === 'jbgq') ? $GQSelet : null, // 公群添加行业
-            $priceInputs,
-            $budgetInputs,
-            ...buttons
-        );
-
-        // 添加到页面
-        $("body").append($container);
-    };
-    createView();
       
     window.OwnerAds = {
         init: function () {

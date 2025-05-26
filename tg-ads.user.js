@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-17:42:08
+// @version      2025.05.26-17:37:49
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -61,7 +61,6 @@
         console.warn('❌ 等待 jQuery 超时');
         return false;
     }
-          
 
     /**
      * 加载多个脚本，并等待多个变量全部定义完成
@@ -120,6 +119,56 @@
         
         console.warn(`超过 ${maxTries} 次仍有变量未 就绪:`, waitVars.filter(name => !(name in window)));
         return false;
+    }
+
+    /** 初始化数据库 */
+    const initDB = async () => {
+        window.cpms_store = "cpms"; // 记录单价
+        window.pviews_store = "pviews"; // 记录展示量
+        if(window.db) return window.db; // 如果数据库已存在，直接返回
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open("myDatabase", 5);
+            request.onerror = (event) => {
+                console.error("数据库打开失败:", event.target.errorCode);
+                resolve(false)
+            };
+            request.onsuccess = (event) => {
+                window.db = event.target.result;
+                console.log("数据库打开成功");
+                resolve(window.db);
+            };
+            request.onupgradeneeded = (event) => {
+                window.db = event.target.result;
+                if (!window.db.objectStoreNames.contains(window.cpms_store)) {
+                    const objectStore = window.db.createObjectStore("cpms", {
+                        autoIncrement: true,
+                    });
+                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
+                    objectStore.createIndex("ads", "ads", { unique: false });
+                    objectStore.createIndex("cpm", "cpm", { unique: false });
+                    objectStore.createIndex("float", "float", { unique: false });
+                    objectStore.createIndex("views", "views", { unique: false });
+                    objectStore.createIndex("clicks", "clicks", { unique: false });
+                    objectStore.createIndex("joins", "joins", { unique: false });
+                    objectStore.createIndex("pays", "pays", { unique: false });
+                    objectStore.createIndex("money", "money", { unique: false });
+                    objectStore.createIndex("createDate", "createDate", { unique: false });
+                }
+                if (!window.db.objectStoreNames.contains(window.pviews_store)) {
+                    const objectStore = window.db.createObjectStore("pviews", {
+                        keyPath: "ads_date",
+                    });
+                    objectStore.createIndex("ads_date", "ads_date", { unique: false });
+                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
+                    objectStore.createIndex("cpm", "cpm", { unique: false });
+                    objectStore.createIndex("views", "views", { unique: false });
+                    objectStore.createIndex("clicks", "clicks", { unique: false });
+                    objectStore.createIndex("joins", "joins", { unique: false });
+                    objectStore.createIndex("pays", "pays", { unique: false });
+                    objectStore.createIndex("money", "money", { unique: false });
+                }
+            };
+        });
     }
 
     /**
@@ -212,9 +261,10 @@
                 window.postID = []
             }
 
-            const expectedVars = [ "ajInit", "OwnerAds" ];
+            await initDB()
 
             console.time("✅ 所有脚本加载成功, 准备执行主逻辑！");
+            const expectedVars = [ "ajInit", "OwnerAds" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
             console.timeEnd("✅ 所有脚本加载成功, 准备执行主逻辑！");
 
