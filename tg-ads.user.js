@@ -113,7 +113,7 @@
             await new Promise(res => setTimeout(res, interval));
         }
         
-        console.warn(`❌ 超过 ${maxTries} 次仍有变量未就绪:`, waitVars.filter(name => !(name in window)));
+        console.warn(`超过 ${maxTries} 次仍有变量未就绪:`, waitVars.filter(name => !(name in window)));
         return false;
     }
 
