@@ -2873,12 +2873,10 @@
             ids.push(v.val);
         });
 
-        title = title.join(" | ");
-        if (title.length > 19) {
-            title = title.slice(0, 19);
+        title = title.join("·");
+        if (title.length > 32) {
+            title = title.slice(0, 32);
         }
-
-        console.log('搜索查询', title)
 
         // 准备参数
         let params = {
@@ -2901,8 +2899,6 @@
             search_queries: ids.join(";"),
             method: "createAd",
         };
-
-        return false
 
         let createAd = async (params) => {
             return new Promise((resolve) => {
