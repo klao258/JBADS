@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.05.26-16:43:45
+// @version      2025.05.26-17:31:56
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -97,21 +97,23 @@
             let allReady = true;
         
             for (let name of waitVars) {
-              if (!(name in window)) {
-                allReady = false;
-                break;
-              }
+                let isWindow = name in window
+                let isLet = typeof eval(name) !== 'undefined'
+
+                if (!isWindow && !isLet) {
+                    allReady = false;
+                    break;
+                }
             }
         
             if (allReady) {
-                // console.log(`✅ 所有变量已准备好: ${waitVars.join(', ')}`);
               return true;
             }
         
             await new Promise(res => setTimeout(res, interval));
         }
         
-        console.warn(`❌ 超过 ${maxTries} 次仍有变量未就绪:`, waitVars.filter(name => !(name in window)));
+        console.warn(`超过 ${maxTries} 次仍有变量未 就绪:`, waitVars.filter(name => !(name in window)));
         return false;
     }
 
@@ -193,7 +195,7 @@
             const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData']);
 
             // 加载 postData
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["window.postData"]);
+            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
 
             // 加载主逻辑
             window.postID = [];
@@ -205,11 +207,7 @@
                 window.postID = []
             }
 
-            const expectedVars = [
-                "window.ajInit",
-                "window.OwnerAds",
-                "window.Aj"
-            ];
+            const expectedVars = [ "ajInit", "OwnerAds", "Aj" ];
 
             console.time("✅ 所有脚本加载成功, 准备执行主逻辑！");
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
