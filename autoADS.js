@@ -2874,8 +2874,8 @@
         });
 
         title = title.join(" | ");
-        if (title.length > 32) {
-            title = title.slice(0, 32);
+        if (title.length > 19) {
+            title = title.slice(0, 19);
         }
 
         console.log('搜索查询', title)
