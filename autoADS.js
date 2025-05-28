@@ -214,7 +214,8 @@
             createButton("文案替换", "textTeviewBtn", async () => onReplace()),
             // createButton("删除15天无浏览量", "delBtn", async () => onDelsViews()),
             createButton("删除0评分审核失败", "delBtn", async () => onDels()),
-            createButton("提价", "proPrice", async () => onProPrice()),
+            createButton("提价(曝光不足)", "proPrice", async () => onProPrice()),
+            createButton("提价(曝光达标)", "proPrice", async () => onProAddPrice()),
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
         ];
 
@@ -2447,7 +2448,7 @@
         await onRefresh();
     };
 
-    // 自动提价
+    // 提价(曝光不足)
     const onProPrice = async () => {
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
@@ -2491,6 +2492,50 @@
         toast(`加价完成：成功${successNum}条，失败${errorNum}条`);
         await onRefresh();
     };
+
+    // 提价(曝光达标)
+    const onProAddPrice = async () => {
+        let list = OwnerAds.getAdsList();
+        list = list.filter((v) => {
+            if (v.status === "Active" && v.qviews > +minViews && v.qviews <= +minViews * 20) {
+                $(`a[href="/account/ad/${v.ad_id}"]`)
+                    .first()
+                    .parents("tr")
+                    .find("td")
+                    .css("backgroundColor", "rgb(17, 154, 245, .5)");
+                return true;
+            }
+            return false;
+        });
+        if (!list?.length) return toast("全部达标");
+
+        console.log(list);
+
+        Aj.showProgress();
+
+        let promiseArr = list.map(async (item) => {
+            let romPrice = 0;
+            if (item?.qviews > (+minViews * 10)) {
+                romPrice = (item.cpm * 0.01).toFixed(2);
+            } else if (item?.qviews > (+minViews * 5)) {
+                romPrice = (item.cpm * 0.02).toFixed(2);
+            } else {
+                romPrice = (item.cpm * 0.03).toFixed(2);
+            }
+            let price = (item.cpm + +romPrice).toFixed(2);
+            return await editCPM(item, price);
+        });
+
+        // 开始报价
+        let promiseRes = await Promise.all(promiseArr); // 等待所有任务完成
+
+        let successNum = promiseRes.filter((flag) => flag)?.length;
+        let errorNum = promiseRes.filter((flag) => !flag)?.length;
+
+        Aj.hideProgress();
+        toast(`加价完成：成功${successNum}条，失败${errorNum}条`);
+        await onRefresh();
+    }
 
     // 设置单价
     $("body").on(
