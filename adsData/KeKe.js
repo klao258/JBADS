@@ -1,8 +1,8 @@
 var postData = {
   "ADS-KeKe-98Ukd4635": "11-0-0",
   "ADS-KeKe-9auF8hi5g": "3-0-0",
-  "ADS-KeKe-9uuRnV8xM": "14-0-0",
-  "ADS-KeKe-9B2enY3Ek": "11-1-10",
+  "ADS-KeKe-9uuRnV8xM": "15-0-0",
+  "ADS-KeKe-9B2enY3Ek": "12-1-10",
   "ADS-KeKe-9B7rYY4sC": "40-1-69.3",
   "ADS-KeKe-9cl92prmh": "46-0-0",
   "ADS-KeKe-9wh3doUty": "10-0-0",
