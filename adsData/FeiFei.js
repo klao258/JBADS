@@ -1,7 +1,7 @@
 var postData = {
   "ADS-FeiFei-3ah14qrZw": "1-0-0",
   "ADS-FeiFei-3jSbOJtKx": "8-0-0",
-  "ADS-FeiFei-3JFN5RKGk": "18-1-101.5",
+  "ADS-FeiFei-3JFN5RKGk": "18-1-134.5",
   "ADS-FeiFei-3fpTeEXNq": "77-0-0",
   "ADS-FeiFei-3oMJtXuhV": "158-9-1330.4",
   "ADS-FeiFei-3sCS2Tjpi": "17-0-0",
@@ -29,7 +29,7 @@ var postData = {
   "ADS-FeiFei-38d3W63eF": "1-0-0",
   "ADS-FeiFei-3H2XobC0a": "7-0-0",
   "ADS-FeiFei-3oN8nGYyX": "1-0-0",
-  "ADS-FeiFei-3NeJCD9Nh": "2-0-0",
+  "ADS-FeiFei-3NeJCD9Nh": "3-0-0",
   "ADS-FeiFei-3XWdtjtB7": "3-0-0",
   "ADS-FeiFei-3AmkWbKK9": "1-0-0"
 }

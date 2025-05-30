@@ -1,5 +1,5 @@
 var postData = {
-  "ADS-HuanHuan-5E5qBozBJ": "20-0-0",
+  "ADS-HuanHuan-5E5qBozBJ": "24-0-0",
   "ADS-HuanHuan-5cHoYJlpS": "7-0-0",
   "ADS-HuanHuan-5UYhnmNhx": "3-0-0",
   "ADS-HuanHuan-5QMTaDhnQ": "106-2-216.3",
