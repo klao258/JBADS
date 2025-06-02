@@ -1,12 +1,12 @@
 var postData = {
   "ADS-GZKK-101XArBSiy": "50-5-223.4",
   "ADS-GZKK-10Y3jb8WoN": "9-1-88.6",
-  "ADS-GZKK-10H12CHCEB": "26-0-0",
-  "ADS-GZKK-10KVMopf1i": "28-0-0",
-  "ADS-GZKK-10HRfYWtEi": "33-0-0",
+  "ADS-GZKK-10H12CHCEB": "28-0-0",
+  "ADS-GZKK-10KVMopf1i": "32-0-0",
+  "ADS-GZKK-10HRfYWtEi": "35-0-0",
   "ADS-GZKK-10upIBD8DP": "9-0-0",
-  "ADS-GZKK-10X1AgF0vQ": "29-1-100",
-  "ADS-GZKK-10H5iFuPa5": "16-0-0",
+  "ADS-GZKK-10X1AgF0vQ": "35-1-100",
+  "ADS-GZKK-10H5iFuPa5": "20-0-0",
   "ADS-GZKK-10iP0vxXgr": "1-0-0",
   "ADS-GZKK-10SPy62YgD": "5-0-0"
 }
