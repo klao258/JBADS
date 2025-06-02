@@ -217,6 +217,7 @@
             createButton("提价(曝光不足)", "proPrice", async () => onProPrice()),
             createButton("提价(曝光达标)", "proPrice", async () => onProAddPrice()),
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
+            createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
         ];
 
         // 添加元素到容器
@@ -2535,6 +2536,22 @@
         Aj.hideProgress();
         toast(`加价完成：成功${successNum}条，失败${errorNum}条`);
         await onRefresh();
+    }
+
+    // 筛选低评分帖子
+    const onFilter = async () => {
+        let list = OwnerAds.getAdsList();
+        list = list.filter((v) => {
+            if (v.ctr < 1 && v.cvr < 10) {
+                $(`a[href="/account/ad/${v.ad_id}"]`)
+                    .first()
+                    .parents("tr")
+                    .find("td")
+                    .css("backgroundColor", "rgb(17, 154, 245, .5)");
+                return true;
+            }
+            return false;
+        });
     }
 
     // 设置单价
