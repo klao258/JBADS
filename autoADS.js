@@ -2542,7 +2542,7 @@
     const onFilter = async () => {
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
-            if (v.views > 2000 && v.ctr < 1 && v.cvr < 10) {
+            if (v.status !== 'On Hold' && v.views > 2000 && v.ctr < 1 && v.cvr < 10) {
                 $(`a[href="/account/ad/${v.ad_id}"]`)
                     .first()
                     .parents("tr")
