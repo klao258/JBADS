@@ -44,6 +44,59 @@
         );
     }
 
+    const scoreAd = (ad) => {
+        const benchmark = {
+            ctr: 0.015,
+            cpc: 0.96,
+            cpa: 9.59,
+            cpm: 0.0144,
+            actionRate: 0.10,  // 注册率
+            topupRate: 0.014
+        };
+      
+        const safeDiv = (a, b) => b === 0 ? 0 : a / b;
+      
+        // 实际值提取（已由系统提供或计算）
+        const ctr = safeDiv(ad.clicks, ad.views);
+        const cpc = ad.cpc;
+        const cpa = ad.cpa;
+        const cpm = ad.cpm;
+        const regRate = safeDiv(ad.actions, ad.clicks);
+        const spendRate = safeDiv(ad.spent, ad.budget);
+      
+        // 子评分
+        const ctrScore = Math.min(ctr / benchmark.ctr, 1) * 20;
+        const cpcScore = Math.max(1 - (cpc / benchmark.cpc), 0) * 15;
+        const cpaScore = Math.max(1 - (cpa / benchmark.cpa), 0) * 20;
+        const cpmScore = Math.max(1 - (cpm / benchmark.cpm), 0) * 15;
+        const actionScore = Math.min(regRate / benchmark.actionRate, 1) * 20;
+        const budgetScore = (spendRate >= 0.9 && spendRate <= 1.1) ? 10 : (spendRate < 0.9 ? 8 : 5);
+      
+        const total = Math.round(ctrScore + cpcScore + cpaScore + cpmScore + actionScore + budgetScore);
+      
+        // 建议逻辑
+        let suggestion = '';
+        if (total >= 85) {
+            suggestion = '✅ 表现优异，建议加价扩大投放';
+        } else if (total >= 70) {
+            suggestion = '🟡 效果良好，建议微调优化';
+        } else if (total >= 50) {
+            suggestion = '🔻 表现一般，建议降价或优化文案';
+        } else {
+            suggestion = '⛔ 效果较差，建议暂停投放';
+        }
+      
+        return {
+            score: total,
+            //   ctr: (ctr * 100).toFixed(2) + '%',
+            //   regRate: (regRate * 100).toFixed(2) + '%',
+            //   cpc: cpc.toFixed(2),
+            //   cpa: cpa.toFixed(2),
+            //   cpm: cpm.toFixed(4),
+          suggestion
+        };
+    }
+
     // 功能界面
     const createView = () => {
         const $toggleBtn = $("<button>", {
@@ -1304,8 +1357,8 @@
                         item["regs"] = +obj[0] || 0;
                         item["pays"] = +obj[1] || 0;
                         item["money"] = +obj[2] || 0;
-                        item["score"] =
-                            getWeightedScore(item)?.toFixed(2) || 0;
+                        item["score"] = scoreAd(item)?.toFixed(2) || 0;
+                            // getWeightedScore(item)?.toFixed(2) || 0;
                         item["_title"] = item.title;
                         // item.title = `权重：${item["score"]} &nbsp;|&nbsp; 注册：${obj[0]} &nbsp;|&nbsp; 付款：${obj[1]} &nbsp;|&nbsp; 总充值：${obj[2]} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${item.title}`;
                     } else {
