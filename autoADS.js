@@ -93,7 +93,7 @@
             //   cpc: cpc.toFixed(2),
             //   cpa: cpa.toFixed(2),
             //   cpm: cpm.toFixed(4),
-          suggestion
+            suggestion
         };
     }
 
@@ -1357,7 +1357,8 @@
                         item["regs"] = +obj[0] || 0;
                         item["pays"] = +obj[1] || 0;
                         item["money"] = +obj[2] || 0;
-                        item["score"] = scoreAd(item)?.toFixed(2) || 0;
+                        item["score"] = scoreAd(item)?.score?.toFixed(2) || 0;
+                        item["suggestion"] = scoreAd(item)?.suggestion;
                             // getWeightedScore(item)?.toFixed(2) || 0;
                         item["_title"] = item.title;
                         // item.title = `权重：${item["score"]} &nbsp;|&nbsp; 注册：${obj[0]} &nbsp;|&nbsp; 付款：${obj[1]} &nbsp;|&nbsp; 总充值：${obj[2]} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${item.title}`;
