@@ -2311,13 +2311,13 @@
         list = list.filter((v) => {
             if (v.status !== "Active" && v.status !== "Stopped") return false;
             if (v.hasOwnProperty("score")) {
-                if (v.score <= 2) {
+                if (v.score <= 50) {
                     if (+v.budget >= 1) return false;
                     v["add_budget"] = 1;
-                } else if (v.score < 5) {
+                } else if (v.score < 75) {
                     if (+v.budget >= 2) return false;
                     v["add_budget"] = 2;
-                } else if (v.score < 10) {
+                } else if (v.score < 100) {
                     if (+v.budget >= 5) return false;
                     v["add_budget"] = 5;
                 }
@@ -2453,7 +2453,7 @@
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
             if (v?.tme_path?.indexOf("?") === -1) return false;
-            if (v.status === "Active" && +v?.score && +v?.score > 0) {
+            if (v.status === "Active" && +v?.score && +v?.score > 50) {
                 $(`a[href="/account/ad/${v.ad_id}"]`)
                     .first()
                     .parents("tr")
@@ -2490,7 +2490,7 @@
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
             if (v?.tme_path?.indexOf("?") === -1) return false;
-            if (v.status === "Active" && !v?.score && +v?.score === 0) {
+            if (v.status === "Active" && +v?.score <= 50) {
                 $(`a[href="/account/ad/${v.ad_id}"]`)
                     .first()
                     .parents("tr")
@@ -2780,7 +2780,7 @@
     // 一键删除
     const onDels = async () => {
         let list = OwnerAds.getAdsList()?.filter((v) => {
-            if (v.status === "Declined" && !v?.score) {
+            if (v.status === "Declined" && v?.score < 30) {
                 $(`a[href="/account/ad/${v.ad_id}"]`)
                     .first()
                     .parents("tr")
