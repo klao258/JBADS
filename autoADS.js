@@ -1,6 +1,6 @@
 (() => {
     "use strict";
-    const { accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, minViews } = autoADSData;
+    const { fbtg, tstg, accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, minViews } = autoADSData;
     const db = window.db;
     const cpms_store = window.cpms_store; // 记录单价
     const pviews_store = window.pviews_store; // 记录展示量
@@ -179,9 +179,9 @@
 
         // 所有按钮封装函数
         const createButton = (text, className, clickFn) => {
-            if (accountAll[window.user]?.options?.length > 1 && ["textTeviewBtn"].includes(className)) {
+            if ((!fbtg?.includes?.(window.user)) && (!tstg?.includes?.(window.user)) && ["textTeviewBtn"].includes(className)) {
                 return null;
-            } else if (accountAll[window.user]?.options?.length === 1 && ["searchADSBtn"].includes(className)) {
+            } else if ((fbtg?.includes?.(window.user) || tstg?.includes?.(window.user)) && ["searchADSBtn"].includes(className)) {
                 return null;
             } else {
                 return $("<button>", {
@@ -2118,7 +2118,7 @@
         let tgname = $(".select")?.val();
 
         // 先区分账号, 在区分下拉框选项
-        if (accountAll[window.user]?.options?.length === 1) {
+        if (fbtg?.includes?.(window.user)) {
             // 正常推广金貝链接
             const source = "ADS"; // 来源
             const code = accountAll?.[window.user]?.['code'] ?? 53377; // 推广码
@@ -2126,6 +2126,14 @@
             const accountEN = accountAll?.[window.user]?.['en'] ?? "null"; // 推广账号
             const postID = guid(); // 推广ID
             return `t.me/JB6666_BOT?start=${code}_${source}-${accountEN}-${browserNum}${postID}`;
+        } else if (tstg?.includes?.(window.user)) {
+            // 正常推广天胜链接
+            const source = "ADS"; // 来源
+            const code = accountAll?.[window.user]?.['code'] ?? ''; // 推广码
+            const browserNum = accountAll?.[window.user]?.['browser'] ?? "N"; // 浏览器编号 没有为N代替
+            const accountEN = accountAll?.[window.user]?.['en'] ?? "null"; // 推广账号
+            const postID = guid(); // 推广ID
+            return `t.me/TSYL666bot?start=${code}_${source}-${accountEN}-${browserNum}${postID}`;
         } else {
             return `t.me/${tgname}`
         }
@@ -3421,6 +3429,11 @@
         // if (accountAll[window.user]?.options?.length === 1) {
         //     await onReview();
         // }
+
+        // 天胜推广人员帖子自动重审
+        if (tstg?.includes?.(window.user)) {
+            await onReview();
+        }
 
         await updatePviews();
     }
