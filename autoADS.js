@@ -2312,14 +2312,14 @@
             if (v.status !== "Active" && v.status !== "Stopped") return false;
             if (v.hasOwnProperty("score")) {
                 if (v.score <= 50) {
+                    if (+v.budget >= 0.5) return false;
+                    v["add_budget"] = 0.5;
+                } else if (v.score < 80) {
                     if (+v.budget >= 1) return false;
                     v["add_budget"] = 1;
-                } else if (v.score < 75) {
+                } else if (v.score < 100) {
                     if (+v.budget >= 2) return false;
                     v["add_budget"] = 2;
-                } else if (v.score < 100) {
-                    if (+v.budget >= 5) return false;
-                    v["add_budget"] = 5;
                 }
             } else {
                 if (+v.joins < 1) {
