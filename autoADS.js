@@ -50,51 +50,48 @@
             cpc: 0.96,
             cpa: 9.59,
             cpm: 0.0144,
-            actionRate: 0.10,  // 注册率
-            topupRate: 0.014
-        };
-      
-        const safeDiv = (a, b) => b === 0 ? 0 : a / b;
-      
-        // 实际值提取（已由系统提供或计算）
-        const ctr = safeDiv(ad.clicks, ad.views);
-        const cpc = ad.cpc;
-        const cpa = ad.cpa;
-        const cpm = ad.cpm;
-        const regRate = safeDiv(ad.actions, ad.clicks);
-        const spendRate = safeDiv(ad.spent, ad.budget);
-      
-        // 子评分
-        const ctrScore = Math.min(ctr / benchmark.ctr, 1) * 20;
-        const cpcScore = Math.max(1 - (cpc / benchmark.cpc), 0) * 15;
-        const cpaScore = Math.max(1 - (cpa / benchmark.cpa), 0) * 20;
-        const cpmScore = Math.max(1 - (cpm / benchmark.cpm), 0) * 15;
-        const actionScore = Math.min(regRate / benchmark.actionRate, 1) * 20;
-        const budgetScore = (spendRate >= 0.9 && spendRate <= 1.1) ? 10 : (spendRate < 0.9 ? 8 : 5);
-      
-        const total = Math.round(ctrScore + cpcScore + cpaScore + cpmScore + actionScore + budgetScore);
-      
-        // 建议逻辑
-        let suggestion = '';
-        if (total >= 85) {
+            actionRate: 0.10
+          };
+        
+          const safeDiv = (a, b) => b === 0 ? 0 : a / b;
+        
+          const ctr = safeDiv(ad.CLICKS, ad.VIEWS);
+          const cpc = ad.CPC;
+          const cpa = ad.CPA;
+          const cpm = ad.CPM;
+          const regRate = safeDiv(ad.ACTIONS, ad.CLICKS);
+          const spendRate = safeDiv(ad.SPENT, ad.BUDGET);
+        
+          // 各项打分
+          const ctrScore = Math.min(ctr / benchmark.ctr, 1) * 15;
+          const cpcScore = Math.max(1 - (cpc / benchmark.cpc), 0) * 10;
+          const cpaScore = Math.max(1 - (cpa / benchmark.cpa), 0) * 15;
+          const cpmScore = Math.max(1 - (cpm / benchmark.cpm), 0) * 10;
+          const actionScore = Math.min(regRate / benchmark.actionRate, 1) * 35;
+          const budgetScore = (spendRate >= 0.9 && spendRate <= 1.1) ? 15 : (spendRate < 0.9 ? 10 : 5);
+        
+          const total = Math.round(ctrScore + cpcScore + cpaScore + cpmScore + actionScore + budgetScore);
+        
+          let suggestion = '';
+          if (total >= 85) {
             suggestion = '✅ 表现优异，建议加价扩大投放';
-        } else if (total >= 70) {
-            suggestion = '🟡 效果良好，建议微调优化';
-        } else if (total >= 50) {
-            suggestion = '🔻 表现一般，建议降价或优化文案';
-        } else {
-            suggestion = '⛔ 效果较差，建议暂停投放';
-        }
-      
-        return {
+          } else if (total >= 70) {
+            suggestion = '🟡 效果尚可，建议小幅优化';
+          } else if (total >= 50) {
+            suggestion = '🔻 表现一般，建议降价或调整创意';
+          } else {
+            suggestion = '⛔ 效果不佳，建议暂停广告';
+          }
+        
+          return {
             score: total,
-            //   ctr: (ctr * 100).toFixed(2) + '%',
-            //   regRate: (regRate * 100).toFixed(2) + '%',
-            //   cpc: cpc.toFixed(2),
-            //   cpa: cpa.toFixed(2),
-            //   cpm: cpm.toFixed(4),
+            // ctr: (ctr * 100).toFixed(2) + '%',
+            // regRate: (regRate * 100).toFixed(2) + '%',
+            // cpc: cpc.toFixed(2),
+            // cpa: cpa.toFixed(2),
+            // cpm: cpm.toFixed(4),
             suggestion
-        };
+          };
     }
 
     // 功能界面
@@ -1370,7 +1367,9 @@
                         item["regs"] = 0;
                         item["pays"] = 0;
                         item["money"] = 0;
-                        item["score"] = 0;
+                        item["score"] = scoreAd(item)?.score?.toFixed(2) || 0;
+                        item["suggestion"] = scoreAd(item)?.suggestion;
+                        // item["score"] = 0;
                         item["_title"] = item.title;
                     }
 
