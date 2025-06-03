@@ -55,12 +55,12 @@
         
           const safeDiv = (a, b) => b === 0 ? 0 : a / b;
         
-          const ctr = safeDiv(ad.CLICKS, ad.VIEWS);
-          const cpc = ad.CPC;
-          const cpa = ad.CPA;
-          const cpm = ad.CPM;
-          const regRate = safeDiv(ad.ACTIONS, ad.CLICKS);
-          const spendRate = safeDiv(ad.SPENT, ad.BUDGET);
+          const ctr = safeDiv(ad.clicks, ad.views);
+          const cpc = ad.cpc;
+          const cpa = ad.cpa;
+          const cpm = ad.cpm;
+          const regRate = safeDiv(ad.actions, ad.clicks);
+          const spendRate = safeDiv(ad.spent, ad.budget);
         
           // 各项打分
           const ctrScore = Math.min(ctr / benchmark.ctr, 1) * 15;
