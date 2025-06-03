@@ -46,7 +46,7 @@
 
     const confidenceWeight = (value, threshold) => {
         if (value >= threshold) return 1;
-        return +(value / threshold).toFixed(2); // 保留两位小数
+        return Math.max(value / threshold, 0.4); // 保底 0.4，避免严重失真
     }
 
     const scoreAd = function scoreAd(ad) {
@@ -69,9 +69,9 @@
         const spendRate = safeDiv(ad.spent, ad.budget);
       
         // ⚠️ 样本量置信度处理
-        const ctrConfidence = confidenceWeight(ad.views, 10000);      // 曝光大于1w才认为稳定
-        const clickConfidence = confidenceWeight(ad.clicks, 1000);     // 点击大于1k
-        const actionConfidence = confidenceWeight(ad.actions, 100);    // 注册大于100
+        const ctrConfidence = confidenceWeight(ad.views, 3000);      // 曝光大于1w才认为稳定
+        const clickConfidence = confidenceWeight(ad.clicks, 300);     // 点击大于1k
+        const actionConfidence = confidenceWeight(ad.actions, 30);    // 注册大于100
       
         // 每项得分乘以置信度
         const ctrScore = Math.min(ctr / benchmark.ctr, 1) * 15 * ctrConfidence;
