@@ -1354,7 +1354,7 @@
                         item["regs"] = +obj[0] || 0;
                         item["pays"] = +obj[1] || 0;
                         item["money"] = +obj[2] || 0;
-                        item["score"] = scoreAd(item)?.score?.toFixed(2) || 0;
+                        item["score"] = scoreAd(item)?.score?.toFixed(0) || 0;
                         item["suggestion"] = scoreAd(item)?.suggestion;
                             // getWeightedScore(item)?.toFixed(2) || 0;
                         item["_title"] = item.title;
@@ -1367,7 +1367,7 @@
                         item["regs"] = 0;
                         item["pays"] = 0;
                         item["money"] = 0;
-                        item["score"] = scoreAd(item)?.score?.toFixed(2) || 0;
+                        item["score"] = scoreAd(item)?.score?.toFixed(0) || 0;
                         item["suggestion"] = scoreAd(item)?.suggestion;
                         // item["score"] = 0;
                         item["_title"] = item.title;
