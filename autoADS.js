@@ -116,13 +116,13 @@
         
           return {
             score: total,
-            ctr: (ctr * 100).toFixed(2) + '%',
-            regRate: (regRate * 100).toFixed(2) + '%',
-            roi: roi.toFixed(2),
-            cpr: cpr.toFixed(2),
-            cpc: cpc.toFixed(2),
-            cpa: cpa.toFixed(2),
-            cpm: cpm.toFixed(4),
+            // ctr: (ctr * 100).toFixed(2) + '%',
+            // regRate: (regRate * 100).toFixed(2) + '%',
+            // roi: roi.toFixed(2),
+            // cpr: cpr.toFixed(2),
+            // cpc: cpc.toFixed(2),
+            // cpa: cpa.toFixed(2),
+            // cpm: cpm.toFixed(4),
             suggestion
           };
     }
