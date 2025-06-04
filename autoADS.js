@@ -1064,8 +1064,10 @@
                                 Ads.wrapAmount(item.daily_budget) +
                                 "</a></small>"
                                 : "";
+                        var sugges = item.score < 30 ? 'x' : item.score > 50 && item.score <= 70 ? '↓' : item.score > 70 && item.score <= 80 ? '-' : '↑'
                         return `<td>
-                            <div class="pr-cell pr-cell-title ${title_class}">
+                            <div class="pr-cell pr-cell-title ${title_class}" style="position: relative; padding-left: 30px;">
+                                <span style="position: absolute; top: 5px; left: -10px;">${sugges}</span>
                                 <a href="${item.base_url}" class="pr-link" style="${item.score < 30 ? 'text-decoration:line-through;' : ''}">${item.title}</a>
                                 <small style="display:var(--coldp-url,inline)"><br>${promote_link}</small>
                             </div>
