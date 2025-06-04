@@ -292,11 +292,8 @@
             createButton("多链发布", "sendMoreUrl", () => sendMoreChannel()),
             createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
             createButton("一键重审", "reviewBtn", async () => onReview()),
-            // createButton("跑动提价", "addPrice", async () => addPriceActiveFn()),
-            // createButton("未跑动提价", "addPrice", async () => addPriceFn()),
             createButton("加预算", "addMount", async () => addMountFn()),
             createButton("文案替换", "textTeviewBtn", async () => onReplace()),
-            // createButton("删除15天无浏览量", "delBtn", async () => onDelsViews()),
             createButton("删除0评分审核失败", "delBtn", async () => onDels()),
             createButton("提价(曝光不足)", "proPrice", async () => onProPrice()),
             createButton("提价(曝光达标)", "proPrice", async () => onProAddPrice()),
@@ -2336,10 +2333,10 @@
                 if (v.score <= 50) {
                     if (+v.budget >= 0.5) return false;
                     v["add_budget"] = 1;
-                } else if (v.score < 80) {
+                } else if (v.score <= 80) {
                     if (+v.budget >= 1) return false;
                     v["add_budget"] = 1;
-                } else if (v.score < 100) {
+                } else if (v.score <= 100) {
                     if (+v.budget >= 2) return false;
                     v["add_budget"] = 2;
                 }
@@ -2468,80 +2465,6 @@
                 }
             });
         });
-    };
-
-    // 已跑动提价, 在原价基数上随机增加0.1 - 0.5
-    const addPriceActiveFn = async () => {
-        let list = OwnerAds.getAdsList();
-        list = list.filter((v) => {
-            if (v?.tme_path?.indexOf("?") === -1) return false;
-            if (v.status === "Active" && +v?.score && +v?.score > 50) {
-                $(`a[href="/account/ad/${v.ad_id}"]`)
-                    .first()
-                    .parents("tr")
-                    .find("td")
-                    .css("backgroundColor", "rgb(17, 154, 245, .5)");
-                return true;
-            }
-            return false;
-        });
-        if (!list?.length) return toast("没有跑动的广告");
-
-        Aj.showProgress();
-
-        // 循环加报价
-        let promiseArr = list.map(async (item) => {
-            let romPrice = getRNum(0.1, 0.5, 1);
-            let price = (item.cpm + +romPrice).toFixed(2);
-            return await editCPM(item, price);
-        });
-
-        // 开始报价
-        let promiseRes = await Promise.all(promiseArr); // 等待所有任务完成
-
-        let successNum = promiseRes.filter((flag) => flag)?.length;
-        let errorNum = promiseRes.filter((flag) => !flag)?.length;
-
-        Aj.hideProgress();
-        toast(`加价完成：成功${successNum}条，失败${errorNum}条`);
-        await onRefresh();
-    };
-
-    // 未跑动自动加报价 在原价格基础上随机增加0.1 - 1元
-    const addPriceFn = async () => {
-        let list = OwnerAds.getAdsList();
-        list = list.filter((v) => {
-            if (v?.tme_path?.indexOf("?") === -1) return false;
-            if (v.status === "Active" && +v?.score <= 50) {
-                $(`a[href="/account/ad/${v.ad_id}"]`)
-                    .first()
-                    .parents("tr")
-                    .find("td")
-                    .css("backgroundColor", "rgb(17, 154, 245, .5)");
-                return true;
-            }
-            return false;
-        });
-        if (!list?.length) return toast("没有0权重广告");
-
-        Aj.showProgress();
-
-        // 循环加报价
-        let promiseArr = list.map(async (item) => {
-            let romPrice = getRNum(0.1, 1, 1);
-            let price = (item.cpm + +romPrice).toFixed(2);
-            return await editCPM(item, price);
-        });
-
-        // 开始报价
-        let promiseRes = await Promise.all(promiseArr); // 等待所有任务完成
-
-        let successNum = promiseRes.filter((flag) => flag)?.length;
-        let errorNum = promiseRes.filter((flag) => !flag)?.length;
-
-        Aj.hideProgress();
-        toast(`加价完成：成功${successNum}条，失败${errorNum}条`);
-        await onRefresh();
     };
 
     // 提价(曝光不足)
@@ -2884,83 +2807,6 @@
         const msInDay = 24 * 60 * 60 * 1000;
 
         return now - inputTime > days * msInDay;
-    };
-
-    // 删除创建15天无浏览量帖子
-    const onDelsViews = async () => {
-        let list = OwnerAds.getAdsList()?.filter((v) => {
-            if (
-                isTimeExpired(+v.date, 15) &&
-                +v.views === 0 &&
-                (v.status === "In Review" || v.status === "Declined")
-            ) {
-                $(`a[href="/account/ad/${v.ad_id}"]`)
-                    .first()
-                    .parents("tr")
-                    .find("td")
-                    .css("backgroundColor", "rgb(17, 154, 245, .5)");
-                return true;
-            }
-            return false;
-        });
-        if (!list.length) return toast("暂无可删除广告 !!!");
-        if (!(await confirm(`删除数量 ${list.length} 条`))) {
-            await onRefresh();
-            return false;
-        }
-
-        // 拿到 confirm_hash
-        let submitDelHashPromise = list.map((v) => {
-            let params = { owner_id: Aj.state.ownerId, ad_id: v.ad_id };
-            return new Promise((resolve) => {
-                Aj.apiRequest("deleteAd", params, (result) => {
-                    if (result.error) {
-                        resolve(false);
-                    } else {
-                        resolve(result.confirm_hash);
-                    }
-                });
-            });
-        });
-        let hashArr = await Promise.all(submitDelHashPromise);
-
-        // 二次确认删除
-        let submitDelPromise = hashArr.filter((v, i) => {
-            if (!v) return false;
-
-            let params = {
-                owner_id: Aj.state.ownerId,
-                ad_id: list[i].ad_id,
-                confirm_hash: v,
-            };
-            return new Promise((resolve) => {
-                Aj.apiRequest("deleteAd", params, (result) => {
-                    if (result.ok) {
-                        resolve(true);
-                    } else {
-                        resolve(false);
-                    }
-                });
-            });
-        });
-
-        if (!submitDelPromise.length) return toast("广告冷却中, 请稍后删除 !!!");
-
-        Aj.showProgress();
-
-        let submitDelArr = await Promise.all(submitDelPromise); // 等待所有任务完成
-        let successNum = submitDelArr.filter((flag) => flag)?.length;
-        let errorNum = submitDelArr.filter((flag) => !flag)?.length;
-
-        Aj.hideProgress();
-
-        toast(
-            `删除广告：成功${successNum}条，失败${errorNum}条, ${list.length - successNum - errorNum
-            }条正在冷却`,
-            async () => {
-                await onRefresh();
-            }
-        );
     };
 
     // 关键字
