@@ -43,13 +43,12 @@ const JBChannel = [
     {label: '金博星辰', tgname: 'JBYL_bot?start=290298519'},
     {label: '金博老三', tgname: 'JBYL_bot?start=630033533'},
     {label: '金博安安', tgname: 'JBYL_bot?start=167740163'},
-    {label: '金博老A', tgname: 'JBYL_bot?start=673146061'},
 ]
 
 const autoADSData = {
     minViews: 300, // 最小浏览量
     fbtg: ["金貝招商 @jbdb", "ads 贝贝", "ads 欢欢", "ads 可可", "金貝推广-七月", "ads 菲菲", "ads 头头", "ads 老k", "ADS组织", "金貝推广-KK", "金貝娱乐-天天", "ads 晶晶", "ads 莹莹", "ads 妮妮"],
-    tstg: ["金貝推广-小豹", "金貝推广-锅巴"],
+    tstg: ["天胜推广-小豹", "天胜推广-锅巴"],
     
     // 账号信息
     accountAll: {
@@ -72,11 +71,11 @@ const autoADSData = {
         "ads 妮妮": { en: "NiNi", browser: 7, code: "64782", options: [...FB] },
 
         /** 天胜娱乐推广 */
-        "金貝推广-小豹": { en: "GZXiaoBao", browser: 14, code: "22782", options: [...TS] },
-        "金貝推广-锅巴": { en: "GZGuoBa", browser: 16, code: "22780", options: [...TS] },
+        "天胜推广-小豹": { en: "GZXiaoBao", browser: 14, code: "22782", options: [...TS] },
+        "天胜推广-锅巴": { en: "GZGuoBa", browser: 16, code: "22780", options: [...TS] },
         
         /** 金貝机器人、频道 */
-        "金貝推广-贝贝": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
+        "金貝频道": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
 
         /** 金貝担保、供需、公群 */
         "金貝担保1": { en: "JBDB1", browser: 22, code: "", options: [ ...DB, ...DBChannel, ] },
