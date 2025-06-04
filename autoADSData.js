@@ -57,7 +57,6 @@ const autoADSData = {
         "ads 贝贝": { en: "BeiBei", browser: 2, code: "64777", options: [...FB] },
         "ads 欢欢": { en: "HuanHuan", browser: 5, code: "64777", options: [...FB] },
         "ads 可可": { en: "KeKe", browser: 9, code: "64777", options: [...FB] },
-        "金貝推广-七月": { en: "GZQiQi", browser: 18, code: "64777", options: [...FB] },
 
         "ads 菲菲": { en: "FeiFei", browser: 3, code: "53377", options: [...FB] },
         "ads 头头": { en: "TouTou", browser: 4, code: "53377", options: [...FB] },
@@ -70,9 +69,11 @@ const autoADSData = {
         "ads 莹莹": { en: "YingYing", browser: 6, code: "64782", options: [...FB] },
         "ads 妮妮": { en: "NiNi", browser: 7, code: "64782", options: [...FB] },
 
+        "金貝推广-七月": { en: "GZQiQi", browser: 18, code: "64777", options: [...FB] },
+
         /** 天胜娱乐推广 */
-        "天胜推广-小豹": { en: "GZXiaoBao", browser: 14, code: "22782", options: [...TS] },
-        "天胜推广-锅巴": { en: "GZGuoBa", browser: 16, code: "22780", options: [...TS] },
+        "天胜推广-小豹": { en: "TSXiaoBao", browser: 14, code: "22782", options: [...TS] },
+        "天胜推广-锅巴": { en: "TSGuoBa", browser: 16, code: "22780", options: [...TS] },
         
         /** 金貝机器人、频道 */
         "金貝频道": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
