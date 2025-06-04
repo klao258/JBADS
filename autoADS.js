@@ -1067,8 +1067,8 @@
                         var sugges = item.score < 30 ? 'x' : item.score > 50 && item.score <= 70 ? '↓' : item.score > 70 && item.score <= 80 ? '-' : '↑'
                         return `<td>
                             <div class="pr-cell pr-cell-title ${title_class}" style="position: relative; padding-left: 30px;">
-                                <span style="position: absolute; top: 7px; left: 18px;" 
-                                color="${ ['x', '↑'].includes(sugges) ? 'red' : sugges == '↓' ? 'green' : ''}">${sugges}</span>
+                                <span style="position: absolute; top: 7px; left: 18px;
+                                color: ${ ['x', '↑'].includes(sugges) ? 'red;' : sugges == '↓' ? 'green;' : ';'}">${sugges}</span>
                                 <a href="${item.base_url}" class="pr-link">${item.title}</a>
                                 <small style="display:var(--coldp-url,inline)"><br>${promote_link}</small>
                             </div>
