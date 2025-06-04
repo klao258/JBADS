@@ -72,8 +72,8 @@ const autoADSData = {
         "ads 妮妮": { en: "NiNi", browser: 7, code: "64782", options: [...FB] },
 
         /** 天胜娱乐推广 */
-        "金貝推广-小豹": { en: "GZXiaoBao", browser: 14, code: "22780", options: [...TS] },
-        "金貝推广-锅巴": { en: "GZGuoBa", browser: 16, code: "22782", options: [...TS] },
+        "金貝推广-小豹": { en: "GZXiaoBao", browser: 14, code: "22782", options: [...TS] },
+        "金貝推广-锅巴": { en: "GZGuoBa", browser: 16, code: "22780", options: [...TS] },
         
         /** 金貝机器人、频道 */
         "金貝推广-贝贝": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
