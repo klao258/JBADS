@@ -51,57 +51,68 @@
 
     const scoreAd = function scoreAd(ad) {
         const benchmark = {
-          ctr: 0.015,
-          cpc: 0.96,
-          cpa: 9.59,
-          cpm: 0.0144,
-          actionRate: 0.10
+            ctr: 0.015,
+            regRate: 0.10,
+            cpc: 0.96,
+            cpa: 9.59,
+            cpm: 0.0144,
+            roi: 1.0, // 1:1 回本
+            cpr: 600  // 每充值花费小于600算合理
         };
-      
+    
         const safeDiv = (a, b) => b === 0 ? 0 : a / b;
-      
-        // 实际数据
+    
         const ctr = safeDiv(ad.clicks, ad.views);
+        const regRate = safeDiv(ad.actions, ad.clicks);
         const cpc = ad.cpc;
         const cpa = ad.cpa;
         const cpm = ad.cpm;
-        const regRate = safeDiv(ad.actions, ad.clicks);
+        const roi = safeDiv(ad.money, ad.spent);
+        const cpr = safeDiv(ad.spent, ad.money);
         const spendRate = safeDiv(ad.spent, ad.budget);
-      
-        // ⚠️ 样本量置信度处理
-        const ctrConfidence = confidenceWeight(ad.views, 3000);      // 曝光大于1w才认为稳定
-        const clickConfidence = confidenceWeight(ad.clicks, 300);     // 点击大于1k
-        const actionConfidence = confidenceWeight(ad.actions, 30);    // 注册大于100
-      
-        // 每项得分乘以置信度
-        const ctrScore = Math.min(ctr / benchmark.ctr, 1) * 15 * ctrConfidence;
-        const cpcScore = Math.max(1 - (cpc / benchmark.cpc), 0) * 10 * clickConfidence;
-        const cpaScore = Math.max(1 - (cpa / benchmark.cpa), 0) * 15 * actionConfidence;
-        const cpmScore = Math.max(1 - (cpm / benchmark.cpm), 0) * 10 * ctrConfidence;
-        const actionScore = Math.min(regRate / benchmark.actionRate, 1) * 35 * clickConfidence;
-        const budgetScore = (spendRate >= 0.9 && spendRate <= 1.1) ? 15 : (spendRate < 0.9 ? 10 : 5);
-      
-        const total = Math.round(ctrScore + cpcScore + cpaScore + cpmScore + actionScore + budgetScore);
-      
+    
+        // 样本置信度（使用前面优化后版本）
+        const ctrConf = confidenceWeight(ad.views, 3000);
+        const clickConf = confidenceWeight(ad.clicks, 300);
+        const actionConf = confidenceWeight(ad.actions, 30);
+        const moneyConf = confidenceWeight(ad.money, 5000); // 若充值金额太少，影响评分
+    
+        // 各项打分
+        const ctrScore = Math.min(ctr / benchmark.ctr, 1) * 10 * ctrConf;
+        const regScore = Math.min(regRate / benchmark.regRate, 1) * 15 * clickConf;
+        const cpcScore = Math.max(1 - (cpc / benchmark.cpc), 0) * 10 * clickConf;
+        const cpaScore = Math.max(1 - (cpa / benchmark.cpa), 0) * 10 * actionConf;
+        const cpmScore = Math.max(1 - (cpm / benchmark.cpm), 0) * 5 * ctrConf;
+        const roiScore = Math.min(roi / benchmark.roi, 2) * 25 * moneyConf;  // ROI高于2也只得满分
+        const cprScore = Math.max(1 - (cpr / benchmark.cpr), 0) * 15 * moneyConf;
+        const budgetScore = (spendRate >= 0.9 && spendRate <= 1.1) ? 10 : (spendRate < 0.9 ? 7 : 4);
+        
+        const total = Math.round(
+            ctrScore + regScore + cpcScore + cpaScore + cpmScore + roiScore + cprScore + budgetScore
+        );
+        
+        // 建议
         let suggestion = '';
         if (total >= 85) {
-          suggestion = '✅ 表现优异，建议加价扩大投放';
+            suggestion = '✅ 表现优异，建议加大预算扩大投放';
         } else if (total >= 70) {
-          suggestion = '🟡 效果尚可，建议微调优化';
+            suggestion = '🟡 效果良好，可优化细节继续投放';
         } else if (total >= 50) {
-          suggestion = '🔻 表现一般，建议降价或调整创意';
+            suggestion = '🔻 效果一般，建议调低出价或换创意';
         } else {
-          suggestion = '⛔ 效果不佳，建议暂停广告';
+            suggestion = '⛔ 表现较差，建议暂停或彻底重构广告';
         }
-      
+        
         return {
-          score: total,
-        //   ctr: (ctr * 100).toFixed(2) + '%',
-        //   regRate: (regRate * 100).toFixed(2) + '%',
-        //   cpc: cpc.toFixed(2),
-        //   cpa: cpa.toFixed(2),
-        //   cpm: cpm.toFixed(4),
-          suggestion
+            score: total,
+            // ctr: (ctr * 100).toFixed(2) + '%',
+            // regRate: (regRate * 100).toFixed(2) + '%',
+            // roi: roi.toFixed(2),
+            // cpr: cpr.toFixed(2),
+            // cpc: cpc.toFixed(2),
+            // cpa: cpa.toFixed(2),
+            // cpm: cpm.toFixed(4),
+            suggestion
         };
     }
     
