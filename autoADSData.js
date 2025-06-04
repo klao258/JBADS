@@ -78,14 +78,14 @@ const autoADSData = {
         "金貝频道": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
 
         /** 金貝担保、供需、公群 */
+        "金貝担保": { en: "GZXiaoHu", browser: 12, code: "", options: [ ...DB, ...DBChannel, ] },
         "金貝担保1": { en: "JBDB1", browser: 22, code: "", options: [ ...DB, ...DBChannel, ] },
         "金貝担保2": { en: "JBDB1", browser: 23, code: "", options: [ ...DB, ...DBChannel, ] },
         "金貝担保3": { en: "JBDB1", browser: 24, code: "", options: [ ...DB, ...DBChannel, ] },
-        "金貝推广-小虎": { en: "GZXiaoHu", browser: 12, code: "", options: [ ...DB, ...DBChannel, ] },
-        "金貝推广-花花": { en: "GZHuaHua", browser: 17, code: "", options: [ ...DB, ...DBChannel, ] },
+        "金貝担保4": { en: "GZHuaHua", browser: 17, code: "", options: [ ...DB, ...DBChannel, ] },
 
         /** 金博推广、机器人、频道 */
-        "金貝推广-小龙": { en: "GZXiaoLong", browser: 13, code: "", options: [...JB, ...JBChannel] },
+        "金博广告": { en: "GZXiaoLong", browser: 13, code: "", options: [...JB, ...JBChannel] },
     },
 
     /** 推广文案 */
