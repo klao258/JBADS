@@ -2313,7 +2313,7 @@
             if (v.hasOwnProperty("score")) {
                 if (v.score <= 50) {
                     if (+v.budget >= 0.5) return false;
-                    v["add_budget"] = 0.5;
+                    v["add_budget"] = 1;
                 } else if (v.score < 80) {
                     if (+v.budget >= 1) return false;
                     v["add_budget"] = 1;
