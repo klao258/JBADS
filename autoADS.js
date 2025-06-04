@@ -1064,7 +1064,7 @@
                                 Ads.wrapAmount(item.daily_budget) +
                                 "</a></small>"
                                 : "";
-                        var sugges = item.score >= 80 ? '↑' : item.score <= 70 ? '-' : item.score > 50 ? '↓' : item.score < 30 ? 'x' : ''
+                        var sugges = item.score >= 80 ? '↑' : item.score >= 70 ? '-' : item.score > 50 ? '↓' : item.score <= 30 ? 'x' : ''
                         return `<td>
                             <div class="pr-cell pr-cell-title ${title_class}" style="position: relative; padding-left: 30px;">
                                 <span style="position: absolute; top: 7px; left: 18px;
