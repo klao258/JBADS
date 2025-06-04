@@ -1705,7 +1705,8 @@
                         var className =
                             "search-item" +
                             (options.itemClass ? " " + options.itemClass : "") +
-                            (item.className ? " " + item.className : "");
+                            (item.className ? " " + item.className : "") + 
+                            (item.score < 40 ? 'failed' : '');
                         var item_html =
                             "<" +
                             tagName +
