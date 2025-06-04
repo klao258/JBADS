@@ -1066,8 +1066,7 @@
                                 : "";
                         return `<td>
                             <div class="pr-cell pr-cell-title ${title_class}">
-                                <a href="${item.base_url}" class="pr-link">${item.title
-                            }</a>
+                                <a href="${item.base_url}" class="pr-link" style="${item.score < 30 ? 'text-decoration:line-through;' : ''}">${item.title}</a>
                                 <small style="display:var(--coldp-url,inline)"><br>${promote_link}</small>
                             </div>
                         </td>
@@ -1707,7 +1706,7 @@
                             (options.itemClass ? " " + options.itemClass : "") +
                             (item.className ? " " + item.className : "");
                         var item_html =
-                            `<${tagName} class="${className}" data-i="${i}" style="${item.score < 30 ? 'text-decoration:line-through;' : ''}">
+                            `<${tagName} class="${className}" data-i="${i}">
                                 ${options.renderItem(item, query)}
                             </${tagName}>`;
                         html += item_html;
