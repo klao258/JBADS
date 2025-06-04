@@ -1707,7 +1707,7 @@
                             (options.itemClass ? " " + options.itemClass : "") +
                             (item.className ? " " + item.className : "");
                         var item_html =
-                            `<${tagName} class="${className}" data-i="${i}" style="${item.score < 30 ? 'background-color: pink;' : ''}">
+                            `<${tagName} class="${className}" data-i="${i}" style="${item.score < 30 ? 'text-decoration:line-through;' : ''}">
                                 ${options.renderItem(item, query)}
                             </${tagName}>`;
                         html += item_html;
