@@ -1,50 +1,54 @@
 var postCNRote = {
   "GZKK": {
-    "ADS-GZKK-10X1AgF0vQ": "12-23-65.71%",
-    "ADS-GZKK-10KVMopf1i": "16-16-50.00%",
-    "ADS-GZKK-10HRfYWtEi": "19-16-45.71%",
+    "ADS-GZKK-10H12CHCEB": "10-21-67.74%",
+    "ADS-GZKK-10X1AgF0vQ": "13-23-63.89%",
+    "ADS-GZKK-10KVMopf1i": "17-17-50.00%",
+    "ADS-GZKK-10HRfYWtEi": "19-17-47.22%",
     "ADS-GZKK-101XArBSiy": "33-17-34.00%"
   },
   "ZhaoShang": {
-    "ADS-ZhaoShang-0xlRnuTe3": "6-31-83.78%",
     "ADS-ZhaoShang-0jt85Sndi": "47-114-70.81%",
-    "ADS-ZhaoShang-0JveORGv9": "43-73-62.93%",
+    "ADS-ZhaoShang-0JveORGv9": "47-75-61.48%",
     "ADS-ZhaoShang-0gGRsxL0E": "17-23-57.50%",
-    "ADS-ZhaoShang-00s0C2q1t": "23-30-56.60%",
-    "ADS-ZhaoShang-0YVbpiAGo": "43-54-55.67%",
-    "ADS-ZhaoShang-0396oZA8X": "30-35-53.85%",
-    "ADS-ZhaoShang-0apBDDgB2": "36-36-50.00%",
+    "ADS-ZhaoShang-0YVbpiAGo": "45-56-55.45%",
+    "ADS-ZhaoShang-00s0C2q1t": "27-33-55.00%",
+    "ADS-ZhaoShang-0396oZA8X": "33-40-54.79%",
+    "ADS-ZhaoShang-0apBDDgB2": "37-40-51.95%",
     "ADS-ZhaoShang-044W8jVyE": "16-16-50.00%",
+    "ADS-ZhaoShang-0peEen4dE": "66-61-48.03%",
     "ADS-ZhaoShang-0asmFb9MA": "38-35-47.95%",
-    "ADS-ZhaoShang-0peEen4dE": "66-60-47.62%",
-    "ADS-ZhaoShang-0ztJZzwam": "31-22-41.51%"
+    "ADS-ZhaoShang-0ztJZzwam": "31-23-42.59%",
+    "ADS-ZhaoShang-0zsoBc1Ih": "18-13-41.94%"
   },
   "TouTou": {
-    "ADS-TouTou-4f0zhiu6O": "9-29-76.32%",
-    "ADS-TouTou-4XQ7dJsxr": "172-109-38.79%"
+    "ADS-TouTou-4f0zhiu6O": "10-30-75.00%",
+    "ADS-TouTou-4XQ7dJsxr": "177-110-38.33%"
   },
   "JingJing": {
-    "ADS-JingJing-1nkPIeFGI": "49-90-64.75%",
-    "ADS-JingJing-1gOrKrrC6": "31-47-60.26%",
-    "ADS-JingJing-1qAqoUTNL": "60-79-56.83%",
+    "ADS-JingJing-1nkPIeFGI": "52-92-63.89%",
+    "ADS-JingJing-1gOrKrrC6": "33-49-59.76%",
+    "ADS-JingJing-1qAqoUTNL": "61-79-56.43%",
+    "ADS-JingJing-1lvJjnt7a": "17-22-56.41%",
     "ADS-JingJing-1h6i9GTga": "106-136-56.20%",
-    "ADS-JingJing-1PJ8YHaHD": "102-126-55.26%",
-    "ADS-JingJing-1lvJjnt7a": "17-21-55.26%",
-    "ADS-JingJing-1O1oFz5TE": "59-68-53.54%",
-    "ADS-JingJing-1sQ1s48Ea": "35-39-52.70%",
+    "ADS-JingJing-1PJ8YHaHD": "105-130-55.32%",
+    "ADS-JingJing-1qssklHUM": "54-62-53.45%",
+    "ADS-JingJing-1sQ1s48Ea": "36-41-53.25%",
+    "ADS-JingJing-1O1oFz5TE": "64-72-52.94%",
     "ADS-JingJing-1uY2RG4ig": "59-65-52.42%",
-    "ADS-JingJing-1qssklHUM": "51-54-51.43%",
-    "ADS-JingJing-1mFmP5CWj": "132-125-48.64%",
-    "ADS-JingJing-1ZbTuMx5p": "46-43-48.31%",
+    "ADS-JingJing-1mFmP5CWj": "140-134-48.91%",
+    "ADS-JingJing-1OzOhLkgG": "45-42-48.28%",
     "ADS-JingJing-1Ib2WT4IO": "24-22-47.83%",
-    "ADS-JingJing-1OzOhLkgG": "43-39-47.56%",
-    "ADS-JingJing-1mpCNkcW1": "182-146-44.51%",
-    "ADS-JingJing-1ZPBjXBBg": "18-14-43.75%",
-    "ADS-JingJing-1IoGxofwY": "142-83-36.89%",
-    "ADS-JingJing-196YKwi0G": "111-63-36.21%",
-    "ADS-JingJing-1f7jjKr0L": "181-92-33.70%",
-    "ADS-JingJing-1TqoNxvcQ": "90-44-32.84%",
-    "ADS-JingJing-1vu8ScXDy": "106-49-31.61%"
+    "ADS-JingJing-1ZbTuMx5p": "48-43-47.25%",
+    "ADS-JingJing-1mpCNkcW1": "183-151-45.21%",
+    "ADS-JingJing-1ZPBjXBBg": "19-15-44.12%",
+    "ADS-JingJing-1O4ydev9U": "19-12-38.71%",
+    "ADS-JingJing-196YKwi0G": "117-70-37.43%",
+    "ADS-JingJing-1IoGxofwY": "149-89-37.39%",
+    "ADS-JingJing-1f7jjKr0L": "192-98-33.79%",
+    "ADS-JingJing-1TqoNxvcQ": "95-46-32.62%",
+    "ADS-JingJing-1emqdFNE9": "56-27-32.53%",
+    "ADS-JingJing-1vu8ScXDy": "106-49-31.61%",
+    "ADS-JingJing-1Ma46oDpt": "22-10-31.25%"
   },
   "FeiFei": {
     "ADS-FeiFei-3ZVt7U34F": "32-39-54.93%",
@@ -55,19 +59,19 @@ var postCNRote = {
     "ADS-LaoK-8nuZuB3b8": "44-32-42.11%"
   },
   "BeiBei": {
-    "ADS-BeiBei-2uwrpFVjG": "15-28-65.12%",
+    "ADS-BeiBei-2uwrpFVjG": "16-34-68.00%",
     "ADS-BeiBei-2iLAsExwr": "41-62-60.19%",
-    "ADS-BeiBei-27dnlHvDR": "21-17-44.74%"
+    "ADS-BeiBei-27dnlHvDR": "23-20-46.51%"
   },
   "YingYing": {
     "ADS-YingYing-68IxdOcUB": "6-33-84.62%",
-    "ADS-YingYing-6uLVYsdL8": "50-64-56.14%",
-    "ADS-YingYing-6E99QiuJJ": "57-59-50.86%",
-    "ADS-YingYing-6h38WAEzz": "147-121-45.15%"
+    "ADS-YingYing-6uLVYsdL8": "56-67-54.47%",
+    "ADS-YingYing-6E99QiuJJ": "59-65-52.42%",
+    "ADS-YingYing-6h38WAEzz": "147-122-45.35%"
   },
   "GZTianTian": {
-    "ADS-GZTianTian-11z39QoYQk": "17-40-70.18%",
-    "ADS-GZTianTian-11jKSYXjGq": "44-50-53.19%"
+    "ADS-GZTianTian-11z39QoYQk": "17-48-73.85%",
+    "ADS-GZTianTian-11jKSYXjGq": "47-53-53.00%"
   },
   "KeKe": {
     "ADS-KeKe-9B7rYY4sC": "24-16-40.00%",
@@ -77,7 +81,8 @@ var postCNRote = {
     "ADS-NiNi-7doTDcv5m": "38-39-50.65%"
   },
   "HuanHuan": {
-    "ADS-HuanHuan-5QMTaDhnQ": "65-41-38.68%"
+    "ADS-HuanHuan-5QMTaDhnQ": "65-42-39.25%",
+    "ADS-HuanHuan-5v8i8u76n": "49-22-30.99%"
   },
   "ADSZuZhi": {
     "ADS-ADSZuZhi-20GltJE3bd": "9-35-79.55%"
