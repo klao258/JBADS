@@ -2633,6 +2633,9 @@
 
         let submitPromise = list.map((v, i) => {
             let key = v.tme_path?.split?.("?")?.[0];
+            if(key === 'tsyl') {
+                key = 'TSYL666bot'
+            }
             let texts = getUserText(key, v.text);
             if (texts?.length) {
                 return new Promise((resolve) => {
