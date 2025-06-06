@@ -6,7 +6,6 @@ var postData = {
   "ADS-YingYing-6cHKKF0J4": "8-0-0",
   "ADS-YingYing-6h38WAEzz": "270-2-328.3",
   "ADS-YingYing-6e0K60caR": "47-0-0",
-  "ADS-YingYing-68IxdOcUB": "39-0-0",
   "ADS-YingYing-604wgPTaf": "5-0-0",
   "ADS-YingYing-6knu9WL56": "2-0-0",
   "ADS-YingYing-6Xj1Fn7w0": "1-0-0",
