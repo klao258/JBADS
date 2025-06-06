@@ -1,5 +1,5 @@
 var postData = {
-  "ADS-ADSZuZhi-20ebtQYl6d": "18-0-0",
+  "ADS-ADSZuZhi-20ebtQYl6d": "19-0-0",
   "ADS-ADSZuZhi-20vlLeOgAh": "8-1-49.3",
   "ADS-ADSZuZhi-20pnqK828m": "5-0-0",
   "ADS-ADSZuZhi-20VISZp233": "8-1-128.3",
@@ -19,14 +19,15 @@ var postData = {
   "ADS-ADSZuZhi-20L6Ejxcei": "4-0-0",
   "ADS-ADSZuZhi-20PRVWEZyL": "8-0-0",
   "ADS-ADSZuZhi-20r9r08Sb8": "4-0-0",
-  "ADS-ADSZuZhi-20OqMVnXte": "70-2-201.8",
-  "ADS-ADSZuZhi-20lN9r7Vbd": "29-1-11.2",
-  "ADS-ADSZuZhi-20Hstu4UOi": "4-1-1430",
+  "ADS-ADSZuZhi-20OqMVnXte": "72-2-201.8",
+  "ADS-ADSZuZhi-20lN9r7Vbd": "30-1-11.2",
+  "ADS-ADSZuZhi-20Hstu4UOi": "4-1-2820",
   "ADS-ADSZuZhi-2091tko7tr": "3-0-0",
   "ADS-ADSZuZhi-209mQJiZgw": "3-0-0",
   "ADS-ADSZuZhi-20BP2NthF8": "1-0-0",
   "ADS-ADSZuZhi-20TRDRAQ88": "1-0-0",
   "ADS-ADSZuZhi-20xTDzDEt0": "1-0-0",
   "ADS-ADSZuZhi-2023TizaAb": "1-0-0",
-  "ADS-ADSZuZhi-20BspkxocO": "1-0-0"
+  "ADS-ADSZuZhi-20BspkxocO": "1-0-0",
+  "ADS-ADSZuZhi-20DYUJHQC3": "1-0-0"
 }
