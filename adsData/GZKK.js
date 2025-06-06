@@ -5,7 +5,7 @@ var postData = {
   "ADS-GZKK-10KVMopf1i": "34-0-0",
   "ADS-GZKK-10HRfYWtEi": "36-0-0",
   "ADS-GZKK-10upIBD8DP": "9-0-0",
-  "ADS-GZKK-10X1AgF0vQ": "36-1-100",
+  "ADS-GZKK-10X1AgF0vQ": "38-1-100",
   "ADS-GZKK-10H5iFuPa5": "21-0-0",
   "ADS-GZKK-10iP0vxXgr": "1-0-0",
   "ADS-GZKK-10SPy62YgD": "6-0-0"
