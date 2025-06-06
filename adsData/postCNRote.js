@@ -64,7 +64,6 @@ var postCNRote = {
     "ADS-BeiBei-27dnlHvDR": "27-21-43.75%"
   },
   "YingYing": {
-    "ADS-YingYing-68IxdOcUB": "6-33-84.62%",
     "ADS-YingYing-6uLVYsdL8": "59-68-53.54%",
     "ADS-YingYing-6E99QiuJJ": "62-70-53.03%",
     "ADS-YingYing-6h38WAEzz": "147-123-45.56%"
@@ -83,8 +82,5 @@ var postCNRote = {
   "HuanHuan": {
     "ADS-HuanHuan-5QMTaDhnQ": "66-42-38.89%",
     "ADS-HuanHuan-5v8i8u76n": "50-22-30.56%"
-  },
-  "ADSZuZhi": {
-    "ADS-ADSZuZhi-20GltJE3bd": "9-35-79.55%"
   }
 }
