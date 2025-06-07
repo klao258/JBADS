@@ -22,7 +22,7 @@ var postData = {
   "ADS-FeiFei-39SGARXZs": "4-2-301.00",
   "ADS-FeiFei-3EqnHnpfg": "3-1-48.3",
   "ADS-FeiFei-3nSp2qN2c": "3-0-0",
-  "ADS-FeiFei-3dULzmjzS": "2-0-0",
+  "ADS-FeiFei-3dULzmjzS": "3-0-0",
   "ADS-FeiFei-3BK7RAYTr": "2-1-60.00",
   "ADS-FeiFei-3tAu0NmXs": "6-0-0",
   "ADS-FeiFei-3gbfbCwYU": "4-1-50.00",
