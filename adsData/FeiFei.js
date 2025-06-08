@@ -10,7 +10,7 @@ var postData = {
   "ADS-FeiFei-3gUh7cGSO": "9-0-0",
   "ADS-FeiFei-3H1k4Ytqx": "14-0-0",
   "ADS-FeiFei-3yWO8W9fa": "4-0-0",
-  "ADS-FeiFei-3ZVt7U34F": "71-1-50",
+  "ADS-FeiFei-3ZVt7U34F": "71-2-150",
   "ADS-FeiFei-3hGyawgX1": "2-0-0",
   "ADS-FeiFei-3EWRyjtG7": "10-0-0",
   "ADS-FeiFei-3mYC8iisv": "7-0-0",
