@@ -1,5 +1,5 @@
 /** 金貝娱乐 */
-const FB = [{label: '金貝飞投机器人', tgname: 'JB6666_BOT'}]
+const FB = [{label: '金貝飞投机器人', tgname: 'JB7777_BOT'}]
 const FBChannel = [
     {label: '金貝娱乐频道', tgname: 'jbpc28'},
     {label: '金貝飞投频道', tgname: 'jbft'},

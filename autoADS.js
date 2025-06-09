@@ -319,6 +319,7 @@
             createButton("提价(曝光达标)", "proPrice", async () => onProAddPrice()),
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
             createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
+            createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
         ];
 
         // 添加元素到容器
@@ -2223,7 +2224,7 @@
             const browserNum = accountAll?.[window.user]?.['browser'] ?? "N"; // 浏览器编号 没有为N代替
             const accountEN = accountAll?.[window.user]?.['en'] ?? "null"; // 推广账号
             const postID = guid(); // 推广ID
-            return `t.me/JB6666_BOT?start=${code}_${source}-${accountEN}-${browserNum}${postID}`;
+            return `t.me/JB7777_BOT?start=${code}_${source}-${accountEN}-${browserNum}${postID}`;
         } else if (tstg?.includes?.(window.user)) {
             // 正常推广天胜链接
             const source = "ADS"; // 来源
@@ -2635,6 +2636,8 @@
             let key = v.tme_path?.split?.("?")?.[0];
             if(key === 'tsyl') {
                 key = 'TSYL666bot'
+            } else if (key === 'jbtb'){
+                key = 'JB7777_BOT'
             }
             let texts = getUserText(key, v.text);
             if (texts?.length) {
@@ -3159,6 +3162,24 @@
             await onRefresh();
         }
     };
+
+    // 替换机器人
+    const onReplaceBot = async () => {
+        let list = OwnerAds.getAdsList();
+        list = list.filter((v) => {
+            if (v.status !== "Declined") return false;
+            v["url"] = `${host}${v.base_url}`;
+
+            return true;
+        });
+
+        if (!list.length) {
+            toast("所有机器人已经替换完成 !!!");
+            return false;
+        }
+
+        console.log(list)
+    }
 
     // 提取数据
     const extractMiddleMultiple = (str, start, end) => {
