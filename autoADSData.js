@@ -63,7 +63,7 @@ const autoADSData = {
         "ads 老k": { en: "LaoK", browser: 8, code: "53377", options: [...FB] },
         "ADS组织": { en: "ADSZuZhi", browser: 20, code: "53377", options: [...FB] },
         "金貝推广-KK": { en: "GZKK", browser: 10, code: "53377", options: [...FB] },
-        "金貝娱乐-天天": { en: "GZTianTian", browser: 11, code: "53377", options: [...FB] },
+        "金貝推广-天天": { en: "GZTianTian", browser: 11, code: "53377", options: [...FB] },
 
         "ads 晶晶": { en: "JingJing", browser: 1, code: "64782", options: [...FB] },
         "ads 莹莹": { en: "YingYing", browser: 6, code: "64782", options: [...FB] },
