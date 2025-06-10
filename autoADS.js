@@ -3206,7 +3206,7 @@
         }
         if (getMoney() < 2) return toast("余额过低");
         const owner_id = Aj.state.ownerId
-        for (const v of tmp) {
+        for (const v of list) {
             Aj.showProgress();
 
             const html = await getHTML(v.url, "h")
