@@ -2587,31 +2587,128 @@
     }
 
     // 设置单价
-    $("body").on(
-        "click",
-        'td[style="display:var(--coldp-cpm,table-cell)"] a',
-        async function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+    $("body").on("click", 'td[style="display:var(--coldp-cpm,table-cell)"] a', async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-            let list = OwnerAds.getAdsList();
-            let ad_id = $(this).attr("href")?.split("/")?.[3];
-            if (!ad_id) return false;
+        let list = OwnerAds.getAdsList();
+        let ad_id = $(this).attr("href")?.split("/")?.[3];
+        if (!ad_id) return false;
 
-            const item = list?.find?.((v) => +v?.ad_id === +ad_id);
+        const item = list?.find?.((v) => +v?.ad_id === +ad_id);
 
-            const cpm = await prompt(item?._title || item?.title);
-            if (cpm <= 0) return false;
+        const cpm = await prompt(item?._title || item?.title);
+        if (cpm <= 0) return false;
 
-            Aj.showProgress();
-            let res = await editCPM(item, cpm);
-            Aj.hideProgress();
+        Aj.showProgress();
+        let res = await editCPM(item, cpm);
+        Aj.hideProgress();
 
-            if (!res) return toast("设置cpm失败 !");
+        if (!res) return toast("设置cpm失败 !");
 
-            await onRefresh();
-        }
-    );
+        await onRefresh();
+    });
+
+    // 查询频道 / 机器人
+    const searchChannel = (isBot, value) => {
+        return new Promise((resolve, reject) => {
+            Aj.apiRequest(
+                isBot ? "searchBot" : "searchChannel",
+                {
+                    owner_id: Aj.state.ownerId,
+                    query: value,
+                },
+                (result) => {
+                    if (result.error) {
+                        resolve(false);
+                        return false;
+                    }
+                    if (result.ok) {
+                        let item = {
+                            val: isBot ? result.bot.id : result.channel.val,
+                            name: isBot ? result.bot.title : result.channel.name,
+                            photo: isBot ? result.bot.photo : result.channel.photo,
+                            username: isBot ? result.bot.username : result.channel.username,
+                        };
+                        resolve(item);
+                    } else {
+                        resolve(false);
+                    }
+                },
+                (err) => {
+                    console.log("请求错误", err);
+                    resolve(false);
+                }
+            );
+        });
+    };
+
+    // 关键字查询结果
+    const onTargetQuerySearch = (query) => {
+        return new Promise((resolve) => {
+            Aj.apiRequest("searchTargetQuery",{ query }, (result) => {
+                if (result.error) return resolve(false);
+                if (result.query) {
+                    let html = new DOMParser().parseFromString(result?.query?.sample_results, "text/html");
+                    if ($(html).find(".empty").length > 0) {
+                        resolve(false);
+                    } else {
+                        let item = {
+                            val: result.query.id,
+                            name: result.query.title,
+                            sample_results: result.query.sample_results,
+                        };
+                        resolve(item);
+                    }
+                }
+            })
+        });
+    };
+
+    // 创建广告
+    const createAd = async (params) => {
+        let query = {
+            owner_id: Aj.state.ownerId, //  owner_id
+            button: undefined, // undefined
+            website_name: "", // ’‘
+            website_photo: "", // ''
+            media: "", // ''
+            ad_info: "", // ''
+            views_per_user: getRNum(1, 4), // 观看次数
+            daily_budget: 0, // 0
+            active: 1, // 1
+            device: undefined, // undefined
+        };
+        return new Promise((resolve) => {
+            Aj.apiRequest("createAd", {...query, ...params}, (result) => {
+                if (result.error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    };
+
+    // 编辑广告
+    const editAd = async (params) => {
+
+    }
+
+    // 删除广告
+    const deleteAd = async (ad_id, owner_id = Aj.state.ownerId) => {
+        return new Promise((resolve, reject) => {
+            
+            Aj.apiRequest("deleteAd", { owner_id, ad_id }, (res1) => {
+                if (res1.error) return resolve(false);
+
+                Aj.apiRequest("deleteAd", { owner_id, ad_id, confirm_hash: res1.confirm_hash }, (res2) => {
+                    if (res2.ok) return resolve(true)
+                    return resolve(false);
+                });
+            });
+        })
+    }
 
     // 一键审核，搜索广告不重审
     const onReview = async () => {
@@ -2828,39 +2925,6 @@
         return now - inputTime > days * msInDay;
     };
 
-    // 关键字
-    const onTargetQuerySearch = (value) => {
-        return new Promise((resolve) => {
-            Aj.apiRequest(
-                "searchTargetQuery",
-                {
-                    query: value,
-                },
-                function (result) {
-                    if (result.error) {
-                        resolve(false);
-                    }
-                    if (result.query) {
-                        let html = new DOMParser().parseFromString(
-                            result.query.sample_results,
-                            "text/html"
-                        );
-                        if ($(html).find(".empty").length > 0) {
-                            resolve(false);
-                        } else {
-                            let item = {
-                                val: result.query.id,
-                                name: result.query.title,
-                                sample_results: result.query.sample_results,
-                            };
-                            resolve(item);
-                        }
-                    }
-                }
-            );
-        });
-    };
-
     // 发布搜索广告
     const onSearchADS = async () => {
         if (getMoney() < 2) return toast("余额过低");
@@ -2950,40 +3014,6 @@
         }
     };
 
-    // 查询频道 / 机器人
-    const searchChannel = (isBot, value) => {
-        return new Promise((resolve, reject) => {
-            Aj.apiRequest(
-                isBot ? "searchBot" : "searchChannel",
-                {
-                    owner_id: Aj.state.ownerId,
-                    query: value,
-                },
-                (result) => {
-                    if (result.error) {
-                        resolve(false);
-                        return false;
-                    }
-                    if (result.ok) {
-                        let item = {
-                            val: isBot ? result.bot.id : result.channel.val,
-                            name: isBot ? result.bot.title : result.channel.name,
-                            photo: isBot ? result.bot.photo : result.channel.photo,
-                            username: isBot ? result.bot.username : result.channel.username,
-                        };
-                        resolve(item);
-                    } else {
-                        resolve(false);
-                    }
-                },
-                (err) => {
-                    console.log("请求错误", err);
-                    resolve(false);
-                }
-            );
-        });
-    };
-
     // 发布单通道广告
     const sendChannel = async () => {
         if (getMoney() < 2) return toast("余额过低");
@@ -2993,7 +3023,12 @@
         urls = urls.split(/\r?\n/);
 
         let texts = getUserText();
-        let createAd = async (url) => {
+        if(!texts?.length) return false
+
+        Aj.showProgress();
+
+        const sendArr = []
+        for (const url of urls) {
             let isBot = /bot$/i.test(url);
             let channelinfo = await searchChannel(isBot, url);
             if (!channelinfo) {
@@ -3004,73 +3039,37 @@
                 }
             }
 
-            return new Promise(async (resolve) => {
-                // 随机设置单价
-                let minPrice = parseFloat($("#minPrice").val());
-                let maxPrice = parseFloat($("#maxPrice").val());
+            // 随机设置单价
+            let minPrice = parseFloat($("#minPrice").val());
+            let maxPrice = parseFloat($("#maxPrice").val());
 
-                // 随机设置总预算
-                let minBudget = parseFloat($("#minBudget").val());
-                let maxBudget = parseFloat($("#maxBudget").val());
+            // 随机设置总预算
+            let minBudget = parseFloat($("#minBudget").val());
+            let maxBudget = parseFloat($("#maxBudget").val());
 
-                let name = channelinfo?.name?.replace(/<[^>]+>/g, "");
-                name = name.replace(/[\u{1D400}-\u{1D7FF}]/gu, "");
+            let name = channelinfo?.name?.replace(/<[^>]+>/g, "");
+            name = name.replace(/[\u{1D400}-\u{1D7FF}]/gu, "");
 
-                let title = name?.length > 19 ? name?.slice(0, 19) : name;
-                let id = channelinfo?.val;
+            let title = name?.length > 19 ? name?.slice(0, 19) : name;
+            let id = channelinfo?.val;
 
-                // 准备参数
-                let params = {
-                    owner_id: Aj.state.ownerId, //  owner_id
-                    title: title, // 标题
-                    text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-                    button: undefined, // undefined
-                    promote_url: getUserUrl(), // 推广链接
-                    website_name: "", // ’‘
-                    website_photo: "", // ''
-                    media: "", // ''
-                    ad_info: "", // ''
-                    cpm: getRNum(minPrice, maxPrice, 1), // 单价
-                    views_per_user: getRNum(1, 4), // 观看次数
-                    budget: getRNum(minBudget, maxBudget), // 总预算
-                    daily_budget: 0, // 0
-                    active: 1, // 1
-                    target_type: isBot ? "bots" : "channels", // bots
-                    device: undefined, // undefined
-                };
-
-                if (isBot) {
-                    params["bots"] = id;
-                } else {
-                    params["channels"] = id;
-                }
-                Aj.apiRequest(
-                    "createAd",
-                    params,
-                    (result) => {
-                        if (result?.error) {
-                            resolve(false);
-                            return false;
-                        } else {
-                            resolve(true);
-                        }
-                    },
-                    (err) => {
-                        console.log("请求错误", err);
-                        resolve(false);
-                    }
-                );
-            });
-        };
-
-        Aj.showProgress();
-
-        let sendPromise = urls.map(async (url) => createAd(url));
-        let sendArr = await Promise.all(sendPromise); // 创建所有广告
+            let params = {
+                title, // 标题
+                text: texts[getRNum(0, texts.length - 1, 0)], // 文案
+                promote_url: getUserUrl(), // 推广链接
+                cpm: getRNum(minPrice, maxPrice, 1), // 单价
+                budget: getRNum(minBudget, maxBudget), // 总预算
+                target_type: isBot ? "bots" : "channels", // bots
+            };
+            isBot ? (params["bots"] = id) : (params["channels"] = id)
+            const isFlag = await createAd(params)
+            sendArr.push(isFlag)
+        }
         let successNum = sendArr.filter((flag) => flag)?.length;
         let errorNum = sendArr.filter((flag) => !flag)?.length;
 
         Aj.hideProgress();
+
         $(".urls").val("");
         toast(`广告发布：成功${successNum}条，失败${errorNum}条`);
         await onRefresh();
@@ -3162,34 +3161,6 @@
         }
     };
 
-    // 创建新广告
-    const createAd = async (params) => {
-        return new Promise((resolve) => {
-            Aj.apiRequest("createAd", params, (result) => {
-                if (result.error) {
-                    resolve(false);
-                } else {
-                    resolve(true);
-                }
-            });
-        });
-    };
-
-    // 删除广告
-    const deleteAd = async (ad_id, owner_id = Aj.state.ownerId) => {
-        return new Promise((resolve, reject) => {
-            
-            Aj.apiRequest("deleteAd", { owner_id, ad_id }, (res1) => {
-                if (res1.error) return resolve(false);
-
-                Aj.apiRequest("deleteAd", { owner_id, ad_id, confirm_hash: res1.confirm_hash }, (res2) => {
-                    if (res2.ok) return resolve(true)
-                    return resolve(false);
-                });
-            });
-        })
-    }
-
     // 替换机器人
     const onReplaceBot = async () => {
         let list = OwnerAds.getAdsList();
@@ -3214,29 +3185,14 @@
             let isBot = v.trg_type === 'bot' ? true : false;
 
             let params = {
-                owner_id, //  owner_id
                 title: v.title, // 标题
                 text: v.text, // 文案
-                button: undefined, // undefined
                 promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}`, // 推广链接
-                website_name: "", // ’‘
-                website_photo: "", // ''
-                media: "", // ''
-                ad_info: "", // ''
                 cpm: v.cpm, // 单价
-                views_per_user: getRNum(1, 4), // 观看次数
                 budget: 1, // 总预算
-                daily_budget: 0, // 0
-                active: 1, // 1
-                target_type: isBot ? "bots" : "channels", // bots
-                device: undefined, // undefined
+                target_type: v.trg_type, // 类型
             };
-            if (isBot) {
-                params["bots"] = ids;
-            } else {
-                params["channels"] = ids;
-            }
-
+            isBot ? (params["bots"] = ids) : (params["channels"] = ids)
             const isFlag = await createAd(params)
             if(isFlag){
                 await deleteAd(v.ad_id, owner_id)
@@ -3252,29 +3208,14 @@
 
                 for (const row of result) {
                     let query = {
-                        owner_id, //  owner_id
                         title: row.title, // 标题
                         text: v.text, // 文案
-                        button: undefined, // undefined
                         promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}-${row.id}`, // 推广链接
-                        website_name: "", // ’‘
-                        website_photo: "", // ''
-                        media: "", // ''
-                        ad_info: "", // ''
                         cpm: v.cpm, // 单价
-                        views_per_user: getRNum(1, 4), // 观看次数
                         budget: 1, // 总预算
-                        daily_budget: 0, // 0
-                        active: 1, // 1
-                        target_type: isBot ? "bots" : "channels", // bots
-                        device: undefined, // undefined
+                        target_type: isBot ? "bots" : "channels", // 类型
                     };
-                    
-                    if (isBot) {
-                        query["bots"] = row.id;
-                    } else {
-                        query["channels"] = row.id;
-                    }
+                    isBot ? (params["bots"] = row.id) : (params["channels"] = row.id)
                     await createAd(query)
                 }
 
@@ -3319,15 +3260,7 @@
 
         // 如果不够当日8点, 往最后一天插入一个时间戳
         const now = new Date();
-        const eightAM = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-            8,
-            0,
-            0,
-            0
-        );
+        const eightAM = new Date(now.getFullYear(),now.getMonth(),now.getDate(),8,0,0,0);
         if (now < eightAM) {
             const timestamp = eightAM.getTime();
             dates.push(timestamp);
@@ -3456,21 +3389,17 @@
     };
 
     // 双击展示报表
-    $("body")
-        .on("dblclick", "tbody>tr", function (event) {
-            let url = $(this)
-                ?.find('[style*="display:var(--coldp-views,table-cell)"] a')
-                ?.attr("href");
-            showIframePopup(url);
-        })
-        .on("contextmenu", "tbody>tr .pr-cell-title", function (e) {
-            e?.preventDefault();
-            e?.stopPropagation();
-            let href = $(this)?.find?.("small a")?.text?.();
-            let ads = href?.split("_");
-            ads = ads?.[ads?.length - 1];
-            copyText(ads);
-        });
+    $("body").on("dblclick", "tbody>tr", function (event) {
+        let url = $(this)?.find('[style*="display:var(--coldp-views,table-cell)"] a')?.attr("href");
+        showIframePopup(url);
+    }).on("contextmenu", "tbody>tr .pr-cell-title", function (e) {
+        e?.preventDefault();
+        e?.stopPropagation();
+        let href = $(this)?.find?.("small a")?.text?.();
+        let ads = href?.split("_");
+        ads = ads?.[ads?.length - 1];
+        copyText(ads);
+    });
 
     // 更新观看量
     const updatePviews = async () => {
