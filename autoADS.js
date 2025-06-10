@@ -3223,13 +3223,51 @@
                 params["channels"] = ids;
             }
 
-            console.log('参数', params)
-
             const isFlag = await createAd(params)
             if(isFlag){
                 console.log('发布成功，准备删除旧数据')
             } else {
                 console.log('发布失败', params)
+                const result = [];
+                $('.selected-item').each(function () {
+                    const dataVal = $(this).data('val');
+                    const label = $(this).find('.label').text().trim();
+                    result.push({ id: dataVal, name: label });
+                });
+
+                for (const row of result) {
+                    let query = {
+                        owner_id: Aj.state.ownerId, //  owner_id
+                        title: row.title, // 标题
+                        text: v.text, // 文案
+                        button: undefined, // undefined
+                        promote_url: v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT'), // 推广链接
+                        website_name: "", // ’‘
+                        website_photo: "", // ''
+                        media: "", // ''
+                        ad_info: "", // ''
+                        cpm: v.cpm, // 单价
+                        views_per_user: getRNum(1, 4), // 观看次数
+                        budget: 1, // 总预算
+                        daily_budget: 0, // 0
+                        active: 1, // 1
+                        target_type: isBot ? "bots" : "channels", // bots
+                        device: undefined, // undefined
+                    };
+                    
+                    if (isBot) {
+                        params["bots"] = row.id;
+                    } else {
+                        params["channels"] = row.id;
+                    }
+                    const isFlag = await createAd(params)
+                    if(isFlag){
+                        console.log('发布成功，准备删除旧数据')
+                    } else {
+                        console.log('发布失败')
+                    }
+                }
+                console.log('发布成功，准备删除旧数据')
             }
         }
     }
