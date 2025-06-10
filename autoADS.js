@@ -147,7 +147,6 @@
         };
     }
     
-
     // 功能界面
     const createView = () => {
         const $toggleBtn = $("<button>", {
@@ -3163,13 +3162,18 @@
         }
     };
 
+    // 获取广告中Bot ids
+    const getBotIds = async () => {
+        // https://ads.telegram.org/account/ad/129
+    }
+    
+
     // 替换机器人
     const onReplaceBot = async () => {
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
             if (v.status !== "Declined") return false;
             v["url"] = `${host}${v.base_url}`;
-
             return true;
         });
 
@@ -3179,6 +3183,16 @@
         }
 
         console.log(list)
+
+        if (getMoney() < 2) return toast("余额过低");
+
+        let tmp = [list[0]]
+        for (const row of tmp) {
+            const html = await getHTML(v.url, "h")
+            console.log(html);
+            
+            // await getBotIds(item);
+        }
     }
 
     // 提取数据
