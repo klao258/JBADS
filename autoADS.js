@@ -3249,7 +3249,7 @@
                 html?.find?.('.selected-item')?.each(function () {
                     const dataVal = $(this).data('val');
                     const label = $(this).find('.label').text().trim();
-                    result.push({ id: dataVal, name: label });
+                    result.push({ id: dataVal, title: label });
                 });
 
                 for (const row of result) {
@@ -3283,6 +3283,7 @@
                 await delAd(v.ad_id, owner_id)
                 Aj.hideProgress();
                 toast(`${v.title}新建成功, 旧广告已删除!`)
+                await onRefresh();
             }
         }
     }
