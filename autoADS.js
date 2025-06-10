@@ -3162,11 +3162,18 @@
         }
     };
 
-    // 获取广告中Bot ids
-    const getBotIds = async () => {
-        // https://ads.telegram.org/account/ad/129
-    }
-    
+    // 创建新广告
+    const createAd = async (params) => {
+        return new Promise((resolve) => {
+            Aj.apiRequest("createAd", params, (result) => {
+                if (result.error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    };
 
     // 替换机器人
     const onReplaceBot = async () => {
@@ -3189,12 +3196,9 @@
         let tmp = [list[0]]
         for (const v of tmp) {
             const html = await getHTML(v.url, "h")
-            
-            // 1. 拿到所有id
             let ids = html.find(".select").data('value');
             let isBot = html.find(".select").data('name');
 
-            // 2. 组装参数
             let params = {
                 owner_id: Aj.state.ownerId, //  owner_id
                 title: v.title, // 标题
@@ -3220,9 +3224,13 @@
             }
 
             console.log('参数', params)
-            // 3. 发新帖子
 
-            // 4. 删除旧数据
+            const isFlag = await createAd(params)
+            if(isFlag){
+                console.log('发布成功，准备删除旧数据')
+            } else {
+                console.log('发布失败', params)
+            }
         }
     }
 
