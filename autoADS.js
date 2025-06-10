@@ -3187,7 +3187,7 @@
         if (getMoney() < 2) return toast("余额过低");
 
         let tmp = [list[0]]
-        for (const row of tmp) {
+        for (const v of tmp) {
             const html = await getHTML(v.url, "h")
             console.log(html);
             
