@@ -3206,7 +3206,7 @@
         }
         if (getMoney() < 2) return toast("余额过低");
         let tmp = [list[0]]
-        
+
         const owner_id = Aj.state.ownerId
         for (const v of tmp) {
             Aj.showProgress();
@@ -3258,7 +3258,7 @@
                         title: row.title, // 标题
                         text: v.text, // 文案
                         button: undefined, // undefined
-                        promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}`, // 推广链接
+                        promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}-${row.id}`, // 推广链接
                         website_name: "", // ’‘
                         website_photo: "", // ''
                         media: "", // ''
