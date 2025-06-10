@@ -3189,9 +3189,40 @@
         let tmp = [list[0]]
         for (const v of tmp) {
             const html = await getHTML(v.url, "h")
-            console.log(html);
             
-            // await getBotIds(item);
+            // 1. 拿到所有id
+            let ids = html.find(".select").data('value');
+            let isBot = html.find(".select").data('name');
+
+            // 2. 组装参数
+            let params = {
+                owner_id: Aj.state.ownerId, //  owner_id
+                title: v.title, // 标题
+                text: v.text, // 文案
+                button: undefined, // undefined
+                promote_url: v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT'), // 推广链接
+                website_name: "", // ’‘
+                website_photo: "", // ''
+                media: "", // ''
+                ad_info: "", // ''
+                cpm: v.cpm, // 单价
+                views_per_user: getRNum(1, 4), // 观看次数
+                budget: 1, // 总预算
+                daily_budget: 0, // 0
+                active: 1, // 1
+                target_type: isBot ? "bots" : "channels", // bots
+                device: undefined, // undefined
+            };
+            if (isBot) {
+                params["bots"] = ids;
+            } else {
+                params["channels"] = ids;
+            }
+
+            console.log('参数', params)
+            // 3. 发新帖子
+
+            // 4. 删除旧数据
         }
     }
 
