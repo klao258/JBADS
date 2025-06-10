@@ -3195,6 +3195,7 @@
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
             if (v.status !== "Declined") return false;
+            if (v.trg_type === "search") return false
             v["url"] = `${host}${v.base_url}`;
             return true;
         });
@@ -3205,7 +3206,6 @@
         }
         if (getMoney() < 2) return toast("余额过低");
         let tmp = [list[0]]
-
         
         const owner_id = Aj.state.ownerId
         for (const v of tmp) {
@@ -3213,7 +3213,7 @@
 
             const html = await getHTML(v.url, "h")
             let ids = html.find(".select").data('value');
-            let isBot = html.find(".select").data('name');
+            let isBot = v.trg_type === 'bot' ? true : false;
 
             let params = {
                 owner_id, //  owner_id
