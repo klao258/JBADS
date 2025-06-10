@@ -3281,9 +3281,10 @@
                 await delAd(v.ad_id, owner_id)
                 Aj.hideProgress();
                 toast(`${v.title}新建成功, 旧广告已删除!`)
-                await onRefresh();
             }
         }
+
+        await onRefresh();
     }
 
     // 提取数据
