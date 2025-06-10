@@ -3175,6 +3175,21 @@
         });
     };
 
+    // 删除广告
+    const delAd = async (ad_id, owner_id = Aj.state.ownerId) => {
+        return new Promise((resolve, reject) => {
+            
+            Aj.apiRequest("deleteAd", { owner_id, ad_id }, (res1) => {
+                if (res1.error) return resolve(false);
+
+                Aj.apiRequest("deleteAd", { owner_id, ad_id, confirm_hash: res1.confirm_hash }, (res2) => {
+                    if (res2.ok) return resolve(true)
+                    return resolve(false);
+                });
+            });
+        })
+    }
+
     // 替换机器人
     const onReplaceBot = async () => {
         let list = OwnerAds.getAdsList();
@@ -3188,19 +3203,20 @@
             toast("所有机器人已经替换完成 !!!");
             return false;
         }
-
-        console.log(list)
-
         if (getMoney() < 2) return toast("余额过低");
-
         let tmp = [list[0]]
+
+        
+        const owner_id = Aj.state.ownerId
         for (const v of tmp) {
+            Aj.showProgress();
+
             const html = await getHTML(v.url, "h")
             let ids = html.find(".select").data('value');
             let isBot = html.find(".select").data('name');
 
             let params = {
-                owner_id: Aj.state.ownerId, //  owner_id
+                owner_id, //  owner_id
                 title: v.title, // 标题
                 text: v.text, // 文案
                 button: undefined, // undefined
@@ -3225,9 +3241,10 @@
 
             const isFlag = await createAd(params)
             if(isFlag){
-                console.log('发布成功，准备删除旧数据')
+                await delAd(v.ad_id, owner_id)
+                Aj.hideProgress();
+                toast(`${v.title}新建成功, 旧广告已删除!`)
             } else {
-                console.log('发布失败', params)
                 const result = [];
                 html?.find?.('.selected-item')?.each(function () {
                     const dataVal = $(this).data('val');
@@ -3237,7 +3254,7 @@
 
                 for (const row of result) {
                     let query = {
-                        owner_id: Aj.state.ownerId, //  owner_id
+                        owner_id, //  owner_id
                         title: row.title, // 标题
                         text: v.text, // 文案
                         button: undefined, // undefined
@@ -3256,18 +3273,16 @@
                     };
                     
                     if (isBot) {
-                        params["bots"] = row.id;
+                        query["bots"] = row.id;
                     } else {
-                        params["channels"] = row.id;
+                        query["channels"] = row.id;
                     }
-                    const isFlag = await createAd(params)
-                    if(isFlag){
-                        console.log('发布成功，准备删除旧数据')
-                    } else {
-                        console.log('发布失败')
-                    }
+                    await createAd(query)
                 }
-                console.log('发布成功，准备删除旧数据')
+
+                await delAd(v.ad_id, owner_id)
+                Aj.hideProgress();
+                toast(`${v.title}新建成功, 旧广告已删除!`)
             }
         }
     }
