@@ -3205,8 +3205,6 @@
             return false;
         }
         if (getMoney() < 2) return toast("余额过低");
-        let tmp = [list[0]]
-
         const owner_id = Aj.state.ownerId
         for (const v of tmp) {
             Aj.showProgress();
