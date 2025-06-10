@@ -3204,7 +3204,7 @@
                 title: v.title, // 标题
                 text: v.text, // 文案
                 button: undefined, // undefined
-                promote_url: v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT'), // 推广链接
+                promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}`, // 推广链接
                 website_name: "", // ’‘
                 website_photo: "", // ''
                 media: "", // ''
@@ -3241,7 +3241,7 @@
                         title: row.title, // 标题
                         text: v.text, // 文案
                         button: undefined, // undefined
-                        promote_url: v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT'), // 推广链接
+                        promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}`, // 推广链接
                         website_name: "", // ’‘
                         website_photo: "", // ''
                         media: "", // ''
