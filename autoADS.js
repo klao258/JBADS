@@ -3176,7 +3176,7 @@
     };
 
     // 删除广告
-    const delAd = async (ad_id, owner_id = Aj.state.ownerId) => {
+    const deleteAd = async (ad_id, owner_id = Aj.state.ownerId) => {
         return new Promise((resolve, reject) => {
             
             Aj.apiRequest("deleteAd", { owner_id, ad_id }, (res1) => {
@@ -3239,7 +3239,7 @@
 
             const isFlag = await createAd(params)
             if(isFlag){
-                await delAd(v.ad_id, owner_id)
+                await deleteAd(v.ad_id, owner_id)
                 Aj.hideProgress();
                 toast(`${v.title}新建成功, 旧广告已删除!`)
             } else {
@@ -3278,7 +3278,7 @@
                     await createAd(query)
                 }
 
-                await delAd(v.ad_id, owner_id)
+                await deleteAd(v.ad_id, owner_id)
                 Aj.hideProgress();
                 toast(`${v.title}新建成功, 旧广告已删除!`)
             }
