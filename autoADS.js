@@ -3229,7 +3229,7 @@
             } else {
                 console.log('发布失败', params)
                 const result = [];
-                $('.selected-item').each(function () {
+                html?.find?.('.selected-item')?.each(function () {
                     const dataVal = $(this).data('val');
                     const label = $(this).find('.label').text().trim();
                     result.push({ id: dataVal, name: label });
