@@ -3035,7 +3035,7 @@
                 isBot = true;
                 channelinfo = await searchChannel(isBot, url);
                 if (!channelinfo) {
-                    return false;
+                    continue;   // 进入下一次循环
                 }
             }
 
