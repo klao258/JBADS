@@ -48,7 +48,7 @@ const JBChannel = [
 const autoADSData = {
     minViews: 300, // 最小浏览量
     fbtg: ["金貝招商 @jbdb", "ads 贝贝", "ads 欢欢", "ads 可可", "金貝推广-七月", "ads 菲菲", "ads 头头", "ads 老k", "ADS组织", "金貝推广-KK", "金貝娱乐-天天", "ads 晶晶", "ads 莹莹", "ads 妮妮"],
-    tstg: ["天胜01", "天胜02", "天胜推广-小豹", "天胜推广-锅巴"],
+    tstg: ["天胜1", "天胜2", "天胜3", "天胜4"],
     
     // 账号信息
     accountAll: {
@@ -72,10 +72,10 @@ const autoADSData = {
         "金貝推广-七月": { en: "GZQiQi", browser: 18, code: "64777", options: [...FB] },
 
         /** 天胜娱乐推广 */
-        "天胜01": { en: "TS01", browser: 14, code: "22782", options: [...TS] }, // 安仔
-        "天胜02": { en: "TS02", browser: 16, code: "22780", options: [...TS] },   // 大山
-        "天胜推广-小豹": { en: "TSXiaoBao", browser: 14, code: "22782", options: [...TS] }, // 安仔
-        "天胜推广-锅巴": { en: "TSGuoBa", browser: 16, code: "22780", options: [...TS] },   // 大山
+        "天胜1": { en: "TS1", browser: '', code: "22782", options: [...TS] }, // 安仔
+        "天胜2": { en: "TS2", browser: '', code: "22780", options: [...TS] },   // 大山
+        "天胜3": { en: "TSXiaoBao", browser: '', code: "22782", options: [...TS] }, // 安仔
+        "天胜4": { en: "TSGuoBa", browser: '', code: "22780", options: [...TS] },   // 大山
         
         /** 金貝机器人、频道 */
         "金貝频道": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
