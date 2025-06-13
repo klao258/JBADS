@@ -3035,6 +3035,7 @@
                 isBot = true;
                 channelinfo = await searchChannel(isBot, url);
                 if (!channelinfo) {
+                    toast(`${url}，发布失败！`);
                     sendArr.push(false)
                     continue;   // 进入下一次循环
                 }
@@ -3065,6 +3066,11 @@
             isBot ? (params["bots"] = id) : (params["channels"] = id)
             const isFlag = await createAd(params)
             sendArr.push(isFlag)
+            if(isFlag){
+                toast(`${title}，发布成功！`);
+            } else {
+                toast(`${title}，发布失败！`);
+            }
         }
         let successNum = sendArr.filter((flag) => flag)?.length;
         let errorNum = sendArr.filter((flag) => !flag)?.length;
