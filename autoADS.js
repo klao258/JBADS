@@ -3439,9 +3439,9 @@
         await addMountFn();
 
         // 金貝推广人员帖子自动重审
-        // if (accountAll[window.user]?.options?.length === 1) {
-        //     await onReview();
-        // }
+        if (accountAll[window.user]?.options?.length === 1) {
+            await onReview();
+        }
 
         // 天胜推广人员帖子自动重审
         if (tstg?.includes?.(window.user)) {
