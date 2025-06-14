@@ -3251,17 +3251,17 @@
         }
         console.log('list', list);
         
-        let arr = []
+        let arr = ''
         for (const v of list) {
             const html = await getHTML(v.url, "h")
             if(!html) return false
             let hrefs = html.find(".pr-target-overview .pr-form-info-block .value");
             if(!hrefs) return false
             hrefs?.each(function(){
-                arr.push(`${ $(this).attr('href') }`)
+                arr += `${ $(this).attr('href') } \n`
             })
         }
-        console.log(arr.join(','))
+        console.log(arr)
     }
 
     // 提取数据
