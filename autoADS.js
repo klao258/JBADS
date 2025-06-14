@@ -3253,9 +3253,9 @@
         let arr = []
         for (const v of list) {
             const html = await getHTML(v.url, "h")
-            let hrefs = html.find(".pr-form-info-block a");
+            let hrefs = html.find(".pr-form-info-block .value");
             hrefs?.each(function(){
-                arr.push($(this).href())
+                arr.push($(this).attr('href'))
             })
         }
         console.log(arr.split(','))
