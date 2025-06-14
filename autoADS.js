@@ -3249,7 +3249,8 @@
             toast("没有出单帖子！");
             return false;
         }
-
+        console.log('list', list);
+        
         let arr = []
         for (const v of list) {
             const html = await getHTML(v.url, "h")
