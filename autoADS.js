@@ -3240,7 +3240,7 @@
     const onGetPayUrl = async () => {
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
-            if (!v?.money) return false;
+            if (!v?.money || v.money === 0) return false;
             v["url"] = `${host}${v.base_url}`;
             return true;
         });
