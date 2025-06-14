@@ -3255,9 +3255,7 @@
             const html = await getHTML(v.url, "h")
             let hrefs = html.find(".pr-form-info-block .value");
             hrefs?.each(function(){
-                console.log(13, $(this).attr('href'));
-                
-                arr.push($(this).attr('href'))
+                arr.push(`${ $(this).attr('href') }`)
             })
         }
         console.log(arr?.split(','))
