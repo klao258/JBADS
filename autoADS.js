@@ -318,8 +318,8 @@
             createButton("提价(曝光达标)", "proPrice", async () => onProAddPrice()),
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
             createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
-            createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
-            createButton("打印出单链接", "replaceBotBtn", async () => onGetPayUrl()),
+            // createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
+            // createButton("打印出单链接", "replaceBotBtn", async () => onGetPayUrl()),
         ];
 
         // 添加元素到容器
