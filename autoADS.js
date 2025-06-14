@@ -3258,7 +3258,7 @@
             let hrefs = html.find(".pr-target-overview .pr-form-info-block .value");
             if(!hrefs) return false
             hrefs?.each(function(){
-                arr += `${ $(this).attr('href') } \n`
+                arr += `${ $(this).attr('href') }\n`
             })
         }
         console.log(arr)
