@@ -3258,7 +3258,7 @@
                 arr.push(`${ $(this).attr('href') }`)
             })
         }
-        console.log(arr?.split(','))
+        console.log(arr?.join(','))
     }
 
     // 提取数据
