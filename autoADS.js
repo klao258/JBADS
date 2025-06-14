@@ -3253,7 +3253,9 @@
         let arr = []
         for (const v of list) {
             const html = await getHTML(v.url, "h")
+            if(!html) return false
             let hrefs = html.find(".pr-form-info-block .value");
+            if(!hrefs) return false
             hrefs?.each(function(){
                 arr.push(`${ $(this).attr('href') }`)
             })
