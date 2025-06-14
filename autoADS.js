@@ -319,6 +319,7 @@
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
             createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
             createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
+            createButton("打印出单链接", "replaceBotBtn", async () => onGetPayUrl()),
         ];
 
         // 添加元素到容器
@@ -3233,6 +3234,31 @@
         }
 
         await onRefresh();
+    }
+
+    // 打印出单链接
+    const onGetPayUrl = async () => {
+        let list = OwnerAds.getAdsList();
+        list = list.filter((v) => {
+            if (v?.money) return false;
+            v["url"] = `${host}${v.base_url}`;
+            return true;
+        });
+
+        if (!list.length) {
+            toast("没有出单帖子！");
+            return false;
+        }
+
+        let arr = []
+        for (const v of list) {
+            const html = await getHTML(v.url, "h")
+            let hrefs = html.find(".pr-form-info-block a");
+            hrefs?.each(function(){
+                arr.push($(this).href())
+            })
+        }
+        console.log(arr.split(','))
     }
 
     // 提取数据
