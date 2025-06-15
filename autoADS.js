@@ -2206,6 +2206,14 @@
             return [];
         }
 
+        // 金貝飞投
+        if (type === 'jbtb') {
+            let emjo = `![😀](tg://emoji?id=6093793027988393802)![😀](tg://emoji?id=6091314909168012709)![😀](tg://emoji?id=6093901746495557133)![😀](tg://emoji?id=6093916216240377552) `
+            if (texts?.[type]?.length) {
+                return texts[type].map((v) => emjo + v);
+            }
+        }
+
         return texts?.[type] || [];
     };
 
