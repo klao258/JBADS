@@ -58,9 +58,8 @@
         const ratio = Math.log(money / min) / Math.log(max / min);
         return Math.max(0.4, Math.min(1, ratio));
     }
-
-    const useMoneyMode = ads.some(ad => ad?.money > 0);
-    const scoreAd = (ad) => {
+    
+    const scoreAd = (ad, useMoneyMode = false) => {
         const {
             views = 0,
             clicks = 0,
