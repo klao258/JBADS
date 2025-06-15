@@ -59,8 +59,8 @@
         return Math.max(0.4, Math.min(1, ratio));
     }
 
+    const useMoneyMode = ads.some(ad => ad?.money > 0);
     const scoreAd = (ad) => {
-        // 字段默认值，防止 undefined 导致 NaN
         const {
             views = 0,
             clicks = 0,
@@ -70,14 +70,12 @@
             cpa = 0,
             cpm = 0,
             spent = 0,
-            budget = 1, // 防止除以0
+            budget = 1,
             money = 0
         } = ad;
-
-        // 安全除法
+    
         const safeDiv = (a, b) => (b && !isNaN(b)) ? a / b : 0;
-
-        // 行业参考标准
+    
         const benchmark = {
             ctr: 0.015,
             regRate: 0.10,
@@ -86,42 +84,50 @@
             cpm: 0.0144,
             roi: 1.0,
             cpr: 600,
-            payRate: 0.08 // 付款人数 / 注册数
+            payRate: 0.08
         };
-
-        // 实际计算指标
+    
         const ctr = safeDiv(clicks, views);
         const regRate = safeDiv(actions, clicks);
         const roi = safeDiv(money, spent);
         const cpr = safeDiv(spent, money);
         const payRate = safeDiv(pays, actions);
         const spendRatio = safeDiv(spent, budget);
-
-        // 样本置信度
+    
         const ctrConf = confidenceWeight(views, 3000);
         const clickConf = confidenceWeight(clicks, 300);
         const actionConf = confidenceWeight(actions, 30);
         const moneyConf = moneyConfidence(money);
         const paysConf = confidenceWeight(pays, 10);
-
-        // 各项打分（乘以置信度，并 capped）
-        const ctrScore     = Math.min(10, (ctr / benchmark.ctr) * 10 * ctrConf);
-        const regScore     = Math.min(20, (regRate / benchmark.regRate) * 20 * clickConf);
-        const cpcScore     = Math.min(10, Math.max(1 - (safeDiv(cpc, benchmark.cpc)), 0) * 10 * clickConf);
-        const cpaScore     = Math.min(10, Math.max(1 - (safeDiv(cpa, benchmark.cpa)), 0) * 10 * actionConf);
-        const cpmScore     = Math.min(5,  Math.max(1 - (safeDiv(cpm, benchmark.cpm)), 0) * 5 * ctrConf);
-        const roiScore     = Math.min(25, Math.min(roi / benchmark.roi, 2) * 25 * moneyConf);
-        const cprScore     = Math.min(8,  Math.max(1 - (safeDiv(cpr, benchmark.cpr)), 0) * 8 * moneyConf);
-        const payRateScore = Math.min(7,  (payRate / benchmark.payRate) * 7 * paysConf);
-        const budgetScore  = spendRatio >= 0.9 && spendRatio <= 1.1 ? 5 : spendRatio < 0.9 ? 3 : 1;
-
-        // 总分 capped 为 100
-        const total = Math.round(
-            ctrScore + regScore + cpcScore + cpaScore +
-            cpmScore + roiScore + cprScore + payRateScore + budgetScore
-        );
-
-        // 建议输出
+    
+        const budgetScore = spendRatio >= 0.9 && spendRatio <= 1.1 ? 5 : spendRatio < 0.9 ? 3 : 1;
+    
+        let total = 0;
+    
+        if (useMoneyMode) {
+            // 优先看充值表现（只要全体广告中存在充值）
+            const roiScore     = Math.min(45, Math.min(roi / benchmark.roi, 2) * 45 * moneyConf);
+            const cprScore     = Math.min(20, Math.max(1 - (safeDiv(cpr, benchmark.cpr)), 0) * 20 * moneyConf);
+            const payRateScore = Math.min(15, (payRate / benchmark.payRate) * 15 * paysConf);
+            const regScore     = Math.min(10, (regRate / benchmark.regRate) * 10 * clickConf);
+            const ctrScore     = Math.min(5,  (ctr / benchmark.ctr) * 5 * ctrConf);
+    
+            total = Math.round(
+                roiScore + cprScore + payRateScore + regScore + ctrScore + budgetScore
+            );
+        } else {
+            // 全部没有充值，只用上游指标判断
+            const ctrScore     = Math.min(10, (ctr / benchmark.ctr) * 10 * ctrConf);
+            const regScore     = Math.min(20, (regRate / benchmark.regRate) * 20 * clickConf);
+            const cpcScore     = Math.min(10, Math.max(1 - (safeDiv(cpc, benchmark.cpc)), 0) * 10 * clickConf);
+            const cpaScore     = Math.min(10, Math.max(1 - (safeDiv(cpa, benchmark.cpa)), 0) * 10 * actionConf);
+            const cpmScore     = Math.min(5,  Math.max(1 - (safeDiv(cpm, benchmark.cpm)), 0) * 5 * ctrConf);
+    
+            total = Math.round(
+                ctrScore + regScore + cpcScore + cpaScore + cpmScore + budgetScore
+            );
+        }
+    
         let suggestion = '';
         if (total >= 85) {
             suggestion = '✅ 表现优异，建议加大预算扩大投放';
@@ -132,20 +138,12 @@
         } else {
             suggestion = '⛔ 效果较差，建议暂停投放或大幅重构';
         }
-
+    
         return {
             score: total,
-            // ctr: (ctr * 100).toFixed(2) + '%',
-            // regRate: (regRate * 100).toFixed(2) + '%',
-            // payRate: (payRate * 100).toFixed(2) + '%',
-            // roi: roi.toFixed(2),
-            // cpr: cpr.toFixed(2),
-            // cpc: cpc.toFixed(2),
-            // cpa: cpa.toFixed(2),
-            // cpm: cpm.toFixed(4),
             suggestion
         };
-    }
+    };
     
     // 功能界面
     const createView = () => {
