@@ -47,7 +47,7 @@ const JBChannel = [
 
 const autoADSData = {
     minViews: 300, // 最小浏览量
-    fbtg: ["金貝招商 @jbdb", "ads 贝贝", "ads 欢欢", "ads 可可", "金貝推广-七月", "ads 菲菲", "ads 头头", "ads 老k", "ADS组织", "金貝推广-KK", "金貝娱乐-天天", "ads 晶晶", "ads 莹莹", "ads 妮妮"],
+    fbtg: ["金貝招商 @jbdb", "ads 贝贝", "ads 欢欢", "ads 可可", "金貝推广-七月", "ads 菲菲", "ads 头头", "ads 老k", "ADS组织", "金貝推广-KK", "金貝娱乐-天天", "ads 晶晶", "ads 莹莹", "ads 妮妮", "金貝1", "金貝2"],
     tstg: ["天胜1", "天胜2", "天胜3", "天胜4"],
     
     // 账号信息
@@ -68,6 +68,9 @@ const autoADSData = {
         "ads 晶晶": { en: "JingJing", browser: 1, code: "64782", options: [...FB] },
         "ads 莹莹": { en: "YingYing", browser: 6, code: "64782", options: [...FB] },
         "ads 妮妮": { en: "NiNi", browser: 7, code: "64782", options: [...FB] },
+
+        "金貝1": { en: "JinBei1", browser: '', code: "53377", options: [...FB] },
+        "金貝2": { en: "JinBei2", browser: '', code: "64777", options: [...FB] },
 
         "金貝推广-七月": { en: "GZQiQi", browser: 18, code: "64777", options: [...FB] },
 
