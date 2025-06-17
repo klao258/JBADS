@@ -2738,7 +2738,7 @@
             let key = v.tme_path?.split?.("?")?.[0];
             if(key === 'tsyl') {
                 key = 'TSYL666bot'
-            } else if (key === 'jbtb'){
+            } else if (key === 'jbtb' || key === 'jbyx'){
                 key = 'JB7777_BOT'
             }
             let texts = getUserText(key, v.text);
@@ -2806,7 +2806,7 @@
             let key = v.tme_path?.split?.("?")?.[0];
                 if(key === 'tsyl') {
                     key = 'TSYL666bot'
-                } else if (key === 'jbtb'){
+                } else if (key === 'jbtb' || key === 'jbyx'){
                     key = 'JB7777_BOT'
                 }
             let texts = getUserText(key, v.text);
