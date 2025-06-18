@@ -6,7 +6,7 @@
     const pviews_store = window.pviews_store; // 记录展示量
     
     console.log('静态数据', autoADSData)
-
+    console.log('查询数据', window.userList)
     window.isLoad = false;
 
     var timerID = null;
@@ -14,7 +14,7 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
-    
+
     // 评分函数
     const getWeightedScore = (ad) => {
         const normalize = (val, min, max) => (val - min) / (max - min || 1) // 归一化函数
