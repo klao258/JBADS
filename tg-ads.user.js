@@ -221,6 +221,14 @@
         });
     };
 
+    // 封装get请求
+    const get = async (path, params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        let res = await fetch(`http://localhost:3003${path}?${query}`)
+        res = res?.data || []
+        return res
+    }
+
     // 自定义所有方法
     await interceptBeforeScript("tgsticker.js?31", () => {
         return new Promise(async (resolve) => {
@@ -249,6 +257,8 @@
 
             // 加载 postData
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
+            window.userList = await get('/user/list', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
+            
 
             // 加载主逻辑
             window.postID = [];
