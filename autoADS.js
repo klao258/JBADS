@@ -22,7 +22,7 @@
         res = res?.json() || {}
         return res
     }
-    let userList = await get('/user/list', {ads: 'JingJing'})
+    let userList = await get('/user/list', {ads: accountAll?.[window.user]?.['en']})
     console.log('userList', userList);
     
 
