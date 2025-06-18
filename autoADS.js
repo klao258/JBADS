@@ -19,7 +19,7 @@
     const get = async (path, params = {}) => {
         const query = new URLSearchParams(params).toString();
         let res = fetch(`http://localhost:3003${path}?${query}`)
-        res = res?.json() || {}
+        res = res?.data || []
         return res
     }
     let userList = await get('/user/list', {ads: accountAll?.[window.user]?.['en']})
