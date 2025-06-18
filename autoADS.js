@@ -14,20 +14,7 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
-
-    // 封装get请求
-    const get = async (path, params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        let res = await fetch(`http://localhost:3003${path}?${query}`)
-        console.log(res);
-        
-        res = res?.data || []
-        return res
-    }
-    let userList = await get('/user/list', {ads: accountAll?.[window.user]?.['en']})
-    console.log('userList', userList);
     
-
     // 评分函数
     const getWeightedScore = (ad) => {
         const normalize = (val, min, max) => (val - min) / (max - min || 1) // 归一化函数
