@@ -17,8 +17,8 @@
 
     // 封装get请求
     const get = async (path, params = {}) => {
-        const params = new URLSearchParams(params).toString();
-        let res = fetch(`http://localhost:3003${path}?${params}`)
+        const query = new URLSearchParams(params).toString();
+        let res = fetch(`http://localhost:3003${path}?${query}`)
         res = res?.json() || {}
         return res
     }
