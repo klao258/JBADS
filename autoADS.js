@@ -1,4 +1,4 @@
-(() => {
+(async() => {
     "use strict";
     const { fbtg, tstg, accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, minViews } = autoADSData;
     const db = window.db;
@@ -14,6 +14,17 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
+
+    // 封装get请求
+    const get = async (path, params = {}) => {
+        const params = new URLSearchParams(params).toString();
+        let res = fetch(`http://localhost:3003${path}?${params}`)
+        res = res?.json() || {}
+        return res
+    }
+    let userList = await get('/user/list', {ads: 'JingJing'})
+    console.log('userList', userList);
+    
 
     // 评分函数
     const getWeightedScore = (ad) => {
