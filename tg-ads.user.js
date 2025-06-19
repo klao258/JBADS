@@ -283,7 +283,7 @@
 
             // 加载 postData
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
-            window.userList = await window.get('/user/list', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
+            window.userList = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
 
             // 加载主逻辑
             window.postID = [];
