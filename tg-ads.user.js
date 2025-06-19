@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.06.19-16:41:26
+// @version      2025.06.19-16:44:40
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -227,9 +227,9 @@
             const query = new URLSearchParams(params).toString();
             const res = await fetch(`http://localhost:3003${path}?${query}`);
             const data = await res.json(); // ⬅️ 这里必须 await
-            resolve((data || [])); // ⬅️ 注意这里返回的是实际数据
+            return (data || [])
           } catch (err) {
-            resolve([]);
+            return []
           }
     }
 
