@@ -6,6 +6,8 @@
     const pviews_store = window.pviews_store; // 记录展示量
     
     console.log('静态数据', autoADSData)
+    console.log('userList', window.userList)
+    
     window.isLoad = false;
 
     var timerID = null;
@@ -13,17 +15,6 @@
 
     var maxWidth = "100%";
     var loadADSFlag = false;
-
-    // 封装get请求
-    const get = async (path, params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        let res = await fetch(`http://localhost:3003${path}?${query}`)
-        res = await res?.json()
-        return (res?.data || [])
-    }
-
-    const userList = await get('/user/list', {ads: accountAll?.[window.user]?.['en']})
-    console.log('userList', userList)
 
     // 评分函数
     const getWeightedScore = (ad) => {
