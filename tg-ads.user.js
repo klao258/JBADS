@@ -226,7 +226,7 @@
         return new Promise(async (resolve, reject) => {
             const query = new URLSearchParams(params).toString();
             let res = await fetch(`http://localhost:3003${path}?${query}`)
-            console.log('res', res)
+            console.log('res', res.json())
             resolve((res?.data || []))
         })
     }
