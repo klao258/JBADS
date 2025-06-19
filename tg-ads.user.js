@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.06.19-18:45:23
+// @version      2025.06.20-02:41:16
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -283,7 +283,7 @@
 
             // 加载 postData
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
-            window.userList = await window.get('/user/list', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
+            window.userList = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
 
             // 加载主逻辑
             window.postID = [];
