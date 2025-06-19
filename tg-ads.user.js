@@ -222,11 +222,12 @@
     };
 
     // 封装get请求
-    const get = async (path, params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        let res = await fetch(`http://localhost:3003${path}?${query}`)
-        res = res?.data || []
-        return res
+    const get = (path, params = {}) => {
+        return new Promise(async (resolve, reject) => {
+            const query = new URLSearchParams(params).toString();
+            let res = await fetch(`http://localhost:3003${path}?${query}`)
+            resolve((res?.data || []))
+        })
     }
 
     // 自定义所有方法
