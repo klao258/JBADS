@@ -227,7 +227,10 @@
             const query = new URLSearchParams(params).toString();
             const res = await fetch(`http://localhost:3003${path}?${query}`);
             const data = await res.json(); // ⬅️ 这里必须 await
-            return (data || [])
+            if (data.code === 0) {
+                return (data?.data || []);
+            }
+            return []
           } catch (err) {
             return []
           }
