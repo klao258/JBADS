@@ -227,9 +227,9 @@
             const query = new URLSearchParams(params).toString();
             const res = await fetch(`http://localhost:3003${path}?${query}`);
             const data = await res.json(); // ⬅️ 这里必须 await
-            resolve((data || [])); // ⬅️ 注意这里返回的是实际数据
+            return (data || [])
           } catch (err) {
-            resolve([]);
+            return []
           }
     }
 
