@@ -21,6 +21,7 @@
     // ===== 🔄 检查远程是否有新版本 =====
     const CURRENT_VERSION = GM_info.script.version;
     const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
+    window.dataHost = 'https://jbjtads.sso66s.cc'; // 数据接口域名
 
     (async function checkForUpdate() {
         try {
@@ -222,18 +223,36 @@
     };
 
     // 封装get请求
-    const get = async (path, params = {}) => {
+    window.get = async (path, params = {}) => {
         try {
             const query = new URLSearchParams(params).toString();
-            const res = await fetch(`http://localhost:3003${path}?${query}`);
+            const res = await fetch(`${window.dataHost}${path}?${query}`);
             const data = await res.json(); // ⬅️ 这里必须 await
             if (data.code === 0) {
                 return (data?.data || []);
             }
             return []
-          } catch (err) {
+        } catch (err) {
             return []
-          }
+        }
+    }
+
+    // 封装post请求
+    window.post = async (path, data) => {
+        try {
+            let res = await fetch(`${window.dataHost}${path}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            const data = await res?.json()
+            if (data.code === 0) {
+                return true
+            }
+            return false
+        } catch (err) {
+            return false
+        }
     }
 
     // 自定义所有方法
@@ -264,7 +283,7 @@
 
             // 加载 postData
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
-            window.userList = await get('/user/list', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
+            window.userList = await window.get('/user/list', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
 
             // 加载主逻辑
             window.postID = [];
