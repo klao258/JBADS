@@ -16,68 +16,50 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
-    // 曝光、点击、注册 的置信度函数（线性+保底）
-    const confidenceWeight = (value, threshold) => Math.max(value / threshold, 0.4);
-  
-    // 充值金额专用置信度（对数衰减）
+    // 置信度函数（线性+保底）
+    const confidenceWeight = (value, threshold) => {
+        return Math.max(value / threshold, 0.4); // 保底 0.4
+    };
+
+    // money 特别处理（对数函数）
     const moneyConfidence = (money) => {
-        const min = 10;
-        const max = 10000;
+        const min = 10, max = 10000;
         if (money <= min) return 0.4;
         if (money >= max) return 1;
         const ratio = Math.log(money / min) / Math.log(max / min);
         return Math.max(0.4, Math.min(1, ratio));
-    }
-    
-    const scoreAd = (ad, useMoneyMode = true) => {
+    };
+
+    const scoreAd = (ad) => {
         const {
             views = 0, clicks = 0, actions = 0, pays = 0,
-            cpc = 0, cpa = 0, cpm = 0,
             spent = 0, budget = 1, money = 0
         } = ad;
-    
+
         const safeDiv = (a, b) => (b && !isNaN(b)) ? a / b : 0;
-        const benchmark = {
-            ctr: 0.015, regRate: 0.10,
-            cpc: 0.96, cpa: 9.59, cpm: 0.0144,
-            roi: 1.0, cpr: 600, payRate: 0.08
-        };
-    
         const ctr = safeDiv(clicks, views);
         const regRate = safeDiv(actions, clicks);
-        const roi = safeDiv(money, spent);
-        const cpr = safeDiv(spent, money);
-        const payRate = safeDiv(pays, actions);
         const spendRatio = safeDiv(spent, budget);
-    
-        const ctrConf = confidenceWeight(views, 3000);
-        const clickConf = confidenceWeight(clicks, 300);
-        const actionConf = confidenceWeight(actions, 30);
+
+        // 置信度
         const moneyConf = moneyConfidence(money);
         const paysConf = confidenceWeight(pays, 10);
-    
+        const regsConf = confidenceWeight(actions, 30);
+        const cvrConf = confidenceWeight(actions, clicks);
+        const ctrConf = confidenceWeight(views, 3000);
+
+        // 评分权重（满分分别为 x 分）
+        const moneyScore = Math.min(40, (moneyConf * 40));
+        const paysScore = Math.min(20, (paysConf * (pays > 0 ? 1 : 0) * 20));
+        const regsScore = Math.min(15, (regsConf * (actions > 0 ? 1 : 0) * 15));
+        const cvrScore  = Math.min(15, (regRate * 10) * cvrConf);  // 转化率常规为0.1左右，放大10倍
+        const ctrScore  = Math.min(5,  (ctr / 0.015) * 5 * ctrConf); // CTR以1.5%为基准
         const budgetScore = spendRatio >= 0.9 && spendRatio <= 1.1 ? 5 : spendRatio < 0.9 ? 3 : 1;
-    
-        let total = 0;
-        if (useMoneyMode && money > 0) {
-            const roiScore     = Math.min(25, Math.min(roi / benchmark.roi, 2) * 25 * moneyConf);
-            const cprScore     = Math.min(15, Math.max(1 - (cpr / benchmark.cpr), 0) * 15 * moneyConf);
-            const payRateScore = Math.min(20, (payRate / benchmark.payRate) * 20 * paysConf);
-            const regScore     = Math.min(15, (regRate / benchmark.regRate) * 15 * clickConf);
-            const ctrScore     = Math.min(5,  (ctr / benchmark.ctr) * 5 * ctrConf);
-    
-            total = Math.round(roiScore + cprScore + payRateScore + regScore + ctrScore + budgetScore);
-        } else {
-            // 上游指标评估
-            const ctrScore = Math.min(5, (ctr / benchmark.ctr) * 5 * ctrConf);
-            const regScore = Math.min(15, (regRate / benchmark.regRate) * 15 * clickConf);
-            const cpcScore = Math.min(10, Math.max(1 - (cpc / benchmark.cpc), 0) * 10 * clickConf);
-            const cpaScore = Math.min(15, Math.max(1 - (cpa / benchmark.cpa), 0) * 15 * actionConf);
-            const cpmScore = Math.min(15, Math.max(1 - (cpm / benchmark.cpm), 0) * 15 * ctrConf);
-    
-            total = Math.round(ctrScore + regScore + cpcScore + cpaScore + cpmScore + budgetScore);
-        }
-    
+
+        const total = Math.round(
+            moneyScore + paysScore + regsScore + cvrScore + ctrScore + budgetScore
+        );
+
         let suggestion = '';
         if (total >= 85) {
             suggestion = '✅ 表现优异，建议加大预算扩大投放';
@@ -88,12 +70,21 @@
         } else {
             suggestion = '⛔ 效果较差，建议暂停投放或大幅重构';
         }
-    
+
         return {
             score: total,
-            suggestion
+            suggestion,
+            details: {
+                moneyScore,
+                paysScore,
+                regsScore,
+                cvrScore,
+                ctrScore,
+                budgetScore
+            }
         };
     };
+
     
     // 功能界面
     const createView = () => {
