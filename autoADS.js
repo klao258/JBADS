@@ -2348,9 +2348,7 @@
                     resolve(false);
                     return false;
                 } else {
-                    if (result.ad) {
-                        OwnerAds.updateAd(result.ad);
-                    }
+                    
 
                     // 根据帖子id 记录在库(时间到秒, 帖子id, 帖子标识, 浏览量, 点击量, 加入量, 付款人数, 付款价格)
                     let tmp = item?.tme_path?.split("_") || [];
@@ -2374,7 +2372,12 @@
                         clicks: item?.clicks || 0,
                         joins: item?.actions || 0,
                     })
+                    console.log('记录cpm', res);
+                    
 
+                    if (result.ad) {
+                        OwnerAds.updateAd(result.ad);
+                    }
                     resolve(true);
                 }
             });
