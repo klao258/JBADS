@@ -2348,23 +2348,9 @@
                     resolve(false);
                     return false;
                 } else {
-                    
-
                     // 根据帖子id 记录在库(时间到秒, 帖子id, 帖子标识, 浏览量, 点击量, 加入量, 付款人数, 付款价格)
                     let tmp = item?.tme_path?.split("_") || [];
                     let ads = tmp[tmp.length - 1] || "";
-                    setDB({
-                        ad_id: item.ad_id,
-                        ads,
-                        cpm: cpm,
-                        float: (cpm - item.cpm).toFixed(2),
-                        views: item?.views || 0,
-                        clicks: item?.clicks || 0,
-                        joins: item?.joins || 0,
-                        pays: item?.pays || 0,
-                        money: item?.money || 0,
-                        createDate: date.getBeijingString(),
-                    });
                     const res = await window.post('/ads/recordCpm', {
                         ads, cpm, 
                         float: (cpm - item.cpm).toFixed(2),
@@ -2372,8 +2358,6 @@
                         clicks: item?.clicks || 0,
                         joins: item?.actions || 0,
                     })
-                    console.log('记录cpm', res);
-                    
 
                     if (result.ad) {
                         OwnerAds.updateAd(result.ad);
