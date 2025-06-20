@@ -17,9 +17,7 @@
     var loadADSFlag = false;
 
     // 曝光、点击、注册 的置信度函数（线性+保底）
-    const confidenceWeight = (value, threshold) => {
-        return Math.max(value / threshold, 0.4);  // 最小置信度 0.4
-    }
+    const confidenceWeight = (value, threshold) => Math.max(value / threshold, 0.4);
   
     // 充值金额专用置信度（对数衰减）
     const moneyConfidence = (money) => {
@@ -33,29 +31,16 @@
     
     const scoreAd = (ad, useMoneyMode = true) => {
         const {
-            views = 0,
-            clicks = 0,
-            actions = 0,
-            pays = 0,
-            cpc = 0,
-            cpa = 0,
-            cpm = 0,
-            spent = 0,
-            budget = 1,
-            money = 0
+            views = 0, clicks = 0, actions = 0, pays = 0,
+            cpc = 0, cpa = 0, cpm = 0,
+            spent = 0, budget = 1, money = 0
         } = ad;
     
         const safeDiv = (a, b) => (b && !isNaN(b)) ? a / b : 0;
-    
         const benchmark = {
-            ctr: 0.015,
-            regRate: 0.10,
-            cpc: 0.96,
-            cpa: 9.59,
-            cpm: 0.0144,
-            roi: 1.0,
-            cpr: 600,
-            payRate: 0.08
+            ctr: 0.015, regRate: 0.10,
+            cpc: 0.96, cpa: 9.59, cpm: 0.0144,
+            roi: 1.0, cpr: 600, payRate: 0.08
         };
     
         const ctr = safeDiv(clicks, views);
@@ -74,29 +59,23 @@
         const budgetScore = spendRatio >= 0.9 && spendRatio <= 1.1 ? 5 : spendRatio < 0.9 ? 3 : 1;
     
         let total = 0;
-    
-        if (useMoneyMode) {
-            // 优先看充值表现（只要全体广告中存在充值）
-            const roiScore     = Math.min(45, Math.min(roi / benchmark.roi, 2) * 45 * moneyConf);
-            const cprScore     = Math.min(20, Math.max(1 - (safeDiv(cpr, benchmark.cpr)), 0) * 20 * moneyConf);
-            const payRateScore = Math.min(15, (payRate / benchmark.payRate) * 15 * paysConf);
-            const regScore     = Math.min(10, (regRate / benchmark.regRate) * 10 * clickConf);
+        if (useMoneyMode && money > 0) {
+            const roiScore     = Math.min(25, Math.min(roi / benchmark.roi, 2) * 25 * moneyConf);
+            const cprScore     = Math.min(15, Math.max(1 - (cpr / benchmark.cpr), 0) * 15 * moneyConf);
+            const payRateScore = Math.min(20, (payRate / benchmark.payRate) * 20 * paysConf);
+            const regScore     = Math.min(15, (regRate / benchmark.regRate) * 15 * clickConf);
             const ctrScore     = Math.min(5,  (ctr / benchmark.ctr) * 5 * ctrConf);
     
-            total = Math.round(
-                roiScore + cprScore + payRateScore + regScore + ctrScore + budgetScore
-            );
+            total = Math.round(roiScore + cprScore + payRateScore + regScore + ctrScore + budgetScore);
         } else {
-            // 全部没有充值，只用上游指标判断
-            const ctrScore     = Math.min(10, (ctr / benchmark.ctr) * 10 * ctrConf);
-            const regScore     = Math.min(20, (regRate / benchmark.regRate) * 20 * clickConf);
-            const cpcScore     = Math.min(10, Math.max(1 - (safeDiv(cpc, benchmark.cpc)), 0) * 10 * clickConf);
-            const cpaScore     = Math.min(10, Math.max(1 - (safeDiv(cpa, benchmark.cpa)), 0) * 10 * actionConf);
-            const cpmScore     = Math.min(5,  Math.max(1 - (safeDiv(cpm, benchmark.cpm)), 0) * 5 * ctrConf);
+            // 上游指标评估
+            const ctrScore = Math.min(5, (ctr / benchmark.ctr) * 5 * ctrConf);
+            const regScore = Math.min(15, (regRate / benchmark.regRate) * 15 * clickConf);
+            const cpcScore = Math.min(10, Math.max(1 - (cpc / benchmark.cpc), 0) * 10 * clickConf);
+            const cpaScore = Math.min(15, Math.max(1 - (cpa / benchmark.cpa), 0) * 15 * actionConf);
+            const cpmScore = Math.min(15, Math.max(1 - (cpm / benchmark.cpm), 0) * 15 * ctrConf);
     
-            total = Math.round(
-                ctrScore + regScore + cpcScore + cpaScore + cpmScore + budgetScore
-            );
+            total = Math.round(ctrScore + regScore + cpcScore + cpaScore + cpmScore + budgetScore);
         }
     
         let suggestion = '';
