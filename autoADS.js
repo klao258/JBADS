@@ -42,14 +42,14 @@
         const regRate = safeDiv(regs, clicks);     // 注册转化率
 
         // 各项得分（总分100）
-        const moneyScore = Math.round(40 * rawConfidence(money, 300));
-        const paysScore  = Math.round(30 * rawConfidence(pays, 10));
-        const regsScore  = Math.round(20 * rawConfidence(regs, 30));
-        const cvrScore = cvr ? Math.round(Math.min(5, (cvr / 100) * 5 * 2)) : 0;
-        const ctrScore = ctr ? Math.round(Math.min(5, ((ctr / 100) * 5 * 5))) : 0;
+        const moneyScore = Number((40 * rawConfidence(money, 300)).toFixed(2));
+        const paysScore  = Number((30 * rawConfidence(pays, 10)).toFixed(2));
+        const regsScore  = Number((20 * rawConfidence(regs, 30)).toFixed(2));
+        const cvrScore = cvr ? Number((Math.min(5, cvr / 100 * 5 * 2)).toFixed(2)) : 0;
+        const ctrScore = ctr ? Number((Math.min(5, ctr / 100 * 5 * 5)).toFixed(2)) : 0;
 
-        const total = moneyScore + paysScore + regsScore + cvrScore + ctrScore;
-
+        const total = Number((moneyScore + paysScore + regsScore + cvrScore + ctrScore).toFixed(2));
+        
         let suggestion = '';
         if (total >= 85) {
             suggestion = '✅ 表现优异，建议加大预算扩大投放';
