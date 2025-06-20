@@ -34,13 +34,7 @@
     };
 
     const scoreAd = (ad) => {
-        const {
-            money = 0,
-            pays = 0,
-            regs = 0,
-            cvr = 0,
-            ctr = 0,
-        } = ad;
+        const { money = 0, pays = 0, regs = 0, cvr = 0, ctr = 0 } = ad;
 
         const safeNum = (val) => {
             const n = Number(val);
@@ -55,13 +49,7 @@
         const _ctr = safeNum(ctr);
 
         // 权重设定
-        const weights = {
-            money: 0.40,
-            pays: 0.30,
-            regs: 0.20,
-            cvr: 0.05,
-            ctr: 0.05,
-        };
+        const weights = { money: 0.40, pays: 0.30, regs: 0.20, cvr: 0.05, ctr: 0.05 };
 
         // 置信度
         const moneyConf = moneyConfidence(_money);
