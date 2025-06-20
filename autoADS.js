@@ -6,7 +6,7 @@
     const pviews_store = window.pviews_store; // 记录展示量
     
     console.log('静态数据', autoADSData)
-    console.log('userList', window.userList)
+    console.log('userList', window.postData)
     
     window.isLoad = false;
 
