@@ -79,7 +79,7 @@
         return {
             score: total,
             suggestion,
-            detail: {
+            details: {
                 money: +moneyScore.toFixed(2),
                 pays: +paysScore.toFixed(2),
                 regs: +regsScore.toFixed(2),
