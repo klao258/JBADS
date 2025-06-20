@@ -283,17 +283,7 @@
 
             // 加载 postData
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
-            window.userList = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
-
-            // 加载主逻辑
-            window.postID = [];
-            if (ready) {
-                window.postID = Object.keys(window.postData || {}); // 对应账号所有ads标识
-            } else {
-                console.warn("❌ 加载失败或变量未就绪");
-                window.postData = {}
-                window.postID = []
-            }
+            window.postData = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
 
             await initDB()
 

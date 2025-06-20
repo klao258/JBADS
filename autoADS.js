@@ -16,35 +16,6 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
-    // 评分函数
-    const getWeightedScore = (ad) => {
-        const normalize = (val, min, max) => (val - min) / (max - min || 1) // 归一化函数
-        const values = Object.values(window.postData || {}).map((str) => {
-            const [regs, pays, money] = str.split("-").map(Number);
-            return { regs, pays, money };
-        });
-
-        const weight = { regs: 1.5, pays: 2.5, money: 5 }; // 权重设置：ROI 优先
-        const stats = {
-            minRegs: 0,
-            maxRegs: Math.max(...values.map((v) => v.regs)),
-            minPays: 0,
-            maxPays: Math.max(...values.map((v) => v.pays)),
-            minMoney: 0,
-            maxMoney: Math.max(...values.map((v) => v.money)),
-        }
-
-        const regScore = normalize(ad.regs, stats.minRegs, stats.maxRegs);
-        const paysScore = normalize(ad.pays, stats.minPays, stats.maxPays);
-        const moneyScore = normalize(ad.money, stats.minMoney, stats.maxMoney);
-
-        return (
-            regScore * weight.regs +
-            paysScore * weight.pays +
-            moneyScore * weight.money
-        );
-    }
-
     // 曝光、点击、注册 的置信度函数（线性+保底）
     const confidenceWeight = (value, threshold) => {
         return Math.max(value / threshold, 0.4);  // 最小置信度 0.4
@@ -1398,19 +1369,19 @@
                                 `Telegram Ads 已加载分析数据${window.postID.length}条`
                             );
                         }
-                        let obj = window.postData[adsKey]?.split("-") || [];
+
+                        let post = window.postData?.find?.(v => v?.ads === adsKey)
+
                         item["pviews"] = tviews - pviews || 0;
                         item["pspent"] = pspent || 0;
                         item["qviews"] = pviews - qviews || 0;
                         item["qspent"] = qspent || 0;
-                        item["regs"] = +obj[0] || 0;
-                        item["pays"] = +obj[1] || 0;
-                        item["money"] = +obj[2] || 0;
+                        item["regs"] = +post?.regs || 0;
+                        item["pays"] = +post?.pays || 0;
+                        item["money"] = +post?.money || 0;
                         item["score"] = scoreAd(item)?.score?.toFixed(0) || 0;
                         item["suggestion"] = scoreAd(item)?.suggestion;
-                            // getWeightedScore(item)?.toFixed(2) || 0;
                         item["_title"] = item.title;
-                        // item.title = `权重：${item["score"]} &nbsp;|&nbsp; 注册：${obj[0]} &nbsp;|&nbsp; 付款：${obj[1]} &nbsp;|&nbsp; 总充值：${obj[2]} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${item.title}`;
                     } else {
                         item["pviews"] = tviews - pviews || 0;
                         item["pspent"] = pspent || 0;
@@ -1421,7 +1392,6 @@
                         item["money"] = 0;
                         item["score"] = scoreAd(item)?.score?.toFixed(0) || 0;
                         item["suggestion"] = scoreAd(item)?.suggestion;
-                        // item["score"] = 0;
                         item["_title"] = item.title;
                     }
 
@@ -2094,40 +2064,6 @@
             request.onerror = (event) => {
                 reject(event.target.error);
             };
-        });
-    };
-
-    // 获取DB所有数据
-    const getAllData = (store_name = cpms_store) => {
-        return new Promise((resolve, reject) => {
-            if (!db) {
-                console.log("全局数据库实例 db 未定义或未初始化");
-                resolve(false);
-                return;
-            }
-            const transaction = db.transaction(store_name, "readonly");
-            const store = transaction.objectStore(store_name);
-
-            // 如果浏览器支持 getAll，优先使用
-            if ("getAll" in store) {
-                const request = store.getAll();
-                request.onsuccess = (event) => resolve(event.target.result);
-                request.onerror = (event) => resolve(false);
-            } else {
-                // 不支持 getAll 时用游标遍历
-                const results = [];
-                const request = store.openCursor();
-                request.onsuccess = (event) => {
-                    const cursor = event.target.result;
-                    if (cursor) {
-                        results.push(cursor.value);
-                        cursor.continue();
-                    } else {
-                        resolve(results);
-                    }
-                };
-                request.onerror = (event) => resolve(false);
-            }
         });
     };
 
