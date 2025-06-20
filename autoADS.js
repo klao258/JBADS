@@ -1362,11 +1362,11 @@
                     let pspent = ((tviews - pviews) * (item?.cpm / 1000)).toFixed(2); // 当日花费
                     let qspent = ((pviews - qviews) * (prow?.cpm / 1000)).toFixed(2); // 昨日花费
 
-                    if (window.postID.includes(adsKey)) {
+                    if (window.postData.includes(adsKey)) {
                         if (!loadADSFlag) {
                             loadADSFlag = true;
                             $(".pr-logo-title").text(
-                                `Telegram Ads 已加载分析数据${window.postID.length}条`
+                                `Telegram Ads 已加载分析数据${window.postData.length}条`
                             );
                         }
 
@@ -2121,9 +2121,9 @@
     };
 
     // 等待 jQuery 注入（页面加载）
-    if (window.postID.length) {
+    if (window.postData.length) {
         $(".pr-logo-title").text(
-            `Telegram Ads 存在分析数据${window.postID.length}条`
+            `Telegram Ads 存在分析数据${window.postData.length}条`
         );
     }
 
