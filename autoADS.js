@@ -1362,15 +1362,14 @@
                     let pspent = ((tviews - pviews) * (item?.cpm / 1000)).toFixed(2); // 当日花费
                     let qspent = ((pviews - qviews) * (prow?.cpm / 1000)).toFixed(2); // 昨日花费
 
-                    if (window.postData.includes(adsKey)) {
+                    let post = window.postData?.find?.(v => v?.ads === adsKey)
+                    if (post) {
                         if (!loadADSFlag) {
                             loadADSFlag = true;
                             $(".pr-logo-title").text(
                                 `Telegram Ads 已加载分析数据${window.postData.length}条`
                             );
                         }
-
-                        let post = window.postData?.find?.(v => v?.ads === adsKey)
 
                         item["pviews"] = tviews - pviews || 0;
                         item["pspent"] = pspent || 0;
