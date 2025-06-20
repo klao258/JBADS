@@ -3169,7 +3169,7 @@
     };
 
     // 动态创建一个弹窗
-    const showIframePopup = async (url) => {
+    const showIframePopup = async (url, ads) => {
         if ($("#popupOverlay").length) {
             $("#popupOverlay").remove();
         }
@@ -3201,8 +3201,10 @@
             return toast("暂无数据 !!!");
         }
 
-        let ad_id = url?.split("/")?.[3];
-        let cpms = await filterDB((item) => +item?.ad_id === +ad_id);
+        // let ad_id = url?.split("/")?.[3];
+        // let cpms = await filterDB((item) => +item?.ad_id === +ad_id);
+
+        let cpms = await window.get('/ads/cpmList', { ads })
         console.log("cpms", cpms);
 
         const res = [];
@@ -3318,7 +3320,11 @@
     // 双击展示报表
     $("body").on("dblclick", "tbody>tr", function (event) {
         let url = $(this)?.find('[style*="display:var(--coldp-views,table-cell)"] a')?.attr("href");
-        showIframePopup(url);
+
+        let href = $(this)?.find?.(".pr-cell-title small a")?.text?.();
+        let ads = href?.split("_");
+        ads = ads?.[ads?.length - 1];
+        showIframePopup(url, ads);
     }).on("contextmenu", "tbody>tr .pr-cell-title", function (e) {
         e?.preventDefault();
         e?.stopPropagation();
