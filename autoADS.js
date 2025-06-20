@@ -39,36 +39,32 @@
     const scoreAd = (ad) => {
         const {
             views = 0, clicks = 0, actions = 0, pays = 0,
-            spent = 0, budget = 1, money = 0
+            spent = 0, money = 0
         } = ad;
     
         const ctr = safeDiv(clicks, views);
         const regRate = safeDiv(actions, clicks);
-        const spendRatio = safeDiv(spent, budget);
     
-        // 置信度（始终为 0.4 ~ 1）
+        // 置信度（都限定在 0.4~1）
         const moneyConf = moneyConfidence(money);
         const paysConf = confidenceWeight(pays, 10);
         const regsConf = confidenceWeight(actions, 30);
-        const cvrConf = confidenceWeight(actions, clicks);
-        const ctrConf = confidenceWeight(views, 3000);
+        const cvrConf  = confidenceWeight(actions, clicks);
+        const ctrConf  = confidenceWeight(views, 3000);
     
-        // 各项评分，NaN 安全处理
-        const moneyScore = Math.min(40, (moneyConf || 0) * 40);
-        const paysScore = Math.min(20, (pays > 0 ? paysConf : 0) * 20);
-        const regsScore = Math.min(20, (actions > 0 ? regsConf : 0) * 20);
-        const cvrScore  = Math.min(10, (regRate * 10 || 0) * cvrConf);  // regRate 放大 10 倍
-        const ctrScore  = Math.min(5,  (safeDiv(ctr, 0.015) || 0) * 5 * ctrConf);
-    
-        const budgetScore = spendRatio >= 0.9 && spendRatio <= 1.1 ? 5 : spendRatio < 0.9 ? 3 : 1;
+        // 各项得分
+        const moneyScore = Math.min(40, 40 * moneyConf);
+        const paysScore  = Math.min(30, 30 * (pays > 0 ? paysConf : 0));
+        const regsScore  = Math.min(20, 20 * (actions > 0 ? regsConf : 0));
+        const cvrScore   = Math.min(5,  (regRate * 10 || 0) * cvrConf);  // 放大后最多 5 分
+        const ctrScore   = Math.min(5,  (safeDiv(ctr, 0.015) || 0) * 5 * ctrConf);  // CTR 基准 1.5%
     
         const total = Math.round(
             (moneyScore || 0) +
             (paysScore || 0) +
             (regsScore || 0) +
             (cvrScore || 0) +
-            (ctrScore || 0) +
-            (budgetScore || 0)
+            (ctrScore || 0)
         );
     
         let suggestion = '';
@@ -90,11 +86,11 @@
                 paysScore: Math.round(paysScore),
                 regsScore: Math.round(regsScore),
                 cvrScore: Math.round(cvrScore),
-                ctrScore: Math.round(ctrScore),
-                budgetScore
+                ctrScore: Math.round(ctrScore)
             }
         };
     };
+    
     
     // 功能界面
     const createView = () => {
