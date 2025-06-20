@@ -2343,7 +2343,7 @@
     let editCPM = async (item, cpm) => {
         return new Promise((resolve, reject) => {
             let params = { owner_id: Aj.state.ownerId, ad_id: item.ad_id, cpm };
-            Aj.apiRequest("editAdCPM", params, function (result) {
+            Aj.apiRequest("editAdCPM", params, async function (result) {
                 if (result.error) {
                     resolve(false);
                     return false;
@@ -2367,6 +2367,13 @@
                         money: item?.money || 0,
                         createDate: date.getBeijingString(),
                     });
+                    const res = await window.post('/ads/recordCpm', {
+                        ads, cpm, 
+                        float: (cpm - item.cpm).toFixed(2),
+                        views: item?.views || 0,
+                        clicks: item?.clicks || 0,
+                        joins: item?.actions || 0,
+                    })
 
                     resolve(true);
                 }
