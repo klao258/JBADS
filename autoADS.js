@@ -31,7 +31,7 @@
         return Math.max(0.4, Math.min(1, ratio));
     }
     
-    const scoreAd = (ad, useMoneyMode = false) => {
+    const scoreAd = (ad, useMoneyMode = true) => {
         const {
             views = 0,
             clicks = 0,
