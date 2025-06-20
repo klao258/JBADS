@@ -56,7 +56,7 @@
         // 各项评分，NaN 安全处理
         const moneyScore = Math.min(40, (moneyConf || 0) * 40);
         const paysScore = Math.min(20, (pays > 0 ? paysConf : 0) * 20);
-        const regsScore = Math.min(20, (actions > 0 ? regsConf : 0) * 15);
+        const regsScore = Math.min(20, (actions > 0 ? regsConf : 0) * 20);
         const cvrScore  = Math.min(10, (regRate * 10 || 0) * cvrConf);  // regRate 放大 10 倍
         const ctrScore  = Math.min(5,  (safeDiv(ctr, 0.015) || 0) * 5 * ctrConf);
     
