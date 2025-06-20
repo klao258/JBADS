@@ -35,9 +35,9 @@
         const regRate = safeDiv(regs, clicks);     // 注册转化率
 
         // 各项得分（总分100）
-        const moneyScore = Number((40 * rawConfidence(money, 10000)).toFixed(2));
-        const paysScore  = Number((30 * rawConfidence(pays, 50)).toFixed(2));
-        const regsScore  = Number((20 * rawConfidence(regs, 300)).toFixed(2));
+        const moneyScore = Number((40 * rawConfidence(money, 300)).toFixed(2));
+        const paysScore  = Number((30 * rawConfidence(pays, 10)).toFixed(2));
+        const regsScore  = Number((20 * rawConfidence(regs, 30)).toFixed(2));
         const cvrScore = cvr ? Number((Math.min(5, cvr / 100 * 5 * 2)).toFixed(2)) : 0;
         const ctrScore = ctr ? Number((Math.min(5, ctr / 100 * 5 * 5)).toFixed(2)) : 0;
 
