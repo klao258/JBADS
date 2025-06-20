@@ -245,8 +245,8 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             })
-            const data = await res?.json()
-            if (data.code === 0) {
+            res = await res?.json()
+            if (res.code === 0) {
                 return true
             }
             return false
