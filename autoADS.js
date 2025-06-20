@@ -16,50 +16,61 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
-    // 置信度函数（线性+保底）
     const confidenceWeight = (value, threshold) => {
-        return Math.max(value / threshold, 0.4); // 保底 0.4
+        const result = value / threshold;
+        return isNaN(result) ? 0.4 : Math.max(result, 0.4);
     };
-
-    // money 特别处理（对数函数）
+    
     const moneyConfidence = (money) => {
         const min = 10, max = 10000;
+        if (!money || isNaN(money)) return 0.4;
         if (money <= min) return 0.4;
         if (money >= max) return 1;
         const ratio = Math.log(money / min) / Math.log(max / min);
         return Math.max(0.4, Math.min(1, ratio));
     };
-
+    
+    const safeDiv = (a, b) => {
+        if (typeof a !== 'number' || typeof b !== 'number') return 0;
+        if (isNaN(a) || isNaN(b) || b === 0) return 0;
+        return a / b;
+    };
+    
     const scoreAd = (ad) => {
         const {
             views = 0, clicks = 0, actions = 0, pays = 0,
             spent = 0, budget = 1, money = 0
         } = ad;
-
-        const safeDiv = (a, b) => (b && !isNaN(b)) ? a / b : 0;
+    
         const ctr = safeDiv(clicks, views);
         const regRate = safeDiv(actions, clicks);
         const spendRatio = safeDiv(spent, budget);
-
-        // 置信度
+    
+        // 置信度（始终为 0.4 ~ 1）
         const moneyConf = moneyConfidence(money);
         const paysConf = confidenceWeight(pays, 10);
         const regsConf = confidenceWeight(actions, 30);
         const cvrConf = confidenceWeight(actions, clicks);
         const ctrConf = confidenceWeight(views, 3000);
-
-        // 评分权重（满分分别为 x 分）
-        const moneyScore = Math.min(40, (moneyConf * 40));
-        const paysScore = Math.min(20, (paysConf * (pays > 0 ? 1 : 0) * 20));
-        const regsScore = Math.min(15, (regsConf * (actions > 0 ? 1 : 0) * 15));
-        const cvrScore  = Math.min(15, (regRate * 10) * cvrConf);  // 转化率常规为0.1左右，放大10倍
-        const ctrScore  = Math.min(5,  (ctr / 0.015) * 5 * ctrConf); // CTR以1.5%为基准
+    
+        // 各项评分，NaN 安全处理
+        const moneyScore = Math.min(40, (moneyConf || 0) * 40);
+        const paysScore = Math.min(20, (pays > 0 ? paysConf : 0) * 20);
+        const regsScore = Math.min(15, (actions > 0 ? regsConf : 0) * 15);
+        const cvrScore  = Math.min(15, (regRate * 10 || 0) * cvrConf);  // regRate 放大 10 倍
+        const ctrScore  = Math.min(5,  (safeDiv(ctr, 0.015) || 0) * 5 * ctrConf);
+    
         const budgetScore = spendRatio >= 0.9 && spendRatio <= 1.1 ? 5 : spendRatio < 0.9 ? 3 : 1;
-
+    
         const total = Math.round(
-            moneyScore + paysScore + regsScore + cvrScore + ctrScore + budgetScore
+            (moneyScore || 0) +
+            (paysScore || 0) +
+            (regsScore || 0) +
+            (cvrScore || 0) +
+            (ctrScore || 0) +
+            (budgetScore || 0)
         );
-
+    
         let suggestion = '';
         if (total >= 85) {
             suggestion = '✅ 表现优异，建议加大预算扩大投放';
@@ -70,21 +81,20 @@
         } else {
             suggestion = '⛔ 效果较差，建议暂停投放或大幅重构';
         }
-
+    
         return {
             score: total,
             suggestion,
             details: {
-                moneyScore,
-                paysScore,
-                regsScore,
-                cvrScore,
-                ctrScore,
+                moneyScore: Math.round(moneyScore),
+                paysScore: Math.round(paysScore),
+                regsScore: Math.round(regsScore),
+                cvrScore: Math.round(cvrScore),
+                ctrScore: Math.round(ctrScore),
                 budgetScore
             }
         };
     };
-
     
     // 功能界面
     const createView = () => {
