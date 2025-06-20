@@ -16,24 +16,22 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
-    // 线性置信度函数（带保底）
-    const confidenceWeight = (value, threshold) => {
-        const result = value / threshold;
-        return isNaN(result) ? 0.4 : Math.max(result, 0.4);
+    // 不保底线性置信度（真实占比）
+    const rawConfidence = (value, threshold) => {
+        if (typeof value !== 'number' || isNaN(value)) return 0;
+        return Math.min(value / threshold, 1);
     };
 
-    // money 置信度：线性处理，更敏感
-    const moneyConfidence = (money) => {
-        const min = 10, max = 300; // 可根据你充值区间调节
-        if (!money || isNaN(money)) return 0.4;
-        if (money <= min) return 0.4;
-        if (money >= max) return 1;
-        return Math.max(0.4, Math.min(1, (money - min) / (max - min)));
+    // 保底置信度（用于CTR、CVR）
+    const safeConfidence = (value, threshold) => {
+        const ratio = value / threshold;
+        if (isNaN(ratio)) return 0.4;
+        return Math.max(0.4, Math.min(ratio, 1));
     };
 
     // 安全除法
     const safeDiv = (a, b) => {
-        if (typeof a !== 'number' || typeof b !== 'number' || b === 0) return 0;
+        if (!b || isNaN(a) || isNaN(b)) return 0;
         return a / b;
     };
 
@@ -47,30 +45,25 @@
             money = 0
         } = ad;
 
-        const ctr = safeDiv(clicks, views);           // 点击率
-        const regRate = safeDiv(regs, clicks);        // CVR（注册转化率）
+        const ctr = safeDiv(clicks, views);        // 点击率
+        const regRate = safeDiv(regs, clicks);     // 注册转化率
 
-        // 置信度（都保底 0.4）
-        const moneyConf = moneyConfidence(money);
-        const paysConf = confidenceWeight(pays, 10);
-        const regsConf = confidenceWeight(regs, 30);
-        const cvrConf  = confidenceWeight(regRate, 0.1);
-        const ctrConf  = confidenceWeight(views, 3000);
+        // 各项得分（总分100）
+        const moneyScore = Math.round(40 * rawConfidence(money, 300));
+        const paysScore  = Math.round(30 * rawConfidence(pays, 10));
+        const regsScore  = Math.round(20 * rawConfidence(regs, 30));
 
-        // 各项评分（按权重分配）
-        const moneyScore = Math.min(40, 40 * moneyConf);
-        const paysScore  = Math.min(30, 30 * paysConf);
-        const regsScore  = Math.min(20, 20 * regsConf);
-        const cvrScore   = Math.min(5,  (regRate * 10) * cvrConf);        // 放大 regRate 比例
-        const ctrScore   = Math.min(5,  safeDiv(ctr, 0.015) * 5 * ctrConf); // CTR 基准 1.5%
+        const cvrScore   = (clicks >= 3)
+            ? Math.round(Math.min(5, regRate * 10 * safeConfidence(regRate, 0.1)))
+            : 0;
 
-        const total = Math.round(
-            (moneyScore || 0) +
-            (paysScore || 0) +
-            (regsScore || 0) +
-            (cvrScore || 0) +
-            (ctrScore || 0)
-        );
+        const ctrRatio = safeDiv(ctr, 0.015); // 0.015 = 1.5%
+        const cappedCtr = Math.min(ctrRatio, 3);   // 放大上限3倍
+        const ctrScore = (clicks >= 3)
+            ? Math.round(Math.min(5, cappedCtr * 5 * safeConfidence(views, 3000)))
+            : 0;
+
+        const total = moneyScore + paysScore + regsScore + cvrScore + ctrScore;
 
         let suggestion = '';
         if (total >= 85) {
@@ -87,14 +80,15 @@
             score: total,
             suggestion,
             details: {
-                moneyScore: Math.round(moneyScore),
-                paysScore: Math.round(paysScore),
-                regsScore: Math.round(regsScore),
-                cvrScore: Math.round(cvrScore),
-                ctrScore: Math.round(ctrScore)
+                moneyScore,
+                paysScore,
+                regsScore,
+                cvrScore,
+                ctrScore
             }
         };
     };
+
 
     // 功能界面
     const createView = () => {
