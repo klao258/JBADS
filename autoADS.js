@@ -37,13 +37,7 @@
 
     // 主评分函数
     const scoreAd = (ad) => {
-        const {
-            views = 0,
-            clicks = 0,
-            regs = 0,
-            pays = 0,
-            money = 0
-        } = ad;
+        const { views = 0, clicks = 0, regs = 0, pays = 0, money = 0 } = ad;
 
         const ctr = safeDiv(clicks, views);        // 点击率
         const regRate = safeDiv(regs, clicks);     // 注册转化率
@@ -1352,8 +1346,6 @@
                         item["regs"] = +post?.regs || 0;
                         item["pays"] = +post?.pays || 0;
                         item["money"] = +post?.money || 0;
-                        item["score"] = scoreAd(item)?.score?.toFixed(0) || 0;
-                        item["suggestion"] = scoreAd(item)?.suggestion;
                         item["_title"] = item.title;
                     } else {
                         item["pviews"] = tviews - pviews || 0;
@@ -1363,11 +1355,12 @@
                         item["regs"] = 0;
                         item["pays"] = 0;
                         item["money"] = 0;
-                        item["score"] = scoreAd(item)?.score?.toFixed(0) || 0;
-                        item["suggestion"] = scoreAd(item)?.suggestion;
                         item["_title"] = item.title;
                     }
-
+                    let scoreInfo = scoreAd(item)
+                    item["score"] = scoreInfo?.score?.toFixed(0) || 0;
+                    item["scoreDetails"] = scoreInfo?.details || {}
+                    item["suggestion"] = scoreInfo?.suggestion;
                     item.base_url = "/account/ad/" + item.ad_id;
                     item._values = [
                         item.title.toLowerCase(),
