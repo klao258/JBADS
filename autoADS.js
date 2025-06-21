@@ -3184,7 +3184,7 @@
                         float: tmp1,
                         view: views?.[i] || 0,
                         click: clicks?.[i] || 0,
-                        actions: actions?.[i] || 0,
+                        action: actions?.[i] || 0,
                         total: +(total[i] / 1000000).toFixed(4),
                     });
                 }
@@ -3220,7 +3220,7 @@
             tableHtml += `</td>
                     <td style="padding: 5px 12px;">${v.view}</td>
                     <td style="padding: 5px 12px;">${v.click}</td>
-                    <td style="padding: 5px 12px;">${v.join}</td>
+                    <td style="padding: 5px 12px;">${v.action}</td>
                     <td style="padding: 5px 12px;">${v.total}</td>
                     </tr>
                 `;
