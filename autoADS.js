@@ -2222,6 +2222,7 @@
         let tmp = row?.tme_path?.split("_") || [];
         let ads = tmp[tmp.length - 1] || "";
             ads = ads?.toLowerCase()?.includes('ads') ? ads : `ADS-${accountAll?.[window.user]?.['en']}-${row?.ad_id}`;
+        return ads;
     }
 
     // 帖子同步
