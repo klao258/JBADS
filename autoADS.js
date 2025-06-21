@@ -258,6 +258,85 @@
     };
     createView();
 
+    // 获取DB数据 返回obj
+    const getDB = (field, val, store_name = cpms_store) => {
+        return new Promise((resolve, reject) => {
+            if (typeof db === "undefined" || !db) {
+                console.log("全局数据库实例 db 未定义或未初始化");
+                resolve(false);
+                return;
+            }
+
+            const transaction = db.transaction(store_name, "readonly");
+            const store = transaction.objectStore(store_name);
+            const index = store.index(field);
+            const request = index.get(val);
+
+            request.onsuccess = (event) => {
+                resolve(event.target.result);
+            };
+
+            request.onerror = (event) => {
+                console.log(event.target.error);
+                resolve(false);
+            };
+        });
+    };
+
+    // 获取符合条件的DB数据
+    const filterDB = (callback, store_name = cpms_store) => {
+        return new Promise((resolve, reject) => {
+            if (typeof db === "undefined" || !db) {
+                console.log("全局数据库实例 db 未定义或未初始化");
+                resolve(false);
+                return;
+            }
+            const transaction = db?.transaction([store_name], "readonly");
+            const store = transaction?.objectStore(store_name);
+            const result = [];
+            const request = store.openCursor();
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (callback(cursor.value)) {
+                        result.push(cursor.value);
+                    }
+                    cursor.continue();
+                } else {
+                    resolve(result); // 遍历完返回数组
+                }
+            };
+
+            request.onerror = (event) => {
+                reject(event.target.error);
+            };
+        });
+    };
+
+    // 设置DB数据
+    const setDB = (data, store_name = cpms_store) => {
+        return new Promise((resolve, reject) => {
+            if (typeof db === "undefined" || !db) {
+                console.log("全局数据库实例 db 未定义或未初始化");
+                resolve(false);
+                return;
+            }
+
+            const transaction = db.transaction(store_name, "readwrite");
+            const store = transaction.objectStore(store_name);
+            const request = store.put(data); // put 自动新增或覆盖
+
+            request.onsuccess = () => {
+                resolve(true);
+            };
+
+            request.onerror = (event) => {
+                console.log(event.target.error);
+                resolve(false);
+            };
+        });
+    };
+
     window.ajInit = (options) => {
         if (!window.history || !history.pushState) {
           return false;
@@ -1968,85 +2047,6 @@
         console.log(res);
     }
     await getAdsDailyStats(accountAll?.[window.user]?.['en']);
-
-    // 获取DB数据 返回obj
-    const getDB = (field, val, store_name = cpms_store) => {
-        return new Promise((resolve, reject) => {
-            if (typeof db === "undefined" || !db) {
-                console.log("全局数据库实例 db 未定义或未初始化");
-                resolve(false);
-                return;
-            }
-
-            const transaction = db.transaction(store_name, "readonly");
-            const store = transaction.objectStore(store_name);
-            const index = store.index(field);
-            const request = index.get(val);
-
-            request.onsuccess = (event) => {
-                resolve(event.target.result);
-            };
-
-            request.onerror = (event) => {
-                console.log(event.target.error);
-                resolve(false);
-            };
-        });
-    };
-
-    // 获取符合条件的DB数据
-    const filterDB = (callback, store_name = cpms_store) => {
-        return new Promise((resolve, reject) => {
-            if (typeof db === "undefined" || !db) {
-                console.log("全局数据库实例 db 未定义或未初始化");
-                resolve(false);
-                return;
-            }
-            const transaction = db?.transaction([store_name], "readonly");
-            const store = transaction?.objectStore(store_name);
-            const result = [];
-            const request = store.openCursor();
-            request.onsuccess = (event) => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    if (callback(cursor.value)) {
-                        result.push(cursor.value);
-                    }
-                    cursor.continue();
-                } else {
-                    resolve(result); // 遍历完返回数组
-                }
-            };
-
-            request.onerror = (event) => {
-                reject(event.target.error);
-            };
-        });
-    };
-
-    // 设置DB数据
-    const setDB = (data, store_name = cpms_store) => {
-        return new Promise((resolve, reject) => {
-            if (typeof db === "undefined" || !db) {
-                console.log("全局数据库实例 db 未定义或未初始化");
-                resolve(false);
-                return;
-            }
-
-            const transaction = db.transaction(store_name, "readwrite");
-            const store = transaction.objectStore(store_name);
-            const request = store.put(data); // put 自动新增或覆盖
-
-            request.onsuccess = () => {
-                resolve(true);
-            };
-
-            request.onerror = (event) => {
-                console.log(event.target.error);
-                resolve(false);
-            };
-        });
-    };
 
     // 获取html
     const getHTML = (url, key, isParse = true) => {
