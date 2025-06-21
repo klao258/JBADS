@@ -288,7 +288,7 @@
 
             await initDB()
 
-            const expectedVars = [ "ajInit", "OwnerAds" ];
+            const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
 
             resolve(true);
