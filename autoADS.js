@@ -3201,9 +3201,6 @@
             return toast("暂无数据 !!!");
         }
 
-        // let ad_id = url?.split("/")?.[3];
-        // let cpms = await filterDB((item) => +item?.ad_id === +ad_id);
-
         let cpms = await window.get('/ads/cpmList', { ads })
         console.log("cpms", cpms);
 
