@@ -7,7 +7,7 @@
     
     console.log('静态数据', autoADSData)
     console.log('帖子数据', window.postData)
-    
+
     window.isLoad = false;
 
     var timerID = null;
@@ -17,11 +17,9 @@
     var loadADSFlag = false;
 
     // 获取近3日的浏览数据
-    const getAdsDailyStats = async (ads) => {
-        const res = await window.get('/ads/getAdsDailyStats', { ads })
-        console.log(res);
-    }
-    await getAdsDailyStats(accountAll?.[window.user]?.['en']);
+    const viewListTmp = await window.get('/ads/getAdsDailyStats', { ads: accountAll?.[window.user]?.['en'] })
+    const viewList = viewListTmp?.data || [];
+    console.log('浏览数据', viewList);
 
     // 不保底线性置信度（真实占比）
     const rawConfidence = (value, threshold) => {
