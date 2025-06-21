@@ -6,7 +6,7 @@
     const pviews_store = window.pviews_store; // 记录展示量
     
     console.log('静态数据', autoADSData)
-    console.log('userList', window.postData)
+    console.log('帖子数据', window.postData)
     
     window.isLoad = false;
 
@@ -3324,28 +3324,6 @@
     // 更新观看量
     const updatePviews = async () => {
         let arr = OwnerAds?.getAdsList?.() || [];
-        // const date = timestampToDate();
-        // for (let i = 0; i < list.length; i++) {
-        //     const { ad_id, cpm, views, clicks, joins, pays, money } = list[i];
-        //     let res = await getDB("ads_date", `${date}_${ad_id}`, pviews_store);
-        //     let data = {};
-        //     if (res) {
-        //         data = { ...res, cpm, views, clicks, joins, pays, money };
-        //     } else {
-        //         data = {
-        //             ads_date: `${date}_${ad_id}`,
-        //             ad_id,
-        //             cpm,
-        //             views,
-        //             clicks,
-        //             joins,
-        //             pays,
-        //             money,
-        //         };
-        //     }
-        //     await setDB(data, pviews_store);
-        // }
-
         const list = arr?.map?.(v => {
             let ads = v?.promote_url?.split("_")
                 ads = ads?.length > 1 ? ads?.[ads?.length - 1] : v?.ad_id;
