@@ -2217,10 +2217,11 @@
         });
     };
 
+    // 获取唯一ads key值
     const getADSKey = (row) => {
         let tmp = row?.tme_path?.split("_") || [];
         let ads = tmp[tmp.length - 1] || "";
-            ads = ads?.toLowerCase()?.includes('ads') ? ads : `ADS-${accountAll?.[window.user]?.['en']}-${v?.ad_id}`;
+            ads = ads?.toLowerCase()?.includes('ads') ? ads : `ADS-${accountAll?.[window.user]?.['en']}-${row?.ad_id}`;
     }
 
     // 帖子同步
