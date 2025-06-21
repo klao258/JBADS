@@ -1369,9 +1369,6 @@
             // 获取昨天所有数据
             let yesday = date.getBeijingDateOnly(-1);
             let qianday = date.getBeijingDateOnly(-2);
-            console.log("昨天", yesday, "前天", qianday);
-
-            let yesData = await filterDB((row) => row["ads_date"]?.indexOf(yesday) !== -1 || row["ads_date"]?.indexOf(qianday) !== -1, pviews_store);
 
             opts = opts || {};
             if (result.items) {
@@ -1381,23 +1378,15 @@
                 let list = [];
                 for (var i = 0; i < result.items.length; i++) {
                     var item = result.items[i];
-                    let tmp = item?.tme_path?.split("_") || [];
-                    let adsKey = tmp[tmp.length - 1] || "";
-
-                    let prow = yesData?.find?.(
-                        (row) => row["ads_date"] === `${yesday}_${item.ad_id}`
-                    );
-                    let qrow = yesData?.find?.(
-                        (row) => row["ads_date"] === `${qianday}_${item.ad_id}`
-                    );
-
+                    let ads = getADSKey(item)
+                    let rowViews = viewList?.find?.(v => v?.ads === ads)
                     let tviews = item?.views || 0; // 当前总浏览量
-                    let pviews = prow?.["views"] || 0; // 昨日总浏览量
-                    let qviews = qrow?.["views"] || 0; // 前日总浏览量
-                    let pspent = ((tviews - pviews) * (item?.cpm / 1000)).toFixed(2); // 当日花费
-                    let qspent = ((pviews - qviews) * (prow?.cpm / 1000)).toFixed(2); // 昨日花费
+                    let pviews = rowViews?.[yesday]?.["views"] || 0; // 昨日总浏览量
+                    let qviews = rowViews?.[qianday]?.["views"] || 0; // 前日总浏览量
+                    let pspent = ((+item?.budget) - (+rowViews?.[yesday]?.["spent"] || 0)).toFixed(2); // 当日花费
+                    let qspent = ((+rowViews?.[yesday]?.["spent"] || 0) - (+rowViews?.[qianday]?.["spent"] || 0)).toFixed(2); // 昨日花费
 
-                    let post = window.postData?.find?.(v => v?.ads === adsKey)
+                    let post = window.postData?.find?.(v => v?.ads === ads)
                     if (post) {
                         if (!loadADSFlag) {
                             loadADSFlag = true;
