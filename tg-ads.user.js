@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.06.21-23:39:20
+// @version      2025.06.22-00:39:51
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -121,56 +121,6 @@
         return false;
     }
 
-    /** 初始化数据库 */
-    const initDB = async () => {
-        window.cpms_store = "cpms"; // 记录单价
-        window.pviews_store = "pviews"; // 记录展示量
-        if(window.db) return window.db; // 如果数据库已存在，直接返回
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open("myDatabase", 5);
-            request.onerror = (event) => {
-                console.error("数据库打开失败:", event.target.errorCode);
-                resolve(false)
-            };
-            request.onsuccess = (event) => {
-                window.db = event.target.result;
-                console.log("数据库打开成功");
-                resolve(window.db);
-            };
-            request.onupgradeneeded = (event) => {
-                window.db = event.target.result;
-                if (!window.db.objectStoreNames.contains(window.cpms_store)) {
-                    const objectStore = window.db.createObjectStore("cpms", {
-                        autoIncrement: true,
-                    });
-                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
-                    objectStore.createIndex("ads", "ads", { unique: false });
-                    objectStore.createIndex("cpm", "cpm", { unique: false });
-                    objectStore.createIndex("float", "float", { unique: false });
-                    objectStore.createIndex("views", "views", { unique: false });
-                    objectStore.createIndex("clicks", "clicks", { unique: false });
-                    objectStore.createIndex("joins", "joins", { unique: false });
-                    objectStore.createIndex("pays", "pays", { unique: false });
-                    objectStore.createIndex("money", "money", { unique: false });
-                    objectStore.createIndex("createDate", "createDate", { unique: false });
-                }
-                if (!window.db.objectStoreNames.contains(window.pviews_store)) {
-                    const objectStore = window.db.createObjectStore("pviews", {
-                        keyPath: "ads_date",
-                    });
-                    objectStore.createIndex("ads_date", "ads_date", { unique: false });
-                    objectStore.createIndex("ad_id", "ad_id", { unique: false });
-                    objectStore.createIndex("cpm", "cpm", { unique: false });
-                    objectStore.createIndex("views", "views", { unique: false });
-                    objectStore.createIndex("clicks", "clicks", { unique: false });
-                    objectStore.createIndex("joins", "joins", { unique: false });
-                    objectStore.createIndex("pays", "pays", { unique: false });
-                    objectStore.createIndex("money", "money", { unique: false });
-                }
-            };
-        });
-    }
-
     /**
      * 拦截目标 script 执行前的所有脚本，先运行自定义 callback，再恢复后续脚本。
      * @param {string} targetUrl - 截断点 script 的 URL 片段，例如 'widget-frame.js'
@@ -285,8 +235,6 @@
             await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
             const postDate = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
             window.postData = postDate?.data || [];
-
-            await initDB()
 
             const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
