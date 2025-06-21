@@ -16,6 +16,13 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
+    // 获取近3日的浏览数据
+    const getAdsDailyStats = async (ads) => {
+        const res = await window.get('/ads/getAdsDailyStats', { ads })
+        console.log(res);
+    }
+    await getAdsDailyStats()
+
     // 不保底线性置信度（真实占比）
     const rawConfidence = (value, threshold) => {
         if (typeof value !== 'number' || isNaN(value)) return 0;
