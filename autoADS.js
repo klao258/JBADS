@@ -3191,7 +3191,8 @@
             return toast("暂无数据 !!!");
         }
 
-        let cpms = await window.get('/ads/cpmList', { ads })
+        let tmp = await window.get('/ads/cpmList', { ads })
+        let cpms = tmp?.data || [];
         console.log("cpms", cpms);
 
         const res = [];
