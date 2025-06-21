@@ -1067,7 +1067,6 @@
                             var promote_link =
                                 '<span class="pr-no-tme-link">' + promote_url_text + "</span>";
                         }
-                        var joins = item.joins !== false ? formatNumber(item.joins) : "–";
                         var actions =
                             item.actions !== false ? formatNumber(item.actions) : "–";
                         var opens = item.opens !== false ? formatNumber(item.opens) : "–";
@@ -1140,7 +1139,7 @@
                             }/stats" class="pr-link">${clicks}</a>
                             </div>
                         </td>
-                        <td style="display:var(--coldp-joins,table-cell)">
+                        <td style="display:var(--coldp-actions,table-cell)">
                             <div class="pr-cell">
                                 <a href="${item.base_url
                             }/stats" class="pr-link">${actions}</a>
@@ -2273,17 +2272,17 @@
                     v["add_budget"] = 2;
                 }
             } else {
-                if (+v.joins < 1) {
+                if (+v.actions < 1) {
                     if (v.status === "Stopped") {
                         v["add_budget"] = 0.5;
                     }
-                } else if (+v.joins < 10) {
+                } else if (+v.actions < 10) {
                     if (+v.budget >= 1) return false;
                     v["add_budget"] = 1;
-                } else if (+v.joins < 30) {
+                } else if (+v.actions < 30) {
                     if (+v.budget >= 1) return false;
                     v["add_budget"] = 2;
-                } else if (+v.joins < 50) {
+                } else if (+v.actions < 50) {
                     if (+v.budget >= 3) return false;
                     v["add_budget"] = 3;
                 } else {
@@ -2379,7 +2378,7 @@
                         float: (cpm - item.cpm).toFixed(2),
                         views: item?.views || 0,
                         clicks: item?.clicks || 0,
-                        joins: item?.actions || 0,
+                        actions: item?.actions || 0,
                     })
 
                     if (result.ad) {
@@ -3139,7 +3138,7 @@
         let dates = array[0]?.[0] || [];
         let views = array[0]?.[1] || [];
         let clicks = array[0]?.[2] || [];
-        let joins = array[0]?.[3] || [];
+        let actions = array[0]?.[3] || [];
         let total = array[1]?.[1] || [];
 
         // 如果不够当日8点, 往最后一天插入一个时间戳
@@ -3150,7 +3149,7 @@
             dates.push(timestamp);
             views.push(0);
             clicks.push(0);
-            joins.push(0);
+            actions.push(0);
             total.push(0);
         }
 
@@ -3185,7 +3184,7 @@
                         float: tmp1,
                         view: views?.[i] || 0,
                         click: clicks?.[i] || 0,
-                        join: joins?.[i] || 0,
+                        actions: actions?.[i] || 0,
                         total: +(total[i] / 1000000).toFixed(4),
                     });
                 }
