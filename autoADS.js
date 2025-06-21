@@ -16,10 +16,70 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
-    // 获取近3日的浏览数据
-    const viewListTmp = await window.get('/ads/getAdsDailyStats', { ads: accountAll?.[window.user]?.['en'] })
-    const viewList = viewListTmp?.data || [];
-    console.log('浏览数据', viewList);
+    // confirm
+    const confirm = async (msg) => {
+        return new Promise((resolve, reject) => {
+            Swal.fire({
+                text: msg,
+                position: "top",
+                backdrop: false,
+                showCancelButton: true,
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    };
+
+    // toast
+    const toast = (msg, fn) => {
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "success",
+            title: msg,
+            showConfirmButton: false,
+            timer: 2000, // 自动关闭
+            timerProgressBar: true,
+            didClose: () => {
+                fn && fn();
+            },
+        });
+    };
+
+    const prompt = (title) => {
+        return new Promise((resolve) => {
+            Swal.fire({
+                title: title,
+                input: "text",
+                inputPlaceholder: "请输入",
+                inputValidator: (value) => {
+                    if (!value) return "❌ 请输入价格！";
+                    const price = parseFloat(value);
+                    if (isNaN(price) || price <= 0)
+                        return "⚠️ 请输入一个大于0的正确数字！";
+                    return null; // 返回null表示验证通过
+                },
+                showCancelButton: true,
+                confirmButtonText: "确认",
+                cancelButtonText: "取消",
+                focusConfirm: false,
+                preConfirm: (value) => parseFloat(value), // 转为浮动数字
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const price = result.value;
+                    resolve(price);
+                } else {
+                    resolve(0);
+                }
+            });
+        });
+    };
 
     // 不保底线性置信度（真实占比）
     const rawConfidence = (value, threshold) => {
@@ -262,84 +322,10 @@
     };
     createView();
 
-    // 获取DB数据 返回obj
-    const getDB = (field, val, store_name = cpms_store) => {
-        return new Promise((resolve, reject) => {
-            if (typeof db === "undefined" || !db) {
-                console.log("全局数据库实例 db 未定义或未初始化");
-                resolve(false);
-                return;
-            }
-
-            const transaction = db.transaction(store_name, "readonly");
-            const store = transaction.objectStore(store_name);
-            const index = store.index(field);
-            const request = index.get(val);
-
-            request.onsuccess = (event) => {
-                resolve(event.target.result);
-            };
-
-            request.onerror = (event) => {
-                console.log(event.target.error);
-                resolve(false);
-            };
-        });
-    };
-
-    // 获取符合条件的DB数据
-    const filterDB = (callback, store_name = cpms_store) => {
-        return new Promise((resolve, reject) => {
-            if (typeof db === "undefined" || !db) {
-                console.log("全局数据库实例 db 未定义或未初始化");
-                resolve(false);
-                return;
-            }
-            const transaction = db?.transaction([store_name], "readonly");
-            const store = transaction?.objectStore(store_name);
-            const result = [];
-            const request = store.openCursor();
-            request.onsuccess = (event) => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    if (callback(cursor.value)) {
-                        result.push(cursor.value);
-                    }
-                    cursor.continue();
-                } else {
-                    resolve(result); // 遍历完返回数组
-                }
-            };
-
-            request.onerror = (event) => {
-                reject(event.target.error);
-            };
-        });
-    };
-
-    // 设置DB数据
-    const setDB = (data, store_name = cpms_store) => {
-        return new Promise((resolve, reject) => {
-            if (typeof db === "undefined" || !db) {
-                console.log("全局数据库实例 db 未定义或未初始化");
-                resolve(false);
-                return;
-            }
-
-            const transaction = db.transaction(store_name, "readwrite");
-            const store = transaction.objectStore(store_name);
-            const request = store.put(data); // put 自动新增或覆盖
-
-            request.onsuccess = () => {
-                resolve(true);
-            };
-
-            request.onerror = (event) => {
-                console.log(event.target.error);
-                resolve(false);
-            };
-        });
-    };
+    // 获取近3日的浏览数据
+    const viewListTmp = await window.get('/ads/getAdsDailyStats', { ads: accountAll?.[window.user]?.['en'] })
+    const viewList = viewListTmp?.data || [];
+    console.log('浏览数据', viewList);
 
     window.ajInit = (options) => {
         if (!window.history || !history.pushState) {
@@ -2144,71 +2130,6 @@
         });
     };
 
-    // confirm
-    const confirm = async (msg) => {
-        return new Promise((resolve, reject) => {
-            Swal.fire({
-                text: msg,
-                position: "top",
-                backdrop: false,
-                showCancelButton: true,
-                confirmButtonText: "确定",
-                cancelButtonText: "取消",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            });
-        });
-    };
-
-    // toast
-    const toast = (msg, fn) => {
-        Swal.fire({
-            toast: true,
-            position: "top-end",
-            icon: "success",
-            title: msg,
-            showConfirmButton: false,
-            timer: 2000, // 自动关闭
-            timerProgressBar: true,
-            didClose: () => {
-                fn && fn();
-            },
-        });
-    };
-
-    const prompt = (title) => {
-        return new Promise((resolve) => {
-            Swal.fire({
-                title: title,
-                input: "text",
-                inputPlaceholder: "请输入",
-                inputValidator: (value) => {
-                    if (!value) return "❌ 请输入价格！";
-                    const price = parseFloat(value);
-                    if (isNaN(price) || price <= 0)
-                        return "⚠️ 请输入一个大于0的正确数字！";
-                    return null; // 返回null表示验证通过
-                },
-                showCancelButton: true,
-                confirmButtonText: "确认",
-                cancelButtonText: "取消",
-                focusConfirm: false,
-                preConfirm: (value) => parseFloat(value), // 转为浮动数字
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const price = result.value;
-                    resolve(price);
-                } else {
-                    resolve(0);
-                }
-            });
-        });
-    };
-
     // 获取唯一ads key值
     const getADSKey = (row) => {
         let tmp = row?.tme_path?.split("_") || [];
@@ -3129,8 +3050,6 @@
         if ($("#popupOverlay").length) {
             $("#popupOverlay").remove();
         }
-
-        console.log(`${url}?period=day`);
 
         let data = await getHTML(`${url}?period=day`, "j", false);
         let code = data[0]["j"];
