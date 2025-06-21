@@ -67,7 +67,6 @@
         };
     };
 
-
     // 功能界面
     const createView = () => {
         const $toggleBtn = $("<button>", {
@@ -228,6 +227,7 @@
 
         // 添加按钮
         const buttons = [
+            createButton("帖子同步", "syncAds", () => syncAdsAll()),
             createButton("单链发布", "newADBtn", () => sendChannel()),
             createButton("多链发布", "sendMoreUrl", () => sendMoreChannel()),
             createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
@@ -2216,6 +2216,28 @@
             });
         });
     };
+
+    // 帖子同步
+    const syncAds = async (posts) => {
+        const res = window.post('/ads/syncAds', posts)
+        if (res) {
+            toast("帖子同步成功");
+        }
+    }
+
+    // 同步所有帖子
+    const syncAdsAll = async () => {
+        let list = OwnerAds.getAdsList();
+        list = list?.map(v => ({
+            ads: v?.tme_path?.split("_")?.pop() || "",
+            title: v?._title || "",
+        }))
+        if(list?.some(v => v?.ads === '' || v?.title === '')) {
+            toast('部分帖子缺少必要参数')
+            return false
+        } 
+        await syncAds(list);
+    }
 
     // 自动加预算
     const addMountFn = async () => {
