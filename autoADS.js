@@ -2218,8 +2218,8 @@
     };
 
     // 帖子同步
-    const syncAds = async (posts) => {
-        const res = window.post('/ads/syncAds', posts)
+    const syncAds = async (list) => {
+        const res = window.post('/ads/syncAds', { list })
         if (res) {
             toast("帖子同步成功");
         }
