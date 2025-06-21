@@ -231,9 +231,9 @@
             if (data.code === 0) {
                 return data;
             }
-            return []
+            return {}
         } catch (err) {
-            return []
+            return {}
         }
     }
 
