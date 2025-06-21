@@ -2750,20 +2750,6 @@
         );
     };
 
-    // 判断时间 s 级别时间戳, 是否大于指定天数
-    const isTimeExpired = (timestampInSeconds, days = 30) => {
-        if (typeof timestampInSeconds !== "number" || typeof days !== "number") {
-            console.error("参数必须是数字");
-            return false;
-        }
-
-        const now = Date.now(); // 当前时间戳（毫秒）
-        const inputTime = timestampInSeconds * 1000; // 转为毫秒
-        const msInDay = 24 * 60 * 60 * 1000;
-
-        return now - inputTime > days * msInDay;
-    };
-
     // 发布搜索广告
     const onSearchADS = async () => {
         if (getMoney() < 2) return toast("余额过低");
