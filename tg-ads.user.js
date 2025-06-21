@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.06.21-20:07:03
+// @version      2025.06.21-23:28:33
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -288,7 +288,7 @@
 
             await initDB()
 
-            const expectedVars = [ "ajInit", "OwnerAds" ];
+            const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
 
             resolve(true);

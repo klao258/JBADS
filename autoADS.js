@@ -8,6 +8,7 @@
     console.log('静态数据', autoADSData)
     console.log('帖子数据', window.postData)
     
+    window.loadFinish = undefined;
     window.isLoad = false;
 
     var timerID = null;
@@ -3352,4 +3353,6 @@
             }
         }
     })();
+
+    window.loadFinish = true
 })();
