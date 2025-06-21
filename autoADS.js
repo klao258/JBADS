@@ -3323,27 +3323,39 @@
 
     // 更新观看量
     const updatePviews = async () => {
-        let list = OwnerAds?.getAdsList?.() || [];
-        const date = timestampToDate();
-        for (let i = 0; i < list.length; i++) {
-            const { ad_id, cpm, views, clicks, joins, pays, money } = list[i];
-            let res = await getDB("ads_date", `${date}_${ad_id}`, pviews_store);
-            let data = {};
-            if (res) {
-                data = { ...res, cpm, views, clicks, joins, pays, money };
-            } else {
-                data = {
-                    ads_date: `${date}_${ad_id}`,
-                    ad_id,
-                    cpm,
-                    views,
-                    clicks,
-                    joins,
-                    pays,
-                    money,
-                };
-            }
-            await setDB(data, pviews_store);
+        let arr = OwnerAds?.getAdsList?.() || [];
+        // const date = timestampToDate();
+        // for (let i = 0; i < list.length; i++) {
+        //     const { ad_id, cpm, views, clicks, joins, pays, money } = list[i];
+        //     let res = await getDB("ads_date", `${date}_${ad_id}`, pviews_store);
+        //     let data = {};
+        //     if (res) {
+        //         data = { ...res, cpm, views, clicks, joins, pays, money };
+        //     } else {
+        //         data = {
+        //             ads_date: `${date}_${ad_id}`,
+        //             ad_id,
+        //             cpm,
+        //             views,
+        //             clicks,
+        //             joins,
+        //             pays,
+        //             money,
+        //         };
+        //     }
+        //     await setDB(data, pviews_store);
+        // }
+
+        const list = arr?.map?.(v => {
+            let ads = v?.promote_url?.split("_")
+                ads = ads?.length > 1 ? ads?.[ads?.length - 1] : v?.ad_id;
+            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, joins: v?.joins || 0 }
+        })
+        if (!list?.length) return false;
+
+        const res = await window.post('/ads/recordViews', { list });
+        if(res){
+            console.log("观看量更新成功");
         }
     };
 
