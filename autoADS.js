@@ -3294,7 +3294,7 @@
         let arr = OwnerAds?.getAdsList?.() || [];
         const list = arr?.map?.(v => {
             let ads = getADSKey(v)
-            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, joins: v?.actions || 0, spent: v?.spent || 0 }
+            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, actions: v?.actions || 0, spent: v?.spent || 0 }
         })
         if (!list?.length) return false;
 
