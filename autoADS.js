@@ -240,7 +240,6 @@
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
             createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
             // createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
-            // createButton("打印出单链接", "replaceBotBtn", async () => onGetPayUrl()),
         ];
 
         // 添加元素到容器
@@ -3119,34 +3118,6 @@
         await onRefresh();
     }
 
-    // 打印出单链接
-    const onGetPayUrl = async () => {
-        let list = OwnerAds.getAdsList();
-        list = list.filter((v) => {
-            if (!v?.money || v.money === 0) return false;
-            v["url"] = `${host}${v.base_url}`;
-            return true;
-        });
-
-        if (!list.length) {
-            toast("没有出单帖子！");
-            return false;
-        }
-        console.log('list', list);
-        
-        let arr = ''
-        for (const v of list) {
-            const html = await getHTML(v.url, "h")
-            if(!html) return false
-            let hrefs = html.find(".pr-target-overview .pr-form-info-block .value");
-            if(!hrefs) return false
-            hrefs?.each(function(){
-                arr += `${ $(this).attr('href') }\n`
-            })
-        }
-        console.log(arr)
-    }
-
     // 提取数据
     const extractMiddleMultiple = (str, start, end) => {
         const regex = new RegExp(start + "(.*?)" + end, "g");
@@ -3329,7 +3300,7 @@
         let arr = OwnerAds?.getAdsList?.() || [];
         const list = arr?.map?.(v => {
             let ads = getADSKey(v)
-            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, joins: v?.joins || 0 }
+            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, joins: v?.joins || 0, budget: v?.budget || 0 }
         })
         if (!list?.length) return false;
 
