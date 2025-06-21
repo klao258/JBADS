@@ -291,6 +291,7 @@
             const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
 
+            console.log("✅ TG广告脚本初始化完成");
             resolve(true);
         });
     });
