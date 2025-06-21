@@ -227,7 +227,7 @@
 
         // 添加按钮
         const buttons = [
-            // createButton("帖子同步", "syncAds", () => syncAdsAll()),
+            createButton("帖子同步", "syncAds", () => syncAdsAll()),
             createButton("单链发布", "newADBtn", () => sendChannel()),
             createButton("多链发布", "sendMoreUrl", () => sendMoreChannel()),
             createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
@@ -2227,7 +2227,7 @@
         if(list?.some(v => v?.ads === '' || v?.title === '')) {
             return toast('部分帖子缺少必要参数, 同步失败')
         } 
-        
+
         const res = window.post('/ads/syncAds', { list })
         if (res) {
             toast("帖子同步成功");
