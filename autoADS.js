@@ -2217,6 +2217,12 @@
         });
     };
 
+    const getADSKey = (row) => {
+        let tmp = row?.tme_path?.split("_") || [];
+        let ads = tmp[tmp.length - 1] || "";
+            ads = ads?.toLowerCase()?.includes('ads') ? ads : `ADS-${accountAll?.[window.user]?.['en']}-${v?.ad_id}`;
+    }
+
     // 帖子同步
     const syncAds = async (arr) => {
         const list = arr?.filter?.(v => {
@@ -2237,11 +2243,7 @@
     // 同步所有帖子
     const syncAdsAll = async () => {
         let list = OwnerAds.getAdsList();
-        list = list?.map(v => ({
-            ads: v?.tme_path?.split("_")?.pop() || "",
-            title: v?._title || "",
-        }))
-        
+        list = list?.map(v => ({ ads: getADSKey(v), title: v?._title || "" }))
         await syncAds(list);
     }
 
@@ -2376,9 +2378,7 @@
                     resolve(false);
                     return false;
                 } else {
-                    // 根据帖子id 记录在库(时间到秒, 帖子id, 帖子标识, 浏览量, 点击量, 加入量, 付款人数, 付款价格)
-                    let tmp = item?.tme_path?.split("_") || [];
-                    let ads = tmp[tmp.length - 1] || "";
+                    let ads = getADSKey(item);
                     const res = await window.post('/ads/recordCpm', {
                         ads, cpm, 
                         float: (cpm - item.cpm).toFixed(2),
@@ -3326,8 +3326,7 @@
     const updatePviews = async () => {
         let arr = OwnerAds?.getAdsList?.() || [];
         const list = arr?.map?.(v => {
-            let ads = v?.promote_url?.split("_")
-                ads = ads?.length > 1 ? ads?.[ads?.length - 1] : v?.ad_id;
+            let ads = getADSKey(v)
             return { ads, views: v?.views || 0, clicks: v?.clicks || 0, joins: v?.joins || 0 }
         })
         if (!list?.length) return false;
