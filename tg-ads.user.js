@@ -229,7 +229,7 @@
             const res = await fetch(`${window.dataHost}${path}?${query}`);
             const data = await res.json(); // ⬅️ 这里必须 await
             if (data.code === 0) {
-                return (data?.data || []);
+                return data;
             }
             return []
         } catch (err) {
