@@ -227,7 +227,7 @@
 
         // 添加按钮
         const buttons = [
-            createButton("帖子同步", "syncAds", () => syncAdsAll()),
+            // createButton("帖子同步", "syncAds", () => syncAdsAll()),
             createButton("单链发布", "newADBtn", () => sendChannel()),
             createButton("多链发布", "sendMoreUrl", () => sendMoreChannel()),
             createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
@@ -2588,11 +2588,15 @@
             active: 1, // 1
             device: undefined, // undefined
         };
+        const { title = '', text = '', promote_url = '', cpm = 0, budget = 0, target_type = '' } = params
+        if(!title || !text || !promote_url || !cpm) return toast("标题、文案、推广链接、CPM 不能为空");
+        
         return new Promise((resolve) => {
-            Aj.apiRequest("createAd", {...query, ...params}, (result) => {
+            Aj.apiRequest("createAd", {...query, ...params}, async (result) => {
                 if (result.error) {
                     resolve(false);
                 } else {
+                    await syncAds([{ ads: params?.promote_url?.split("_")?.pop() || "", title: params.title || "" }]);
                     resolve(true);
                 }
             });
@@ -2880,36 +2884,16 @@
 
         // 准备参数
         let params = {
-            owner_id: Aj.state.ownerId, //  owner_id
-            title: title, // 标题
+            title, // 标题
             text: "", // 文案
             promote_url: getUserUrl(), // 推广频道链接
-            website_name: "", // ’‘
-            website_photo: "", // ''
-            media: "", // ''
-            ad_info: "", // ''
             cpm: getRNum(minPrice, maxPrice, 1), // 单价
-            views_per_user: getRNum(1, 4), // 观看次数
             budget: getRNum(minBudget, maxBudget), // 总预算
-            daily_budget: 0, // 0
-            active: 1, // 1
-            target_type: "search", // bots
+            target_type: "search",
             channels: "",
             bots: "",
             search_queries: ids.join(";"),
             method: "createAd",
-        };
-
-        let createAd = async (params) => {
-            return new Promise((resolve) => {
-                Aj.apiRequest("createAd", params, (result) => {
-                    if (result.error) {
-                        resolve(false);
-                    } else {
-                        resolve(true);
-                    }
-                });
-            });
         };
 
         // 发送请求
@@ -3030,22 +3014,12 @@
         // 准备参数
         let texts = getUserText();
         let params = {
-            owner_id: Aj.state.ownerId, //  owner_id
             title: title, // 标题
             text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-            button: undefined, // undefined
             promote_url: getUserUrl(), // 推广链接
-            website_name: "", // ’‘
-            website_photo: "", // ''
-            media: "", // ''
-            ad_info: "", // ''
             cpm: getRNum(minPrice, maxPrice, 1), // 单价
-            views_per_user: getRNum(1, 4), // 观看次数
             budget: getRNum(minBudget, maxBudget), // 总预算
-            daily_budget: 0, // 0
-            active: 1, // 1
             target_type: isBot ? "bots" : "channels", // bots
-            device: undefined, // undefined
         };
 
         if (isBot) {
@@ -3053,18 +3027,6 @@
         } else {
             params["channels"] = ids.join(";");
         }
-
-        let createAd = async (params) => {
-            return new Promise((resolve) => {
-                Aj.apiRequest("createAd", params, (result) => {
-                    if (result.error) {
-                        resolve(false);
-                    } else {
-                        resolve(true);
-                    }
-                });
-            });
-        };
 
         // 发送请求
         Aj.showProgress();
