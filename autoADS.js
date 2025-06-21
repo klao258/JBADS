@@ -2237,7 +2237,7 @@
     // 同步所有帖子
     const syncAdsAll = async () => {
         let list = OwnerAds.getAdsList();
-        list = list?.filter(v => ({
+        list = list?.map(v => ({
             ads: v?.tme_path?.split("_")?.pop() || "",
             title: v?._title || "",
         }))
