@@ -1383,7 +1383,7 @@
                     let tviews = item?.views || 0; // 当前总浏览量
                     let pviews = rowViews?.[yesday]?.["views"] || 0; // 昨日总浏览量
                     let qviews = rowViews?.[qianday]?.["views"] || 0; // 前日总浏览量
-                    let pspent = ((+item?.budget) - (+rowViews?.[yesday]?.["spent"] || 0)).toFixed(2); // 当日花费
+                    let pspent = ((+item?.spent) - (+rowViews?.[yesday]?.["spent"] || 0)).toFixed(2); // 当日花费
                     let qspent = ((+rowViews?.[yesday]?.["spent"] || 0) - (+rowViews?.[qianday]?.["spent"] || 0)).toFixed(2); // 昨日花费
 
                     let post = window.postData?.find?.(v => v?.ads === ads)
@@ -3294,7 +3294,7 @@
         let arr = OwnerAds?.getAdsList?.() || [];
         const list = arr?.map?.(v => {
             let ads = getADSKey(v)
-            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, joins: v?.joins || 0, budget: v?.budget || 0 }
+            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, joins: v?.joins || 0, spent: v?.spent || 0 }
         })
         if (!list?.length) return false;
 
