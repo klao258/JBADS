@@ -2218,7 +2218,16 @@
     };
 
     // 帖子同步
-    const syncAds = async (list) => {
+    const syncAds = async (arr) => {
+        const list = arr?.filter?.(v => {
+            if (!v?.ads?.toLowerCase()?.includes('ads')) return false;
+            return true
+        })
+
+        if(list?.some(v => v?.ads === '' || v?.title === '')) {
+            return toast('部分帖子缺少必要参数, 同步失败')
+        } 
+        
         const res = window.post('/ads/syncAds', { list })
         if (res) {
             toast("帖子同步成功");
@@ -2228,14 +2237,11 @@
     // 同步所有帖子
     const syncAdsAll = async () => {
         let list = OwnerAds.getAdsList();
-        list = list?.map(v => ({
+        list = list?.filter(v => ({
             ads: v?.tme_path?.split("_")?.pop() || "",
             title: v?._title || "",
         }))
-        if(list?.some(v => v?.ads === '' || v?.title === '')) {
-            toast('部分帖子缺少必要参数')
-            return false
-        } 
+        
         await syncAds(list);
     }
 
@@ -2590,7 +2596,7 @@
         };
         const { title = '', text = '', promote_url = '', cpm = 0, budget = 0, target_type = '' } = params
         if(!title || !text || !promote_url || !cpm) return toast("标题、文案、推广链接、CPM 不能为空");
-        
+
         return new Promise((resolve) => {
             Aj.apiRequest("createAd", {...query, ...params}, async (result) => {
                 if (result.error) {
