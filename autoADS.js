@@ -21,7 +21,7 @@
         const res = await window.get('/ads/getAdsDailyStats', { ads })
         console.log(res);
     }
-    await getAdsDailyStats(accountAll?.[window.user]?.['嗯']);
+    await getAdsDailyStats(accountAll?.[window.user]?.['en']);
 
     // 不保底线性置信度（真实占比）
     const rawConfidence = (value, threshold) => {
