@@ -331,6 +331,9 @@
     };
     createView();
 
+    const postDate = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
+    window.postData = postDate?.data || [];
+
     // 获取近3日的浏览数据
     const viewListTmp = await window.get('/ads/getAdsDailyStats', { ads: accountAll?.[window.user]?.['en'] })
     const viewList = viewListTmp?.data || [];
