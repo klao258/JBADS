@@ -1648,8 +1648,19 @@
 
                 let isSort = $(".sort-active");
 
+                const statusOrder = {
+                    'In Review': 1, // 待审
+                    'Declined': 2,   // 拒绝
+                    'Active': 3,    // 通过
+                    'On Hold': 4, // 暂停
+                    'Stopped': 5, // 预算不足
+                };
+
                 result.sort(function (a, b) {
                     if (isSort.length) return a._score - b._score || a._i - b._i;
+
+                    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+                    if (statusDiff !== 0) return statusDiff;
 
                     const aScore = a?.score || 0;
                     const bScore = b?.score || 0;
