@@ -292,7 +292,7 @@
 
         // 添加按钮
         const buttons = [
-            createButton("帖子同步", "syncAds", () => syncAdsAll()),
+            // createButton("帖子同步", "syncAds", () => syncAdsAll()),
             createButton("单链发布", "newADBtn", () => sendChannel()),
             createButton("多链发布", "sendMoreUrl", () => sendMoreChannel()),
             createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
