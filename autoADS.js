@@ -1491,7 +1491,7 @@
             );
         },
         getAdsList: function () {
-            var _data = Aj.state.adsList;
+            var _data = Aj?.state?.adsList;
             if (_data === false) {
                 return false;
             } else if (_data) {
