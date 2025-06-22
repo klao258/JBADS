@@ -16,6 +16,15 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
+    // 按状态排序
+    const statusOrder = {
+        'In Review': 1, // 待审
+        'Declined': 2,   // 拒绝
+        'Active': 3,    // 通过
+        'On Hold': 4, // 暂停
+        'Stopped': 5, // 预算不足
+    };
+
     // confirm
     const confirm = async (msg) => {
         return new Promise((resolve, reject) => {
@@ -1311,6 +1320,7 @@
                 Aj.state.adsList.sort(function (ad1, ad2) {
                     var v1 = sortAsc ? ad1 : ad2;
                     var v2 = sortAsc ? ad2 : ad1;
+
                     return v1[sortBy] - v2[sortBy] || v2?.score - v1?.score || v2?.qviews - v1?.qviews || v1.date - v2.date;
                 });
             }
@@ -1411,6 +1421,9 @@
                 }
                 Aj.state.adsList = [...Aj.state.adsList, ...list];
                 Aj.state.adsList.sort((a, b) => {
+                    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+                    if (statusDiff !== 0) return statusDiff;
+                    
                     const aScore = a?.score || 0;
                     const bScore = b?.score || 0;
 
@@ -1647,14 +1660,6 @@
                 }
 
                 let isSort = $(".sort-active");
-
-                const statusOrder = {
-                    'In Review': 1, // 待审
-                    'Declined': 2,   // 拒绝
-                    'Active': 3,    // 通过
-                    'On Hold': 4, // 暂停
-                    'Stopped': 5, // 预算不足
-                };
 
                 result.sort(function (a, b) {
                     if (isSort.length) return a._score - b._score || a._i - b._i;
