@@ -1421,9 +1421,9 @@
                 }
                 Aj.state.adsList = [...Aj.state.adsList, ...list];
                 Aj.state.adsList.sort((a, b) => {
-                    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+                    const statusDiff = statusOrder[b.status] - statusOrder[a.status];
                     if (statusDiff !== 0) return statusDiff;
-                    
+
                     const aScore = a?.score || 0;
                     const bScore = b?.score || 0;
 
