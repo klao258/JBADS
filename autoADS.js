@@ -5,8 +5,16 @@
     const cpms_store = window.cpms_store; // 记录单价
     const pviews_store = window.pviews_store; // 记录展示量
     
+    const postDate = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
+    window.postData = postDate?.data || [];
+
+    // 获取近3日的浏览数据
+    const viewListTmp = await window.get('/ads/getAdsDailyStats', { ads: accountAll?.[window.user]?.['en'] })
+    const viewList = viewListTmp?.data || [];
+
     console.log('静态数据', autoADSData)
     console.log('帖子数据', window.postData)
+    console.log('浏览数据', viewList);
 
     window.isLoad = false;
 
@@ -330,14 +338,6 @@
         $("body").append($container);
     };
     createView();
-
-    const postDate = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
-    window.postData = postDate?.data || [];
-
-    // 获取近3日的浏览数据
-    const viewListTmp = await window.get('/ads/getAdsDailyStats', { ads: accountAll?.[window.user]?.['en'] })
-    const viewList = viewListTmp?.data || [];
-    console.log('浏览数据', viewList);
 
     window.ajInit = (options) => {
         if (!window.history || !history.pushState) {
