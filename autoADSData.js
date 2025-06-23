@@ -53,7 +53,7 @@ const autoADSData = {
     // 账号信息
     accountAll: {
         /** 金貝推广 */
-        "金貝招商 @jbdb": { en: "ZhaoShang", browser: 0, code: "64777", options: [...FB] },
+        "金貝招商 @jbdb（请直奔主题） 没有时间闲聊": { en: "ZhaoShang", browser: 0, code: "64777", options: [...FB] },
         "ads 贝贝": { en: "BeiBei", browser: 2, code: "64777", options: [...FB] },
         "ads 欢欢": { en: "HuanHuan", browser: 5, code: "64777", options: [...FB] },
         "ads 可可": { en: "KeKe", browser: 9, code: "64777", options: [...FB] },
