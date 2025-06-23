@@ -2060,11 +2060,8 @@
         const $target = $(".pr-header-text");
         const text = `${M}月总消耗: ${mAmount}`;
         let $existing = $target.find(".mAmount");
-        $existing.length > 0
-            ? $existing.text(text)
-            : $target.append(
-                `<span class="mAmount" style="margin-left: 10px; color: red;">${text}</span>`
-            );
+        $existing.length > 0 ? $existing.text(text) : $target.append(`<span class="mAmount" style="margin-left: 10px; color: red;">${text}</span>`);
+        return mAmount
     };
 
     // 等待 jQuery 注入（页面加载）
@@ -3213,7 +3210,7 @@
     });
 
     // 更新观看量
-    const updatePviews = async () => {
+    const updatePviews = async (isLast = false) => {
         let arr = OwnerAds?.getAdsList?.() || [];
         const list = arr?.map?.(v => {
             let ads = getADSKey(v)
@@ -3221,14 +3218,21 @@
         })
         if (!list?.length) return false;
 
-        const res = await window.post('/ads/recordViews', { list });
+        const budget = $('.pr-header-auth .pr-header-text .js-header_owner_budget .pr-link')?.text()?.match?.(/[-+]?\d*\.?\d+/g)?.[0];
+        const totalBudget = await getMonthTotal()
+        const res = await window.post('/ads/recordViews', {
+            adsUser: window.user,
+            budget,
+            totalBudget: isLast ? totalBudget : 0,
+            list,  
+        });
         if(res){
             console.log("观看量更新成功");
         }
     };
 
     // 每到0 和 30分的时候自动执行一次加预算
-    async function runMyTask() {
+    async function runMyTask(isLast) {
         await addMountFn();
 
         // 金貝推广人员帖子自动重审
@@ -3241,24 +3245,22 @@
             await onReview();
         }
 
-        await updatePviews();
+        await updatePviews(isLast);
     }
 
     (function loop() {
         requestAnimationFrame(loop);
 
-        const now = new Date();
+        const now = new Date(autoADSData.date.getBeijingString());  // 获取北京时间
+        const hours = now.getHours()
         const min = now.getMinutes();
         const sec = now.getSeconds();
 
         // 判断分钟是5、15、30、45、59并且秒数在0~1之间（防止多次触发）
         if ([15, 30, 45, 59].includes(min) && sec === 0) {
-            if (
-                !loop.lastTrigger ||
-                loop.lastTrigger !== `${now.getHours()}-${min}`
-            ) {
-                loop.lastTrigger = `${now.getHours()}-${min}`;
-                runMyTask();
+            if (!loop.lastTrigger || loop.lastTrigger !== `${hours}-${min}`) {
+                loop.lastTrigger = `${hours}-${min}`;
+                runMyTask(hours === 23 && min === 59);
             }
         }
     })();
