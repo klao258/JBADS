@@ -3220,12 +3220,16 @@
 
         const budget = $('.pr-header-auth .pr-header-text .js-header_owner_budget .pr-link')?.text()?.match?.(/[-+]?\d*\.?\d+/g)?.[0];
         const totalBudget = await getMonthTotal()
-        const res = await window.post('/ads/recordViews', {
-            adsUser: window.user,
-            budget,
-            totalBudget: isLast ? totalBudget : 0,
-            list,  
-        });
+
+        const params = { adsUser: window.user, list }
+        if(budget && budget < 10){
+            params['budget'] = budget
+        }
+        if(isLast && totalBudget){
+            params['totalBudget'] = totalBudget
+        }
+
+        const res = await window.post('/ads/recordViews', params);
         if(res){
             console.log("观看量更新成功");
         }
