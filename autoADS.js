@@ -2585,6 +2585,8 @@
                 key = 'TSYL666bot'
             } else if (key === 'jbtb' || key === 'jbyx'){
                 key = 'JB7777_BOT'
+            } else if (key === 'jbdp') {
+                key = 'JBYL_bot'
             }
             let texts = getUserText(key, v.text);
             if (texts?.length) {
