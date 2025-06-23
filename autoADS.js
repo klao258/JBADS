@@ -322,6 +322,7 @@
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
             createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
             // createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
+            createButton("筛选英文名广告", "refreshBtn", async () => onGetENFilter()),
         ];
 
         // 添加元素到容器
@@ -3032,6 +3033,12 @@
         }
 
         await onRefresh();
+    }
+
+    // 查看哪些链接协议号注册多
+    const onGetENFilter = async () => {
+        const res = await window.get('/ads/getAdsUEN', { ads: accountAll?.[window.user]?.['en'] })
+        console.log(res.data)
     }
 
     // 提取数据
