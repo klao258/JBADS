@@ -18,6 +18,7 @@
 
     window.isLoad = false;
 
+    let animationFrameId;
     var timerID = null;
     var host = "https://ads.telegram.org";
 
@@ -2246,7 +2247,8 @@
         }
 
         // 超预算停止定时器
-        if (getMoney() < total) {
+        if (getMoney() <= total) {
+            stopLoop()
             clearInterval(timerID);
             timerID = null;
         }
@@ -3268,22 +3270,47 @@
         await updatePviews(false, isLast);
     }
 
-    (function loop() {
-        requestAnimationFrame(loop);
+    // (function loop() {
+    //     requestAnimationFrame(loop);
 
-        const now = new Date(autoADSData.date.getBeijingString());  // 获取北京时间
-        const hours = now.getHours()
+    //     const now = new Date(autoADSData.date.getBeijingString());  // 获取北京时间
+    //     const hours = now.getHours()
+    //     const min = now.getMinutes();
+    //     const sec = now.getSeconds();
+
+    //     // 判断分钟是5、15、30、45、59并且秒数在0~1之间（防止多次触发）
+    //     if ([15, 30, 45, 59].includes(min) && sec === 0) {
+    //         if (!loop.lastTrigger || loop.lastTrigger !== `${hours}-${min}`) {
+    //             loop.lastTrigger = `${hours}-${min}`;
+    //             runMyTask(hours === 23 && min === 59);
+    //         }
+    //     }
+    // })();
+
+    
+
+    const loop = () => {
+        animationFrameId = requestAnimationFrame(loop);
+
+        const now = new Date(autoADSData.date.getBeijingString());
+        const hours = now.getHours();
         const min = now.getMinutes();
         const sec = now.getSeconds();
 
-        // 判断分钟是5、15、30、45、59并且秒数在0~1之间（防止多次触发）
         if ([15, 30, 45, 59].includes(min) && sec === 0) {
             if (!loop.lastTrigger || loop.lastTrigger !== `${hours}-${min}`) {
                 loop.lastTrigger = `${hours}-${min}`;
                 runMyTask(hours === 23 && min === 59);
             }
         }
-    })();
+    }
+
+    loop(); // 启动
+
+    // 主动停止调用，执行取消
+    const stopLoop = () => {
+        cancelAnimationFrame(animationFrameId);
+    }
 
     window.loadFinish = true
 })();
