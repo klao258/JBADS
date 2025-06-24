@@ -3221,8 +3221,10 @@
     // 更新观看量
     const updatePviews = async (isRefresh = true, isLast = false) => {
         let arr = OwnerAds?.getAdsList?.() || [];
+        let ySpent = 0
         const list = arr?.map?.(v => {
             let ads = getADSKey(v)
+            ySpent = +(qspent || 0)
             return { ads, views: v?.views || 0, clicks: v?.clicks || 0, actions: v?.actions || 0, spent: v?.spent || 0 }
         })
         if (!list?.length) return false;
@@ -3232,11 +3234,13 @@
         // 不是刷新时才出来推送
         if(!isRefresh){
             const budget = $('.pr-header-auth .pr-header-text .js-header_owner_budget .pr-link')?.text()?.match?.(/[-+]?\d*\.?\d+/g)?.[0];
-            const totalBudget = await getMonthTotal()
+            let totalBudget = await getMonthTotal()
+                totalBudget = totalBudget?.match?.(/[-+]?\d*\.?\d+/g)?.[0];
             if(budget && budget < 10){
-                params['budget'] = budget
+                params['budget'] = budget   // 当前预算
+                params['ySpent'] = ySpent   // 昨日消耗
             }
-            if(isLast && totalBudget){
+            if(isLast && totalBudget && !['金貝频道','金博广告','金貝担保','金貝担保1','金貝担保2','金貝担保3','金貝担保4'].includes(window.user)){
                 params['totalBudget'] = totalBudget
             }
         }
