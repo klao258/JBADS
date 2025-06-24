@@ -3224,7 +3224,7 @@
         let ySpent = 0
         const list = arr?.map?.(v => {
             let ads = getADSKey(v)
-            ySpent = +(qspent || 0)
+            ySpent = +(v?.qspent || 0)
             return { ads, views: v?.views || 0, clicks: v?.clicks || 0, actions: v?.actions || 0, spent: v?.spent || 0 }
         })
         if (!list?.length) return false;
