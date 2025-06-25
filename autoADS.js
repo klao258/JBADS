@@ -2248,9 +2248,10 @@
 
         // 超预算停止定时器
         if (getMoney() <= total) {
-            stopLoop()
             clearInterval(timerID);
             timerID = null;
+            toast("余额不足 !!!");
+            return false;
         }
 
         Aj.showProgress();
