@@ -2196,7 +2196,7 @@
          * 4. 加入量大于0   增加 3
          * 5. 没有加入量 且 余额为0  增加2
          **/
-        let total = 0;
+        let total = 1;
         list = list.filter((v) => {
             if (v.status !== "Active" && v.status !== "Stopped") return false;
             if (v.hasOwnProperty("score")) {
