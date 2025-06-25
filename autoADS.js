@@ -3239,7 +3239,7 @@
             const budget = $('.pr-header-auth .pr-header-text .js-header_owner_budget .pr-link')?.text()?.match?.(/[-+]?\d*\.?\d+/g)?.[0];
             let totalBudget = await getMonthTotal()
                 totalBudget = parseInt(totalBudget?.match?.(/[-+]?\d{1,3}(?:,\d{3})*(?:\.\d+)?|[-+]?\d+(?:\.\d+)?/g)?.[0]?.replace(/,/g, '') || '', 10)
-            if(budget && budget < 10){
+            if(budget && budget < 10 && window.user?.includes('天胜')){
                 params['budget'] = budget   // 当前预算
                 params['ySpent'] = ySpent.toFixed(0)   // 昨日消耗
             }
