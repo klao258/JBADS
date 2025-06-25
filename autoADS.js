@@ -3242,7 +3242,7 @@
                 params['budget'] = budget   // 当前预算
                 params['ySpent'] = ySpent.toFixed(0)   // 昨日消耗
             }
-            if(isLast && totalBudget && !['金貝频道','金博广告','金貝担保','金貝担保1','金貝担保2','金貝担保3','金貝担保4'].includes(window.user)){
+            if(isLast && totalBudget && window.user?.includes('天胜')){
                 params['totalBudget'] = totalBudget
             }
         }
