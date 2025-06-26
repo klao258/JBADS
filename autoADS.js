@@ -3049,9 +3049,11 @@
 
     // 获取今日数据
     const onGetTodayData = async () => {
-        await syncAdsAll()
-        const res = await window.get('/ads/getTodayData', { ads: accountAll?.[window.user]?.['en'] })
-        console.log(res.data)
+        const res0 = await syncAdsAll()
+        if(res0?.code === 0) {
+            const res = await window.get('/ads/getTodayData', { ads: accountAll?.[window.user]?.['en'] })
+            console.log(res.data)
+        }
     }
 
     // 提取数据
