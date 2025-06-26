@@ -2233,11 +2233,11 @@
 
             v["url"] = `${host}/account?l=account/ad/${v.ad_id}${path}`;
             total += v["add_budget"];
-            $(`a[href="/account/ad/${v.ad_id}"]`)
-                .first()
-                .parents("tr")
-                .find("td")
-                .css("backgroundColor", "rgb(17, 154, 245, .5)");
+            // $(`a[href="/account/ad/${v.ad_id}"]`)
+            //     .first()
+            //     .parents("tr")
+            //     .find("td")
+            //     .css("backgroundColor", "rgb(17, 154, 245, .5)");
 
             return true;
         });
