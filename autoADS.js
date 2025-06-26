@@ -2179,6 +2179,7 @@
         let list = OwnerAds.getAdsList();
         list = list?.map(v => ({ ads: getADSKey(v), title: v?._title || "" }))
         await syncAds(list);
+        return true
     }
 
     // 自动加预算
@@ -3049,11 +3050,9 @@
 
     // 获取今日数据
     const onGetTodayData = async () => {
-        const res0 = await syncAdsAll()
-        if(res0?.code === 0) {
-            const res = await window.get('/ads/getTodayData', { ads: accountAll?.[window.user]?.['en'] })
-            console.log(res.data)
-        }
+        await syncAdsAll()
+        const res = await window.get('/ads/getTodayData', { ads: accountAll?.[window.user]?.['en'] })
+        console.log(res.data)
     }
 
     // 提取数据
