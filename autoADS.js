@@ -324,6 +324,7 @@
             createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
             // createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
             createButton("筛选英文名广告", "refreshBtn", async () => onGetENFilter()),
+            createButton("今日数据", "getTodayData", async () => onGetTodayData()),
         ];
 
         // 添加元素到容器
@@ -3043,6 +3044,12 @@
     // 查看哪些链接协议号注册多
     const onGetENFilter = async () => {
         const res = await window.get('/ads/getAdsUEN', { ads: accountAll?.[window.user]?.['en'] })
+        console.log(res.data)
+    }
+
+    // 获取今日数据
+    const onGetTodayData = async () => {
+        const res = await window.get('/ads/getTodayData', { ads: accountAll?.[window.user]?.['en'] })
         console.log(res.data)
     }
 
