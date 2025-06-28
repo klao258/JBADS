@@ -19,16 +19,17 @@
     console.log(`✅ TG广告脚本已加载，当前版本： ${ GM_info.script.version }`);
     window.dataHost = 'https://jbjtads.sso66s.cc'; // 数据接口域名
 
+    const CURRENT_VERSION = GM_info.script.version;
+    // const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
+    const REMOTE_URL = "https://cdn.jsdelivr.net/gh/klao258/JBADS/tg-ads.user.js";
+
     // ===== 🔄 检查远程是否有新版本 =====
     (async function checkForUpdate() {
         try {
-            const CURRENT_VERSION = GM_info.script.version;
-            // const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
-            const REMOTE_URL = "https://cdn.jsdelivr.net/gh/klao258/JBADS/tg-ads.user.js";
             const text = await (await fetch(REMOTE_URL + '?t=' + Date.now())).text();
             const match = text.match(/@version\s+([^\n]+)/);
             if (match && match[1] && match[1].trim() !== CURRENT_VERSION.trim()) {
-                showUpdatePopup(match[1].trim(), REMOTE_URL);
+                showUpdatePopup(match[1].trim());
             }
         } catch (e) {
             console.warn("🚫 检查版本更新失败：", e);
