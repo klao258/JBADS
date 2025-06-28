@@ -224,20 +224,24 @@
             
 
             // 等待 jQuery 加载完成
+            console.time('加载jquery:')
             await waitForJQuery();
-
             window.user =  $(".pr-header-account-name").text()
+            console.timeEnd('加载jquery:')
 
             // 加载 autoADSData
+            console.time('加载今天数据:')
             const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData']);
+            console.timeEnd('加载今天数据:')
 
             // 加载 postData
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
+            // await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
 
+            console.time('自定义脚本加载:')
             const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
+            console.timeEnd('自定义脚本加载:')
 
-            console.log("✅ TG广告脚本初始化完成");
             resolve(true);
         });
     });
