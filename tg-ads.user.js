@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.06.28-21:01:47
+// @version      2025.06.28-21:20:10
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -224,20 +224,24 @@
             
 
             // 等待 jQuery 加载完成
+            console.time('加载jquery:')
             await waitForJQuery();
-
             window.user =  $(".pr-header-account-name").text()
+            console.timeEnd('加载jquery:')
 
             // 加载 autoADSData
+            console.time('加载今天数据:')
             const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData']);
+            console.timeEnd('加载今天数据:')
 
             // 加载 postData
-            await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
+            // await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
 
+            console.time('自定义脚本加载:')
             const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
             await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
+            console.timeEnd('自定义脚本加载:')
 
-            console.log("✅ TG广告脚本初始化完成");
             resolve(true);
         });
     });
