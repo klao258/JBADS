@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.06.28-20:46:52
+// @version      2025.06.28-20:49:18
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -28,7 +28,7 @@
             const text = await (await fetch(REMOTE_URL + '?t=' + Date.now())).text();
             const match = text.match(/@version\s+([^\n]+)/);
             if (match && match[1] && match[1].trim() !== CURRENT_VERSION.trim()) {
-                showUpdatePopup(match[1].trim());
+                showUpdatePopup(match[1].trim(), REMOTE_URL);
             }
         } catch (e) {
             console.warn("🚫 检查版本更新失败：", e);
@@ -36,7 +36,7 @@
     })();
 
     // ===== 💬 弹窗提示新版本 =====
-    function showUpdatePopup(newVersion) {
+    function showUpdatePopup(newVersion, REMOTE_URL) {
         const div = document.createElement("div");
         div.innerHTML = `
         <div style="position:fixed;top:20px;right:20px;background:#222;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 0 8px #000;">
