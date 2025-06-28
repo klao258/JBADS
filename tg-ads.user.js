@@ -23,17 +23,17 @@
     const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
 
     // ===== 🔄 检查远程是否有新版本 =====
-    (async function checkForUpdate() {
-        try {
-            const text = await (await fetch(REMOTE_URL + '?t=' + Date.now())).text();
-            const match = text.match(/@version\s+([^\n]+)/);
-            if (match && match[1] && match[1].trim() !== CURRENT_VERSION.trim()) {
-                showUpdatePopup(match[1].trim());
-            }
-        } catch (e) {
-            console.warn("🚫 检查版本更新失败：", e);
-        }
-    })();
+    // (async function checkForUpdate() {
+    //     try {
+    //         const text = await (await fetch(REMOTE_URL + '?t=' + Date.now())).text();
+    //         const match = text.match(/@version\s+([^\n]+)/);
+    //         if (match && match[1] && match[1].trim() !== CURRENT_VERSION.trim()) {
+    //             showUpdatePopup(match[1].trim());
+    //         }
+    //     } catch (e) {
+    //         console.warn("🚫 检查版本更新失败：", e);
+    //     }
+    // })();
 
     // ===== 💬 弹窗提示新版本 =====
     function showUpdatePopup(newVersion, REMOTE_URL) {
