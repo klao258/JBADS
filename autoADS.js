@@ -2704,16 +2704,13 @@
     // 一键删除
     const onDels = async () => {
         let list = OwnerAds.getAdsList()?.filter((v) => {
-            // if (v.status === "Declined" && v?.score < 30) {
-            //     $(`a[href="/account/ad/${v.ad_id}"]`)
-            //         .first()
-            //         .parents("tr")
-            //         .find("td")
-            //         .css("backgroundColor", "rgb(17, 154, 245, .5)");
-            //     return true;
-            // }
-            if(v.tme_path === 'tsyl'){
-                return true
+            if (v.status === "Declined" && v?.score < 30) {
+                $(`a[href="/account/ad/${v.ad_id}"]`)
+                    .first()
+                    .parents("tr")
+                    .find("td")
+                    .css("backgroundColor", "rgb(17, 154, 245, .5)");
+                return true;
             }
             return false;
         });
