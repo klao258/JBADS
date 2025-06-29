@@ -5,7 +5,7 @@
     const cpms_store = window.cpms_store; // 记录单价
     const pviews_store = window.pviews_store; // 记录展示量
     
-    console.log('唯一id', JSON.parse(JSON.stringify(window)), window?.Aj?.state?.ownerId)
+    console.log('唯一id', Aj?.state?.ownerId)
     const postDate = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
     window.postData = postDate?.data || [];
 
