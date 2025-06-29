@@ -78,6 +78,9 @@ const autoADSData = {
         "天胜4": { en: "TSGuoBa", browser: '', code: "22780", options: [...TS] },   // 大山
         "天胜5": { en: "TS5", browser: '', code: "22782", options: [...TS] },   // 安仔
         "天胜6": { en: "TS6", browser: '', code: "22782", options: [...TS] },   // 安仔
+        "天胜7": { en: "TS7", browser: '', code: "22782", options: [...TS] },   // 安仔
+        "天胜8": { en: "TS8", browser: '', code: "22780", options: [...TS] },   // 大山
+        
         
         /** 金貝机器人、频道 */
         "金貝频道": { en: "GZBeiBei", browser: 15, code: "", options: [...FB, ...FBChannel] },
