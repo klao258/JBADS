@@ -269,7 +269,7 @@
                 <label class="rangeLabel" style="font-weight: 400; font-size: 12px; margin-bottom: 0;">预算：</label>
                 <input type="number" id="minBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
                 <label> - </label>
-                <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="1" min="1" max="50" step="1">
+                <input type="number" id="maxBudget" class="budget-input" style="flex: 1; border: 1px solid #ccc; width: 40px;" value="5" min="1" max="50" step="1">
             </div>
         `).css({
             flex: 1,
