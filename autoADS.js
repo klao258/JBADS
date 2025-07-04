@@ -316,7 +316,7 @@
             createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
             createButton("一键重审", "reviewBtn", async () => onReview()),
             createButton("加预算", "addMount", async () => addMountFn()),
-            createButton("文案替换", "textTeviewBtn", async () => onReplace()),
+            createButton("待审核文案替换", "textTeviewBtn", async () => onReplace()),
             createButton("删除0评分审核失败", "delBtn", async () => onDels()),
             createButton("提价(曝光不足)", "proPrice", async () => onProPrice()),
             createButton("提价(曝光达标)", "proPrice", async () => onProAddPrice()),
