@@ -2527,7 +2527,7 @@
             media: "", // ''
             ad_info: "", // ''
             views_per_user: getRNum(1, 4), // 观看次数
-            daily_budget: 0, // 0
+            daily_budget: 100, // 0
             active: 1, // 1
             device: undefined, // undefined
         };
