@@ -3273,9 +3273,9 @@
         }
 
         // 天胜推广人员帖子自动重审
-        if (tstg?.includes?.(window.user)) {
-            await onReview();
-        }
+        // if (tstg?.includes?.(window.user)) {
+        //     await onReview();
+        // }
 
         await updatePviews(false, isLast);
     }
