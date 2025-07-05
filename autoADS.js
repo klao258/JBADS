@@ -2586,7 +2586,7 @@
 
         let submitPromise = list.map((v, i) => {
             let key = v.tme_path?.split?.("?")?.[0];
-            if(key === 'tsyl') {
+            if(key === 'tsyl' || key === 'tsyx') {
                 key = 'TSYL666bot'
             } else if (key === 'jbtb' || key === 'jbyx'){
                 key = 'JB7777_BOT'
@@ -2656,7 +2656,7 @@
 
         let submitPromise = list.map((v, i) => {
             let key = v.tme_path?.split?.("?")?.[0];
-                if(key === 'tsyl') {
+                if(key === 'tsyl' || key === 'tsyx') {
                     key = 'TSYL666bot'
                 } else if (key === 'jbtb' || key === 'jbyx'){
                     key = 'JB7777_BOT'
