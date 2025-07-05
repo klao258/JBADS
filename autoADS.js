@@ -2607,7 +2607,7 @@
                         media: "",
                         ad_info: "",
                         cpm: v.cpm,
-                        daily_budget: 0,
+                        daily_budget: v.daily_budget || 0,
                         active: 1,
                         views_per_user: getRNum(1, 4), // 观看次数
                     };
