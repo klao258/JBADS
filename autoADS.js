@@ -2182,6 +2182,42 @@
         return true
     }
 
+    // 增加预算
+    const asyncAddAmount = async (row) => {
+        // let owner_id = $form.find("input[name='owner_id']").value();
+        // let ad_id = $form.find("input[name='ad_id']").value();
+        // let params = { owner_id, ad_id, amount: v.add_budget, popup: 1 };
+
+        let owner_id = Aj.state.ownerId
+        let ad_id = row.ad_id
+        let amount = row.add_budget
+        let params = { owner_id, ad_id, amount, popup: 1 };
+        return new Promise((resolve) => {
+            Aj.apiRequest("incrAdBudget", params, function (result) {
+                if (result.error) {
+                    resolve(false);
+                    return false;
+                }
+
+                if (result.ad) {
+                    OwnerAds.updateAd(result.ad);
+                }
+                if (result.header_owner_budget) {
+                    // 更新总金额
+                    $(".js-header_owner_budget").html(result.header_owner_budget);
+                }
+                if (result.owner_budget) {
+                    $(".js-owner_budget").html(result.owner_budget);
+                }
+                if (result.ad_budget_val) {
+                    $(".js-ad_budget_val").value(result.ad_budget_val);
+                }
+
+                resolve(true);
+            });
+        });
+    }
+
     // 自动加预算
     const addMountFn = async () => {
         await onRefresh();
@@ -2247,6 +2283,35 @@
             toast("预算充足 !!!");
             return false;
         }
+        /********新逻辑**** */
+        if(getMoney() < 1){
+            clearInterval(timerID);
+            timerID = null;
+            toast("余额不足 !!!");
+            return false;
+        }
+
+        Aj.showProgress();
+
+        for (const row of list) {
+            let res = await asyncAddAmount(row)
+            if(getMoney() < 1){
+                Aj.hideProgress();
+                clearInterval(timerID);
+                timerID = null;
+                toast("余额不足 !!!");
+                await onRefresh();
+                return false;
+            }
+        }
+        Aj.hideProgress();
+
+        toast(`增加预算完成`);
+        await onRefresh();
+
+
+        return false
+        /**************** END */
 
         // 超预算停止定时器
         if (getMoney() <= total) {
