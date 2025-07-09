@@ -3268,7 +3268,7 @@
     };
 
     // 每到0 和 30分的时候自动执行一次加预算
-    async function runMyTask(isLast) {
+    const runMyTask = async (isLast) => {
         await addMountFn();
 
         // 金貝推广人员帖子自动重审
@@ -3283,25 +3283,6 @@
 
         await updatePviews(false, isLast);
     }
-
-    // (function loop() {
-    //     requestAnimationFrame(loop);
-
-    //     const now = new Date(autoADSData.date.getBeijingString());  // 获取北京时间
-    //     const hours = now.getHours()
-    //     const min = now.getMinutes();
-    //     const sec = now.getSeconds();
-
-    //     // 判断分钟是5、15、30、45、59并且秒数在0~1之间（防止多次触发）
-    //     if ([15, 30, 45, 59].includes(min) && sec === 0) {
-    //         if (!loop.lastTrigger || loop.lastTrigger !== `${hours}-${min}`) {
-    //             loop.lastTrigger = `${hours}-${min}`;
-    //             runMyTask(hours === 23 && min === 59);
-    //         }
-    //     }
-    // })();
-
-    
 
     const loop = () => {
         animationFrameId = requestAnimationFrame(loop);
@@ -3318,7 +3299,6 @@
             }
         }
     }
-
     loop(); // 启动
 
     // 主动停止调用，执行取消
