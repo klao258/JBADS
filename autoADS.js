@@ -2182,12 +2182,8 @@
         return true
     }
 
-    // 增加预算
+    // 单条广告增加预算
     const asyncAddAmount = async (row) => {
-        // let owner_id = $form.find("input[name='owner_id']").value();
-        // let ad_id = $form.find("input[name='ad_id']").value();
-        // let params = { owner_id, ad_id, amount: v.add_budget, popup: 1 };
-
         let owner_id = Aj.state.ownerId
         let ad_id = row.ad_id
         let amount = row.add_budget
@@ -2283,7 +2279,7 @@
             toast("预算充足 !!!");
             return false;
         }
-        /********新逻辑**** */
+
         if(getMoney() < 1){
             clearInterval(timerID);
             timerID = null;
@@ -2295,6 +2291,10 @@
 
         for (const row of list) {
             let res = await asyncAddAmount(row)
+            if(res) {
+                toast(`${row.title}增加${row.add_budget}成功!`);
+            }
+
             if(getMoney() < 1){
                 Aj.hideProgress();
                 clearInterval(timerID);
@@ -2307,67 +2307,6 @@
         Aj.hideProgress();
 
         toast(`增加预算完成`);
-        await onRefresh();
-
-
-        return false
-        /**************** END */
-
-        // 超预算停止定时器
-        if (getMoney() <= total) {
-            clearInterval(timerID);
-            timerID = null;
-            toast("余额不足 !!!");
-            return false;
-        }
-
-        Aj.showProgress();
-
-        // 循环获取html放入数组中
-        let htmlPromise = list.map(async (v) => await getHTML(v.url, "l"));
-
-        // 获取所有html
-        let htmlArr = await Promise.all(htmlPromise); // 等待所有任务完成
-
-        let submitPromise = list.map((v, i) => {
-            let $form = htmlArr[i];
-            let owner_id = $form.find("input[name='owner_id']").value();
-            let ad_id = $form.find("input[name='ad_id']").value();
-            let params = { owner_id, ad_id, amount: v.add_budget, popup: 1 };
-            return new Promise((resolve) => {
-                Aj.apiRequest("incrAdBudget", params, function (result) {
-                    if (result.error) {
-                        resolve(false);
-                        return false;
-                    }
-
-                    if (result.ad) {
-                        OwnerAds.updateAd(result.ad);
-                    }
-                    if (result.header_owner_budget) {
-                        // 更新总金额
-                        $(".js-header_owner_budget").html(result.header_owner_budget);
-                    }
-                    if (result.owner_budget) {
-                        $(".js-owner_budget").html(result.owner_budget);
-                    }
-                    if (result.ad_budget_val) {
-                        $(".js-ad_budget_val").value(result.ad_budget_val);
-                    }
-
-                    resolve(true);
-                });
-            });
-        });
-
-        let submitArr = await Promise.all(submitPromise); // 等待所有任务完成
-        let successNum = submitArr.filter((flag) => flag)?.length;
-        let errorNum = submitArr.filter((flag) => !flag)?.length;
-
-        Aj.hideProgress();
-
-        toast(`增加预算：成功${successNum}条，失败${errorNum}条`);
-
         await onRefresh();
     };
 
