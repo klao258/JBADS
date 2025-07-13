@@ -2615,8 +2615,10 @@
 
         // 根据ad_id获取详情
         let html = await getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
+        window.lkhtml = html
         let media = html.find('input[name="media"]')?.val()
         console.log('图片', media)
+        console.log(window.lkhtml)
     }
 
     // 一键审核，搜索广告不重审
