@@ -2551,34 +2551,46 @@
     };
 
     // 编辑广告
-    const editAd = async (v) => {
-        // 根据ad_id获取详情
-        let html = await getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
-        let media = html.find('input[name="media"]')?.val()
-        
-            
+    const editAd = async (row) => {
+        // 获取文案
+        let key = row.tme_path?.split?.("?")?.[0];
+        const obj = {
+            'tsyl': 'TSYL666bot',   // 天胜
+            'tsyx': 'TSYL666bot',   // 天胜
+            'jbtb': 'JB7777_BOT',   // 金貝
+            'jbyx': 'JB7777_BOT',   // 金貝
+            'jbdp': 'JBYL_bot',     // 金博
+        }
+        let texts = getUserText((obj[key] || key), row.text);
+        if(!texts?.length) {
+            resolve(false);
+        }
 
-        let params = {
+        // 根据ad_id获取图片id
+        let html = await getHTML(`https://ads.telegram.org/account/ad/${row.ad_id}`, "h");
+        let media = html.find('input[name="media"]')?.val() || ''
+
+        let data = {
             owner_id: Aj.state.ownerId,
-            ad_id: v.ad_id,
-            title: v?.["_title"] || v?.title,
+            ad_id: row.ad_id,
+            title: row?.["_title"] || row?.title,
             text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-            promote_url: `t.me/${v.tme_path}`, // 推广链接
+            promote_url: `t.me/${row.tme_path}`, // 推广链接
             website_name: "",
             website_photo: "",
-            media: "",
+            media: media,
             ad_info: "",
-            cpm: v.cpm,
-            daily_budget: v.daily_budget || 0,
+            cpm: row.cpm,
+            daily_budget: row.daily_budget || 0,
             active: 1,
             views_per_user: getRNum(1, 4), // 观看次数
         };
-        // Aj.apiRequest("editAd", params, function (result) {
-        //     if (result.error) {
-        //         resolve(false);
-        //     }
-        //     resolve(true);
-        // });
+        Aj.apiRequest("editAd", data, function (result) {
+            if (result.error) {
+                resolve(false);
+            }
+            resolve(true);
+        });
     }
 
     // 删除广告
@@ -2598,27 +2610,30 @@
 
     // 一键重审
     const onReview = async () => {
-        // await onRefresh();
-        // let list = OwnerAds.getAdsList();
-        // list = list.filter((v) => {
-        //     if (v.status !== "Declined") return false;
-        //     if (v.trg_type === "search") return false;
-        //     v["url"] = `${host}${v.base_url}`;
-        //     return true;
-        // });
+        await onRefresh();
+        let list = OwnerAds.getAdsList();
+        list = list.filter((v) => {
+            if (v.status !== "Declined") return false;
+            if (v.trg_type === "search") return false;
+            v["url"] = `${host}${v.base_url}`;
+            return true;
+        });
 
-        // if (!list.length) return toast("没有需要审核的广告 !!!");
+        if (!list.length) return toast("没有需要审核的广告 !!!");
 
-        // for (const row of list) {
-            
-        // }
+        Aj.showProgress();
+        const submitArr = []
+        for (const row of list) {
+            let res = await editAd(row)
+            submitArr.push(res)
+        }
+        let successNum = submitArr.filter((flag) => flag)?.length;
+        let errorNum = submitArr.filter((flag) => !flag)?.length;
+        Aj.hideProgress();
 
-        // 根据ad_id获取详情
-        let html = await getHTML(`https://ads.telegram.org/account/ad/222`, "h");
-        window.lkhtml = html
-        let media = html.find('input[name="media"]')?.val()
-        console.log('图片', media)
-        console.log(window.lkhtml)
+        toast(`审核完成：成功${successNum}条，失败${errorNum}条`);
+
+        await onRefresh();
     }
 
     // 一键审核，搜索广告不重审
