@@ -2531,8 +2531,8 @@
             media: "", // ''
             ad_info: "", // ''
             views_per_user: getRNum(1, 4), // 观看次数
-            daily_budget: 100, // 0
-            active: 1, // 1
+            daily_budget: 100, // 日最高预算
+            active: 1, // 开始投放
             device: undefined, // undefined
         };
         const { title = '', text = '', promote_url = '', cpm = 0, budget = 0, target_type = '' } = params
@@ -2551,8 +2551,34 @@
     };
 
     // 编辑广告
-    const editAd = async (params) => {
+    const editAd = async (v) => {
+        // 根据ad_id获取详情
+        let html = await window.getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
+        let media = html.find('input[name="media"]')?.val()
+        
+            
 
+        let params = {
+            owner_id: Aj.state.ownerId,
+            ad_id: v.ad_id,
+            title: v?.["_title"] || v?.title,
+            text: texts[getRNum(0, texts.length - 1, 0)], // 文案
+            promote_url: `t.me/${v.tme_path}`, // 推广链接
+            website_name: "",
+            website_photo: "",
+            media: "",
+            ad_info: "",
+            cpm: v.cpm,
+            daily_budget: v.daily_budget || 0,
+            active: 1,
+            views_per_user: getRNum(1, 4), // 观看次数
+        };
+        // Aj.apiRequest("editAd", params, function (result) {
+        //     if (result.error) {
+        //         resolve(false);
+        //     }
+        //     resolve(true);
+        // });
     }
 
     // 删除广告
@@ -2570,8 +2596,31 @@
         })
     }
 
-    // 一键审核，搜索广告不重审
+    // 一键重审
     const onReview = async () => {
+        // await onRefresh();
+        // let list = OwnerAds.getAdsList();
+        // list = list.filter((v) => {
+        //     if (v.status !== "Declined") return false;
+        //     if (v.trg_type === "search") return false;
+        //     v["url"] = `${host}${v.base_url}`;
+        //     return true;
+        // });
+
+        // if (!list.length) return toast("没有需要审核的广告 !!!");
+
+        // for (const row of list) {
+            
+        // }
+
+        // 根据ad_id获取详情
+        let html = await window.getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
+        let media = html.find('input[name="media"]')?.val()
+        console.log('图片', media)
+    }
+
+    // 一键审核，搜索广告不重审
+    const onReview1 = async () => {
         await onRefresh();
 
         let list = OwnerAds.getAdsList();
