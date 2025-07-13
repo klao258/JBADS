@@ -2614,7 +2614,7 @@
         // }
 
         // 根据ad_id获取详情
-        let html = await getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
+        let html = await getHTML(`https://ads.telegram.org/account/ad/222`, "h");
         window.lkhtml = html
         let media = html.find('input[name="media"]')?.val()
         console.log('图片', media)
