@@ -2637,77 +2637,77 @@
     }
 
     // 一键审核，搜索广告不重审
-    const onReview1 = async () => {
-        await onRefresh();
+    // const onReview1 = async () => {
+    //     await onRefresh();
 
-        let list = OwnerAds.getAdsList();
-        list = list.filter((v) => {
-            if (v.status !== "Declined") return false;
-            if (v.trg_type === "search") return false;
-            v["url"] = `${host}${v.base_url}`;
+    //     let list = OwnerAds.getAdsList();
+    //     list = list.filter((v) => {
+    //         if (v.status !== "Declined") return false;
+    //         if (v.trg_type === "search") return false;
+    //         v["url"] = `${host}${v.base_url}`;
 
-            return true;
-        });
+    //         return true;
+    //     });
 
-        if (!list.length) {
-            toast("没有需要审核的广告 !!!");
-            return false;
-        }
+    //     if (!list.length) {
+    //         toast("没有需要审核的广告 !!!");
+    //         return false;
+    //     }
 
-        let submitPromise = list.map((v, i) => {
-            let key = v.tme_path?.split?.("?")?.[0];
-            if(key === 'tsyl' || key === 'tsyx') {
-                key = 'TSYL666bot'
-            } else if (key === 'jbtb' || key === 'jbyx'){
-                key = 'JB7777_BOT'
-            } else if (key === 'jbdp') {
-                key = 'JBYL_bot'
-            }
-            let texts = getUserText(key, v.text);
-            if (texts?.length) {
-                return new Promise((resolve) => {
-                    let params = {
-                        owner_id: Aj.state.ownerId,
-                        ad_id: v.ad_id,
-                        title: v?.["_title"] || v?.title,
-                        text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-                        promote_url: `t.me/${v.tme_path}`, // 推广链接
-                        website_name: "",
-                        website_photo: "",
-                        media: "",
-                        ad_info: "",
-                        cpm: v.cpm,
-                        daily_budget: v.daily_budget || 0,
-                        active: 1,
-                        views_per_user: getRNum(1, 4), // 观看次数
-                    };
-                    Aj.apiRequest("editAd", params, function (result) {
-                        if (result.error) {
-                            resolve(false);
-                        }
-                        resolve(true);
-                    });
-                });
-            } else {
-                return false;
-            }
-        });
+    //     let submitPromise = list.map((v, i) => {
+    //         let key = v.tme_path?.split?.("?")?.[0];
+    //         if(key === 'tsyl' || key === 'tsyx') {
+    //             key = 'TSYL666bot'
+    //         } else if (key === 'jbtb' || key === 'jbyx'){
+    //             key = 'JB7777_BOT'
+    //         } else if (key === 'jbdp') {
+    //             key = 'JBYL_bot'
+    //         }
+    //         let texts = getUserText(key, v.text);
+    //         if (texts?.length) {
+    //             return new Promise((resolve) => {
+    //                 let params = {
+    //                     owner_id: Aj.state.ownerId,
+    //                     ad_id: v.ad_id,
+    //                     title: v?.["_title"] || v?.title,
+    //                     text: texts[getRNum(0, texts.length - 1, 0)], // 文案
+    //                     promote_url: `t.me/${v.tme_path}`, // 推广链接
+    //                     website_name: "",
+    //                     website_photo: "",
+    //                     media: "",
+    //                     ad_info: "",
+    //                     cpm: v.cpm,
+    //                     daily_budget: v.daily_budget || 0,
+    //                     active: 1,
+    //                     views_per_user: getRNum(1, 4), // 观看次数
+    //                 };
+    //                 Aj.apiRequest("editAd", params, function (result) {
+    //                     if (result.error) {
+    //                         resolve(false);
+    //                     }
+    //                     resolve(true);
+    //                 });
+    //             });
+    //         } else {
+    //             return false;
+    //         }
+    //     });
 
-        submitPromise = submitPromise?.filter?.((v) => v);
+    //     submitPromise = submitPromise?.filter?.((v) => v);
 
-        Aj.showProgress();
+    //     Aj.showProgress();
 
-        let submitArr = await Promise.all(submitPromise); // 等待所有任务完成
+    //     let submitArr = await Promise.all(submitPromise); // 等待所有任务完成
 
-        let successNum = submitArr.filter((flag) => flag)?.length;
-        let errorNum = submitArr.filter((flag) => !flag)?.length;
+    //     let successNum = submitArr.filter((flag) => flag)?.length;
+    //     let errorNum = submitArr.filter((flag) => !flag)?.length;
 
-        Aj.hideProgress();
+    //     Aj.hideProgress();
 
-        toast(`审核完成：成功${successNum}条，失败${errorNum}条`);
+    //     toast(`审核完成：成功${successNum}条，失败${errorNum}条`);
 
-        await onRefresh();
-    };
+    //     await onRefresh();
+    // };
 
     // 替换文案
     const onReplace = async () => {
