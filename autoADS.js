@@ -2553,7 +2553,7 @@
     // 编辑广告
     const editAd = async (v) => {
         // 根据ad_id获取详情
-        let html = await window.getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
+        let html = await getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
         let media = html.find('input[name="media"]')?.val()
         
             
@@ -2614,7 +2614,7 @@
         // }
 
         // 根据ad_id获取详情
-        let html = await window.getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
+        let html = await getHTML(`https://ads.telegram.org/account/ad/222`, "h", false);
         let media = html.find('input[name="media"]')?.val()
         console.log('图片', media)
     }
