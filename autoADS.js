@@ -2563,7 +2563,7 @@
         }
         let texts = getUserText((obj[key] || key), row.text);
         if(!texts?.length) {
-            resolve(false);
+            return false;
         }
 
         // 根据ad_id获取图片id
@@ -2587,9 +2587,9 @@
         };
         Aj.apiRequest("editAd", data, function (result) {
             if (result.error) {
-                resolve(false);
+                return false;
             }
-            resolve(true);
+            return true;
         });
     }
 
