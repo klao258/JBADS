@@ -66,16 +66,17 @@
      * 加载多个脚本，并等待多个变量全部定义完成
      * @param {string[]} urls - 要加载的多个脚本链接
      * @param {string[]} waitVars - 要检测的全局变量（如 ['window.adminData', 'window.config']）
+     * @param {boolean} isCache - 是否使用缓存, 默认false
      * @param {number} maxTries - 最大轮询次数（默认50）
      * @param {number} interval - 每次轮询间隔 ms（默认100）
      * @returns {Promise<boolean>} 是否全部加载成功并变量可用
      */
-    async function loadMultipleScriptsAndWaitForAll(urls, waitVars, maxTries = 50, interval = 100) {
+    async function loadMultipleScriptsAndWaitForAll(urls, waitVars, isCache = false, maxTries = 50, interval = 100) {
         // 1. 并行加载所有脚本
         const loadScript = (url) =>
             new Promise((resolve) => {
                 const script = document.createElement("script");
-                script.src = `${url}?t=${Date.now()}`;
+                script.src = isCache ? `${url}` : `${url}?t=${Date.now()}`;
                 script.async = true;
                 script.onload = () => {
                     // console.log(`✅ 加载成功：${url}`);
@@ -231,11 +232,8 @@
 
             // 加载 autoADSData
             console.time('加载静态数据')
-            const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData']);
+            const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData'], true);
             console.timeEnd('加载静态数据')
-
-            // 加载 postData
-            // await loadMultipleScriptsAndWaitForAll([`https://klao258.github.io/JBADS/adsData/${ autoADSData?.['accountAll']?.[window.user]?.['en'] }.js`], ["postData"]);
 
             console.time('自定义脚本加载')
             const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
