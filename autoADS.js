@@ -2418,8 +2418,8 @@
             let postID = ""; // 推广ID, 区分单链接(前6(频道用户名id) + 后4(随机文本)) 和 多链接(沿用之前的逻辑),
             if (url?.length) {
                 const shortId = getShortId(url); // 6位数
-                const guid = guid(4); // 4位数
-                postID = `${shortId}${guid}`;
+                const guId = guid(4); // 4位数
+                postID = `${shortId}${guId}`;
             } else {
                 postID = guid(9);
             }
