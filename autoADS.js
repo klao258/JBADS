@@ -1,20 +1,37 @@
-(async() => {
+(async () => {
     "use strict";
-    const { fbtg, tstg, accountAll, texts, GQText, copyText, guid, getRNum, sleep, date, timestampToDate, minViews } = autoADSData;
+    const {
+        fbtg,
+        tstg,
+        accountAll,
+        texts,
+        GQText,
+        copyText,
+        guid,
+        getRNum,
+        sleep,
+        date,
+        timestampToDate,
+        minViews,
+    } = autoADSData;
     const db = window.db;
     const cpms_store = window.cpms_store; // 记录单价
     const pviews_store = window.pviews_store; // 记录展示量
-    
-    const postDate = await window.get('/user/getAccoutPost', {ads: autoADSData?.['accountAll']?.[window.user]?.['en']})
+
+    const postDate = await window.get("/user/getAccoutPost", {
+        ads: autoADSData?.["accountAll"]?.[window.user]?.["en"],
+    });
     window.postData = postDate?.data || [];
 
     // 获取近3日的浏览数据
-    const viewListTmp = await window.get('/ads/getAdsDailyStats', { ads: accountAll?.[window.user]?.['en'] })
+    const viewListTmp = await window.get("/ads/getAdsDailyStats", {
+        ads: accountAll?.[window.user]?.["en"],
+    });
     const viewList = viewListTmp?.data || [];
 
-    console.log('静态数据', autoADSData)
-    console.log('帖子数据', window.postData)
-    console.log('浏览数据', viewList);
+    console.log("静态数据", autoADSData);
+    console.log("帖子数据", window.postData);
+    console.log("浏览数据", viewList);
 
     window.isLoad = false;
 
@@ -25,13 +42,64 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
+    // 生成
+    const getShortId = (url) => {
+        const BASE62 =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        const toBase62 = (num) => {
+            let result = "";
+            while (num > 0) {
+                result = BASE62[num % 62] + result;
+                num = Math.floor(num / 62);
+            }
+            return result.padStart(6, "a");
+        };
+
+        const extractShortKey = (url) => {
+            try {
+                url = url.replace(/@/g, "");
+                const u = new URL(url);
+                const parts = u.pathname.split("/").filter(Boolean);
+                if (parts.length === 0) return url;
+                if (parts[0] === "joinchat" && parts[1]) return parts[1];
+                return parts[0];
+            } catch {
+                return url;
+            }
+        };
+
+        const generateShortIdFromString = async (input, length = 6) => {
+            const key = extractShortKey(input);
+
+            // 将 key 转为 Uint8Array
+            const encoder = new TextEncoder();
+            const data = encoder.encode(key);
+
+            // 生成 sha256 hash
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = new Uint8Array(hashBuffer);
+
+            // 截取前 6 字节用于转换
+            const slice = hashArray.slice(0, 6);
+            const hex = Array.from(slice)
+                .map((b) => b.toString(16).padStart(2, "0"))
+                .join("");
+            const num = parseInt(hex, 16);
+
+            return toBase62(num).slice(0, length);
+        };
+
+        return generateShortIdFromString(url);
+    };
+
     // 按状态排序
     const statusOrder = {
-        'In Review': 1, // 待审
-        'Declined': 2,   // 拒绝
-        'Active': 3,    // 通过
-        'On Hold': 4, // 暂停
-        'Stopped': 5, // 预算不足
+        "In Review": 1, // 待审
+        Declined: 2, // 拒绝
+        Active: 3, // 通过
+        "On Hold": 4, // 暂停
+        Stopped: 5, // 预算不足
     };
 
     // confirm
@@ -101,7 +169,7 @@
 
     // 不保底线性置信度（真实占比）
     const rawConfidence = (value, threshold) => {
-        if (typeof value !== 'number' || isNaN(value)) return 0;
+        if (typeof value !== "number" || isNaN(value)) return 0;
         return Math.min(value / threshold, 1);
     };
 
@@ -113,28 +181,44 @@
 
     // 主评分函数
     const scoreAd = (ad) => {
-        const { views = 0, clicks = 0, regs = 0, pays = 0, money = 0, ctr = 0, cvr = 0 } = ad;
+        const {
+            views = 0,
+            clicks = 0,
+            regs = 0,
+            pays = 0,
+            money = 0,
+            ctr = 0,
+            cvr = 0,
+        } = ad;
 
-        const regRate = safeDiv(regs, clicks);     // 注册转化率
+        const regRate = safeDiv(regs, clicks); // 注册转化率
 
         // 各项得分（总分100）
         const moneyScore = Number((40 * rawConfidence(money, 300)).toFixed(2));
-        const paysScore  = Number((30 * rawConfidence(pays, 10)).toFixed(2));
-        const regsScore  = Number((20 * rawConfidence(regs, 30)).toFixed(2));
-        const cvrScore = cvr ? Number((Math.min(5, cvr / 100 * 5 * 2)).toFixed(2)) : 0;
-        const ctrScore = ctr ? Number((Math.min(5, ctr / 100 * 5 * 5)).toFixed(2)) : 0;
+        const paysScore = Number((30 * rawConfidence(pays, 10)).toFixed(2));
+        const regsScore = Number((20 * rawConfidence(regs, 30)).toFixed(2));
+        const cvrScore = cvr
+            ? Number(Math.min(5, (cvr / 100) * 5 * 2).toFixed(2))
+            : 0;
+        const ctrScore = ctr
+            ? Number(Math.min(5, (ctr / 100) * 5 * 5).toFixed(2))
+            : 0;
 
-        const total = Number((moneyScore + paysScore + regsScore + cvrScore + ctrScore).toFixed(2));
+        const total = Number(
+            (moneyScore + paysScore + regsScore + cvrScore + ctrScore).toFixed(
+                2
+            )
+        );
 
-        let suggestion = '';
+        let suggestion = "";
         if (total >= 85) {
-            suggestion = '✅ 表现优异，建议加大预算扩大投放';
+            suggestion = "✅ 表现优异，建议加大预算扩大投放";
         } else if (total >= 70) {
-            suggestion = '🟡 效果良好，建议继续投放并微调素材';
+            suggestion = "🟡 效果良好，建议继续投放并微调素材";
         } else if (total >= 50) {
-            suggestion = '🔻 效果一般，建议调低出价或调整受众';
+            suggestion = "🔻 效果一般，建议调低出价或调整受众";
         } else {
-            suggestion = '⛔ 效果较差，建议暂停投放或大幅重构';
+            suggestion = "⛔ 效果较差，建议暂停投放或大幅重构";
         }
 
         return {
@@ -145,8 +229,8 @@
                 paysScore,
                 regsScore,
                 cvrScore,
-                ctrScore
-            }
+                ctrScore,
+            },
         };
     };
 
@@ -204,7 +288,9 @@
         // 创建文本域
         let $textArea = $("<textarea>", {
             class: "urls",
-        }).attr("placeholder", "请输入频道/机器人链接, 多个链接需要换行").css({
+        })
+            .attr("placeholder", "请输入频道/机器人链接, 多个链接需要换行")
+            .css({
                 width: "100%",
                 height: "100px",
                 border: "1px solid #ccc",
@@ -212,7 +298,7 @@
                 borderRadius: "5px",
                 fontSize: "14px",
                 resize: "none",
-        });
+            });
 
         // 创建推广链接下拉框
         const $select = $("<select>", {
@@ -225,9 +311,11 @@
         });
 
         // 添加选项（可根据需要修改）
-        accountAll?.[window.user]?.options?.map?.(v => {
-            $select.append($(`<option value="${v.tgname}">${v.label}</option>`))
-        })
+        accountAll?.[window.user]?.options?.map?.((v) => {
+            $select.append(
+                $(`<option value="${v.tgname}">${v.label}</option>`)
+            );
+        });
 
         // 创建行业下拉框
         const $GQSelet = $("<select>", {
@@ -285,9 +373,17 @@
 
         // 所有按钮封装函数
         const createButton = (text, className, clickFn) => {
-            if ((!fbtg?.includes?.(window.user)) && (!tstg?.includes?.(window.user)) && ["textTeviewBtn"].includes(className)) {
+            if (
+                !fbtg?.includes?.(window.user) &&
+                !tstg?.includes?.(window.user) &&
+                ["textTeviewBtn"].includes(className)
+            ) {
                 return null;
-            } else if ((fbtg?.includes?.(window.user) || tstg?.includes?.(window.user)) && ["searchADSBtn"].includes(className)) {
+            } else if (
+                (fbtg?.includes?.(window.user) ||
+                    tstg?.includes?.(window.user)) &&
+                ["searchADSBtn"].includes(className)
+            ) {
                 return null;
             } else {
                 return $("<button>", {
@@ -316,22 +412,38 @@
             createButton("搜索广告", "searchADSBtn", () => onSearchADS()),
             createButton("一键重审", "reviewBtn", async () => onReview()),
             createButton("加预算", "addMount", async () => addMountFn()),
-            createButton("待审核文案替换", "textTeviewBtn", async () => onReplace()),
+            createButton("待审核文案替换", "textTeviewBtn", async () =>
+                onReplace()
+            ),
             createButton("删除0评分审核失败", "delBtn", async () => onDels()),
-            createButton("提价(曝光不足)", "proPrice", async () => onProPrice()),
-            createButton("提价(曝光达标)", "proPrice", async () => onProAddPrice()),
+            createButton("提价(曝光不足)", "proPrice", async () =>
+                onProPrice()
+            ),
+            createButton("提价(曝光达标)", "proPrice", async () =>
+                onProAddPrice()
+            ),
             createButton("刷新页面", "refreshBtn", async () => onRefresh()),
-            createButton("筛选低评分广告", "refreshBtn", async () => onFilter()),
+            createButton("筛选低评分广告", "refreshBtn", async () =>
+                onFilter()
+            ),
             // createButton("替换机器人", "replaceBotBtn", async () => onReplaceBot()),
-            createButton("筛选英文名广告", "refreshBtn", async () => onGetENFilter()),
-            createButton("今日数据", "getTodayData", async () => onGetTodayData()),
+            createButton("筛选英文名广告", "refreshBtn", async () =>
+                onGetENFilter()
+            ),
+            createButton("今日数据", "getTodayData", async () =>
+                onGetTodayData()
+            ),
         ];
 
         // 添加元素到容器
         $container.append(
             $textArea,
             $select,
-            accountAll?.[window.user]?.options?.find?.(v => v?.tgname === 'jbgq') ? $GQSelet : null, // 公群添加行业
+            accountAll?.[window.user]?.options?.find?.(
+                (v) => v?.tgname === "jbgq"
+            )
+                ? $GQSelet
+                : null, // 公群添加行业
             $priceInputs,
             $budgetInputs,
             ...buttons
@@ -344,665 +456,729 @@
 
     window.ajInit = (options) => {
         if (!window.history || !history.pushState) {
-          return false;
+            return false;
         }
-      
-        var nav_url   = location.href;
+
+        var nav_url = location.href;
         var short_url = layerUrlToShort(nav_url);
         if (options.layer && !short_url) {
-          nav_url = layerUrlToNav(nav_url, options.layerUnderUrl);
+            nav_url = layerUrlToNav(nav_url, options.layerUnderUrl);
         }
         if (!history.state) {
-          history.replaceState({i: 0, u: nav_url}, null, short_url);
+            history.replaceState({ i: 0, u: nav_url }, null, short_url);
         } else if (!history.state.u) {
-          history.replaceState({i: history.state.i, u: nav_url}, null, short_url);
+            history.replaceState(
+                { i: history.state.i, u: nav_url },
+                null,
+                short_url
+            );
         } else if (short_url && location.href != short_url) {
-          history.replaceState(history.state, null, short_url);
+            history.replaceState(history.state, null, short_url);
         }
-      
-        var $progress = $('#aj_progress'),
-            progressBoxShadow = 'inset 0 2px 0 var(--accent-color, #39ade7)',
-            progressNoBoxShadow = 'inset 0 0 0 var(--accent-color, #39ade7)',
-            progressTransition = 'width .3s linear, box-shadow .2s ease',
+
+        var $progress = $("#aj_progress"),
+            progressBoxShadow = "inset 0 2px 0 var(--accent-color, #39ade7)",
+            progressNoBoxShadow = "inset 0 0 0 var(--accent-color, #39ade7)",
+            progressTransition = "width .3s linear, box-shadow .2s ease",
             progressTo,
             progressVal = 0;
         $progress.css({
-          width: 0,
-          transition: progressTransition,
-          position: 'fixed',
-          zIndex: 1000,
-          top: 0,
-          height: 3
+            width: 0,
+            transition: progressTransition,
+            position: "fixed",
+            zIndex: 1000,
+            top: 0,
+            height: 3,
         });
-      
+
         var skipPopState = false;
         var curHistoryState = history.state;
         var curLocation = loc(curHistoryState.u);
         var layerCloseLocation = layerCloseLoc(curHistoryState.u);
         var underLayerTitle = document.title;
-        var curOnLoad = [], curOnUnload = [];
-        var curOnLayerLoad = [], curOnLayerUnload = [];
-        var curBeforeUnload = false, curBeforeLayerUnload = false;
-        var ajContainer = $('#aj_content');
+        var curOnLoad = [],
+            curOnUnload = [];
+        var curOnLayerLoad = [],
+            curOnLayerUnload = [];
+        var curBeforeUnload = false,
+            curBeforeLayerUnload = false;
+        var ajContainer = $("#aj_content");
 
         window.Aj = {
-          apiUrl: options.apiUrl,
-          version: options.version,
-          unauth: options.unauth || false,
-          onLoad: onLoad,
-          onUnload: onUnload,
-          onLayerLoad: onLayerLoad,
-          onLayerUnload: onLayerUnload,
-          pageLoaded: pageLoaded,
-          layerLoaded: layerLoaded,
-          showProgress: showProgress,
-          hideProgress: hideProgress,
-          onBeforeUnload: onBeforeUnload,
-          onBeforeLayerUnload: onBeforeLayerUnload,
-          linkHandler: linkHandler,
-          location: _location,
-          layerLocation: layerLocation,
-          setLocation: setLocation,
-          setLayerLocation: setLayerLocation,
-          reload: reload,
-          apiRequest: apiRequest,
-          uploadRequest: uploadRequest,
-          needAuth: needAuth,
-          ajContainer: ajContainer,
-          state: options.state || {},
-          layerState: {},
-          globalState: {},
-          layer: false
+            apiUrl: options.apiUrl,
+            version: options.version,
+            unauth: options.unauth || false,
+            onLoad: onLoad,
+            onUnload: onUnload,
+            onLayerLoad: onLayerLoad,
+            onLayerUnload: onLayerUnload,
+            pageLoaded: pageLoaded,
+            layerLoaded: layerLoaded,
+            showProgress: showProgress,
+            hideProgress: hideProgress,
+            onBeforeUnload: onBeforeUnload,
+            onBeforeLayerUnload: onBeforeLayerUnload,
+            linkHandler: linkHandler,
+            location: _location,
+            layerLocation: layerLocation,
+            setLocation: setLocation,
+            setLayerLocation: setLayerLocation,
+            reload: reload,
+            apiRequest: apiRequest,
+            uploadRequest: uploadRequest,
+            needAuth: needAuth,
+            ajContainer: ajContainer,
+            state: options.state || {},
+            layerState: {},
+            globalState: {},
+            layer: false,
         };
-      
+
         if (options.layer) {
-          Aj.layer = $('#layer-popup-container');
-          Aj.layerState = options.layerState || {};
-          if (options.layerTitle) {
-            document.title = options.layerTitle;
-          }
+            Aj.layer = $("#layer-popup-container");
+            Aj.layerState = options.layerState || {};
+            if (options.layerTitle) {
+                document.title = options.layerTitle;
+            }
         }
-      
+
         function showProgress() {
-          clearTimeout(progressTo);
-          if (!progressVal) {
-            $progress.css({width: 0, transition: 'none'});
-            progressTo = setTimeout(function() {
-              $progress.css({transition: progressTransition});
-              showProgress();
-            }, 50);
-          } else {
-            progressTo = setTimeout(showProgress, 300);
-          }
-          $progress.css({width: progressVal + '%', boxShadow: progressBoxShadow});
-          progressVal = progressVal + (99 - progressVal) / 4;
+            clearTimeout(progressTo);
+            if (!progressVal) {
+                $progress.css({ width: 0, transition: "none" });
+                progressTo = setTimeout(function () {
+                    $progress.css({ transition: progressTransition });
+                    showProgress();
+                }, 50);
+            } else {
+                progressTo = setTimeout(showProgress, 300);
+            }
+            $progress.css({
+                width: progressVal + "%",
+                boxShadow: progressBoxShadow,
+            });
+            progressVal = progressVal + (99 - progressVal) / 4;
         }
-      
+
         function hideProgress(cancel) {
-          clearTimeout(progressTo);
-          progressTo = false;
-          progressVal = 0;
-          $progress.css({width: cancel ? '0%' : '100%'});
-          setTimeout(function() {
-            $progress.css({boxShadow: progressNoBoxShadow});
-          }, 300);
+            clearTimeout(progressTo);
+            progressTo = false;
+            progressVal = 0;
+            $progress.css({ width: cancel ? "0%" : "100%" });
+            setTimeout(function () {
+                $progress.css({ boxShadow: progressNoBoxShadow });
+            }, 300);
         }
-      
+
         function apiRequest(method, data, onSuccess) {
-          return $.ajax(Aj.apiUrl, {
-            type: 'POST',
-            data: $.extend(data, {method: method}),
-            dataType: 'json',
-            xhrFields: {
-              withCredentials: true
-            },
-            success: function(result) {
-              if (result._dlog) {
-                $('#dlog').append(result._dlog);
-              }
-              onSuccess && onSuccess(result);
-            },
-            error: function(xhr) {
-              if (!xhr.readyState && !xhr.status) {
-                // was aborted
-              } else if (xhr.status == 401) {
-                location.href = '/auth';
-              } else if (xhr.readyState > 0) {
-                location.reload();
-              }
-            }
-          });
+            return $.ajax(Aj.apiUrl, {
+                type: "POST",
+                data: $.extend(data, { method: method }),
+                dataType: "json",
+                xhrFields: {
+                    withCredentials: true,
+                },
+                success: function (result) {
+                    if (result._dlog) {
+                        $("#dlog").append(result._dlog);
+                    }
+                    onSuccess && onSuccess(result);
+                },
+                error: function (xhr) {
+                    if (!xhr.readyState && !xhr.status) {
+                        // was aborted
+                    } else if (xhr.status == 401) {
+                        location.href = "/auth";
+                    } else if (xhr.readyState > 0) {
+                        location.reload();
+                    }
+                },
+            });
         }
-      
+
         function uploadRequest(method, file, params, onSuccess, onProgress) {
-          var data = new FormData();
-          data.append('file', file, file.name);
-          data.append('method', method);
-          for (var key in params) {
-            data.append(key, params[key]);
-          }
-          return $.ajax(Aj.apiUrl, {
-            type: 'POST',
-            data: data,
-            cache: false,
-            dataType: 'json',
-            processData: false,
-            contentType: false,
-            xhrFields: {
-              withCredentials: true
-            },
-            xhr: function() {
-              var xhr = new XMLHttpRequest();
-              xhr.upload.addEventListener('progress', function(event) {
-                if (event.lengthComputable) {
-                  onProgress && onProgress(event.loaded, event.total);
-                }
-              });
-              return xhr;
-            },
-            beforeSend: function(xhr) {
-              onProgress && onProgress(0, 1);
-            },
-            success: function(result) {
-              if (result._dlog) {
-                $('#dlog').append(result._dlog);
-              }
-              onSuccess && onSuccess(result);
-            },
-            error: function(xhr) {
-              if (xhr.status == 401) {
-                location.href = '/auth';
-              } else if (xhr.readyState > 0) {
-                onSuccess && onSuccess({error: 'Network error'});
-              }
+            var data = new FormData();
+            data.append("file", file, file.name);
+            data.append("method", method);
+            for (var key in params) {
+                data.append(key, params[key]);
             }
-          });
+            return $.ajax(Aj.apiUrl, {
+                type: "POST",
+                data: data,
+                cache: false,
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                xhrFields: {
+                    withCredentials: true,
+                },
+                xhr: function () {
+                    var xhr = new XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function (event) {
+                        if (event.lengthComputable) {
+                            onProgress && onProgress(event.loaded, event.total);
+                        }
+                    });
+                    return xhr;
+                },
+                beforeSend: function (xhr) {
+                    onProgress && onProgress(0, 1);
+                },
+                success: function (result) {
+                    if (result._dlog) {
+                        $("#dlog").append(result._dlog);
+                    }
+                    onSuccess && onSuccess(result);
+                },
+                error: function (xhr) {
+                    if (xhr.status == 401) {
+                        location.href = "/auth";
+                    } else if (xhr.readyState > 0) {
+                        onSuccess && onSuccess({ error: "Network error" });
+                    }
+                },
+            });
         }
-      
+
         function loc(href) {
-          var url = document.createElement('a');
-          url.href = href;
-          return url;
+            var url = document.createElement("a");
+            url.href = href;
+            return url;
         }
-      
+
         function layerHref(href) {
-          var url = document.createElement('a');
-          url.href = href;
-          var search = url.search;
-          if (search.substr(0, 1) == '?') {
-            search = search.substr(1);
-          }
-          var params = search.split('&');
-          for (var i = 0; i < params.length; i++) {
-            var kv = params[i].split('=');
-            if (kv[0] == 'l') {
-              return decodeURIComponent(kv[1] || '');
+            var url = document.createElement("a");
+            url.href = href;
+            var search = url.search;
+            if (search.substr(0, 1) == "?") {
+                search = search.substr(1);
             }
-          }
-          return null;
+            var params = search.split("&");
+            for (var i = 0; i < params.length; i++) {
+                var kv = params[i].split("=");
+                if (kv[0] == "l") {
+                    return decodeURIComponent(kv[1] || "");
+                }
+            }
+            return null;
         }
-      
+
         function layerOpenHref(href, l) {
-          var url = document.createElement('a');
-          url.href = href;
-          url.search = url.search.replace(/&l=[^&]*/g, '', url.search);
-          url.search = url.search.replace(/(\?)l=[^&]*&|\?l=[^&]*$/g, '$1', url.search);
-          url.search += (url.search ? '&' : '?') + 'l=' + encodeURIComponent(l);
-          return url.href;
+            var url = document.createElement("a");
+            url.href = href;
+            url.search = url.search.replace(/&l=[^&]*/g, "", url.search);
+            url.search = url.search.replace(
+                /(\?)l=[^&]*&|\?l=[^&]*$/g,
+                "$1",
+                url.search
+            );
+            url.search +=
+                (url.search ? "&" : "?") + "l=" + encodeURIComponent(l);
+            return url.href;
         }
-      
+
         function layerCloseLoc(href) {
-          var url = document.createElement('a');
-          url.href = href;
-          url.search = url.search.replace(/&l=[^&]*/g, '', url.search);
-          url.search = url.search.replace(/(\?)l=[^&]*&|\?l=[^&]*$/g, '$1', url.search);
-          return url;
+            var url = document.createElement("a");
+            url.href = href;
+            url.search = url.search.replace(/&l=[^&]*/g, "", url.search);
+            url.search = url.search.replace(
+                /(\?)l=[^&]*&|\?l=[^&]*$/g,
+                "$1",
+                url.search
+            );
+            return url;
         }
-      
+
         function layerUrlToShort(href) {
-          var url = document.createElement('a');
-          url.href = href;
-          var match = url.search.match(/(\?|&)l=([^&]*)/);
-          if (match) {
-            return '/' + decodeURIComponent(match[2]);
-          }
-          return null;
+            var url = document.createElement("a");
+            url.href = href;
+            var match = url.search.match(/(\?|&)l=([^&]*)/);
+            if (match) {
+                return "/" + decodeURIComponent(match[2]);
+            }
+            return null;
         }
-      
+
         function layerUrlToNav(href, cur_loc) {
-          if (layerUrlToShort(href)) {
-            return href;
-          }
-          var url = document.createElement('a');
-          url.href = href;
-          var layer_url = url.pathname.replace(/^\/+|\/+$/g, '');
-          return layerOpenHref(cur_loc || '/', layer_url);
+            if (layerUrlToShort(href)) {
+                return href;
+            }
+            var url = document.createElement("a");
+            url.href = href;
+            var layer_url = url.pathname.replace(/^\/+|\/+$/g, "");
+            return layerOpenHref(cur_loc || "/", layer_url);
         }
-      
+
         function changeLocation(url, push_state) {
-          if (push_state) {
-            location.href = url;
-          } else {
-            location.replace(url);
-          }
+            if (push_state) {
+                location.href = url;
+            } else {
+                location.replace(url);
+            }
         }
-      
+
         function scrollToEl(elem) {
-          $(window).scrollTop($(elem).offset().top);
+            $(window).scrollTop($(elem).offset().top);
         }
-      
+
         function scrollToHash(hash) {
-          hash = hash || curLocation.hash;
-          if (hash[0] == '#') hash = hash.substr(1);
-          if (!hash) return;
-          var elem = document.getElementById(hash);
-          if (elem) {
-            return scrollToEl(elem);
-          }
-          elem = $('a[name]').filter(function() {
-            return $(this).attr('name') == hash;
-          }).eq(0);
-          if (elem.length) {
-            scrollToEl(elem);
-          }
+            hash = hash || curLocation.hash;
+            if (hash[0] == "#") hash = hash.substr(1);
+            if (!hash) return;
+            var elem = document.getElementById(hash);
+            if (elem) {
+                return scrollToEl(elem);
+            }
+            elem = $("a[name]")
+                .filter(function () {
+                    return $(this).attr("name") == hash;
+                })
+                .eq(0);
+            if (elem.length) {
+                scrollToEl(elem);
+            }
         }
-      
+
         function onLoad(func) {
-          curOnLoad.push(func);
+            curOnLoad.push(func);
         }
-      
+
         function onUnload(func) {
-          curOnUnload.push(func);
+            curOnUnload.push(func);
         }
-      
+
         function onLayerLoad(func) {
-          curOnLayerLoad.push(func);
+            curOnLayerLoad.push(func);
         }
-      
+
         function onLayerUnload(func) {
-          curOnLayerUnload.push(func);
+            curOnLayerUnload.push(func);
         }
-      
+
         function onBeforeUnload(func) {
-          curBeforeUnload = func;
+            curBeforeUnload = func;
         }
-      
+
         function onBeforeLayerUnload(func) {
-          curBeforeLayerUnload = func;
+            curBeforeLayerUnload = func;
         }
-      
+
         function pageLoaded() {
-          if (curOnLoad.length) {
-            for (var i = 0; i < curOnLoad.length; i++) {
-              curOnLoad[i](Aj.state);
+            if (curOnLoad.length) {
+                for (var i = 0; i < curOnLoad.length; i++) {
+                    curOnLoad[i](Aj.state);
+                }
             }
-          }
-          onUnload(function() {
-            $(ajContainer).off('.curPage');
-            $(document).off('.curPage');
-          });
-          $(ajContainer).trigger('page:load');
-          if (Aj.layer) {
-            layerLoaded();
-          }
+            onUnload(function () {
+                $(ajContainer).off(".curPage");
+                $(document).off(".curPage");
+            });
+            $(ajContainer).trigger("page:load");
+            if (Aj.layer) {
+                layerLoaded();
+            }
         }
-      
+
         function layerLoaded() {
-          if (curOnLayerLoad.length) {
-            for (var i = 0; i < curOnLayerLoad.length; i++) {
-              curOnLayerLoad[i](Aj.layerState);
+            if (curOnLayerLoad.length) {
+                for (var i = 0; i < curOnLayerLoad.length; i++) {
+                    curOnLayerLoad[i](Aj.layerState);
+                }
             }
-          }
-          onLayerUnload(function() {
-            Aj.layer.off('.curLayer');
-          });
-          Aj.layer.one('popup:close', function() {
-            if (curOnLayerUnload.length) {
-              for (var i = 0; i < curOnLayerUnload.length; i++) {
-                curOnLayerUnload[i](Aj.layerState);
-              }
-            }
-            Aj.layer.remove();
-            if (underLayerTitle) {
-              document.title = underLayerTitle;
-            }
-            if (layerCloseLocation) {
-              setLocation(layerCloseLocation.href);
-              layerCloseLocation = false;
-            }
-            Aj.layer = false;
-            Aj.layerState = {};
-            curOnLayerLoad = [];
-            curOnLayerUnload = [];
-          });
-          Aj.layer.on('click.curLayer', 'a[data-layer-close]', function(e) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            closePopup(Aj.layer);
-          });
-          openPopup(Aj.layer, {
-            closeByClickOutside: '.popup-no-close',
-            onBeforeClose: function($popup) {
-              var unloaded = checkBeforeUnload(function() {
-                var options = $popup.data('options');
-                options.onBeforeClose = null;
-                closePopup($popup);
-              });
-              return unloaded;
-            }
-          });
-          $(ajContainer).trigger('layer:load');
+            onLayerUnload(function () {
+                Aj.layer.off(".curLayer");
+            });
+            Aj.layer.one("popup:close", function () {
+                if (curOnLayerUnload.length) {
+                    for (var i = 0; i < curOnLayerUnload.length; i++) {
+                        curOnLayerUnload[i](Aj.layerState);
+                    }
+                }
+                Aj.layer.remove();
+                if (underLayerTitle) {
+                    document.title = underLayerTitle;
+                }
+                if (layerCloseLocation) {
+                    setLocation(layerCloseLocation.href);
+                    layerCloseLocation = false;
+                }
+                Aj.layer = false;
+                Aj.layerState = {};
+                curOnLayerLoad = [];
+                curOnLayerUnload = [];
+            });
+            Aj.layer.on("click.curLayer", "a[data-layer-close]", function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                closePopup(Aj.layer);
+            });
+            openPopup(Aj.layer, {
+                closeByClickOutside: ".popup-no-close",
+                onBeforeClose: function ($popup) {
+                    var unloaded = checkBeforeUnload(function () {
+                        var options = $popup.data("options");
+                        options.onBeforeClose = null;
+                        closePopup($popup);
+                    });
+                    return unloaded;
+                },
+            });
+            $(ajContainer).trigger("layer:load");
         }
-      
+
         function onResult(url, http_code, result, push_state) {
-          hideProgress();
-          if (http_code != 200 || !result || !result.v || result.v != Aj.version) {
-            changeLocation(url, push_state);
-            return;
-          }
-          var url_hash = loc(url).hash;
-          if (result.r) {
-            var redirect_url = result.r;
-            if (url_hash) {
-              redirect_url = redirect_url.split('#')[0] + url_hash;
+            hideProgress();
+            if (
+                http_code != 200 ||
+                !result ||
+                !result.v ||
+                result.v != Aj.version
+            ) {
+                changeLocation(url, push_state);
+                return;
             }
-            if (result.hr || !loadPage(loc(redirect_url), push_state)) {
-              changeLocation(redirect_url, push_state);
+            var url_hash = loc(url).hash;
+            if (result.r) {
+                var redirect_url = result.r;
+                if (url_hash) {
+                    redirect_url = redirect_url.split("#")[0] + url_hash;
+                }
+                if (result.hr || !loadPage(loc(redirect_url), push_state)) {
+                    changeLocation(redirect_url, push_state);
+                }
+                return;
             }
-            return;
-          }
-          var saved_ult = underLayerTitle;
-          var saved_lcl = (!Aj.layer || !push_state) ? layerCloseLocation : false;
-          underLayerTitle = false;
-          layerCloseLocation = false;
-          closeAllPopups();
-          underLayerTitle = saved_ult;
-          layerCloseLocation = saved_lcl;
-      
-          if (result.h) {
-            if (curOnUnload.length) {
-              for (var i = 0; i < curOnUnload.length; i++) {
-                curOnUnload[i](Aj.state);
-              }
-            }
-            if (push_state) {
-              if (result.l) {
-                url = layerUrlToNav(url);
-              }
-              setLocation(url);
-            }
-            Aj.state = {};
-            curOnLoad = [];
-            curOnUnload = [];
-            if (result.t) {
-              document.title = result.t;
-              underLayerTitle = document.title;
-            }
+            var saved_ult = underLayerTitle;
+            var saved_lcl =
+                !Aj.layer || !push_state ? layerCloseLocation : false;
+            underLayerTitle = false;
+            layerCloseLocation = false;
+            closeAllPopups();
+            underLayerTitle = saved_ult;
+            layerCloseLocation = saved_lcl;
+
             if (result.h) {
-              ajContainer.html(result.h);
+                if (curOnUnload.length) {
+                    for (var i = 0; i < curOnUnload.length; i++) {
+                        curOnUnload[i](Aj.state);
+                    }
+                }
+                if (push_state) {
+                    if (result.l) {
+                        url = layerUrlToNav(url);
+                    }
+                    setLocation(url);
+                }
+                Aj.state = {};
+                curOnLoad = [];
+                curOnUnload = [];
+                if (result.t) {
+                    document.title = result.t;
+                    underLayerTitle = document.title;
+                }
+                if (result.h) {
+                    ajContainer.html(result.h);
+                }
+                if (result.s) {
+                    $.extend(Aj.state, result.s);
+                }
+                document.documentElement.className = result.rc || "";
+                if (result._dlog) {
+                    $("#dlog").html(result._dlog);
+                }
+                if (push_state || !Aj._useScrollHack) {
+                    $(window).scrollTop(0);
+                }
+                unfreezeBody();
+                if (url_hash) {
+                    scrollToHash();
+                }
+                if (result.l) {
+                    Aj.layer = $(
+                        '<div class="popup-container hide" id="layer-popup-container"></div>'
+                    );
+                    Aj.layerState = {};
+                    curOnLayerLoad = [];
+                    curOnLayerUnload = [];
+                    if (result.lt) {
+                        document.title = result.lt;
+                    }
+                    if (result.ls) {
+                        $.extend(Aj.layerState, result.ls);
+                    }
+                    Aj.layer.html(result.l).appendTo(document.body);
+                }
+                if (result.j) {
+                    window.execScript
+                        ? window.execScript(result.j)
+                        : eval(result.j);
+                }
+                pageLoaded();
+                return;
+            } else if (result.l) {
+                if (push_state) {
+                    url = layerUrlToNav(url);
+                    setLocation(url);
+                }
+                if (result.s) {
+                    $.extend(Aj.state, result.s);
+                }
+                if (result._dlog) {
+                    $("#dlog").html(result._dlog);
+                }
+                Aj.layer = $(
+                    '<div class="popup-container hide" id="layer-popup-container"></div>'
+                );
+                Aj.layerState = {};
+                curOnLayerLoad = [];
+                curOnLayerUnload = [];
+                if (result.lt) {
+                    document.title = result.lt;
+                }
+                if (result.ls) {
+                    $.extend(Aj.layerState, result.ls);
+                }
+                Aj.layer.html(result.l).appendTo(document.body);
+                if (result.j) {
+                    window.execScript
+                        ? window.execScript(result.j)
+                        : eval(result.j);
+                }
+                layerLoaded();
+                return;
             }
-            if (result.s) {
-              $.extend(Aj.state, result.s);
-            }
-            document.documentElement.className = result.rc || '';
-            if (result._dlog) {
-              $('#dlog').html(result._dlog);
-            }
-            if (push_state || !Aj._useScrollHack) {
-              $(window).scrollTop(0);
-            }
-            unfreezeBody();
-            if (url_hash) {
-              scrollToHash();
-            }
-            if (result.l) {
-              Aj.layer = $('<div class="popup-container hide" id="layer-popup-container"></div>');
-              Aj.layerState = {};
-              curOnLayerLoad = [];
-              curOnLayerUnload = [];
-              if (result.lt) {
-                document.title = result.lt;
-              }
-              if (result.ls) {
-                $.extend(Aj.layerState, result.ls);
-              }
-              Aj.layer.html(result.l).appendTo(document.body);
-            }
-            if (result.j) {
-              window.execScript ? window.execScript(result.j) : eval(result.j);
-            }
-            pageLoaded();
-            return;
-          } else if (result.l) {
-            if (push_state) {
-              url = layerUrlToNav(url);
-              setLocation(url);
-            }
-            if (result.s) {
-              $.extend(Aj.state, result.s);
-            }
-            if (result._dlog) {
-              $('#dlog').html(result._dlog);
-            }
-            Aj.layer = $('<div class="popup-container hide" id="layer-popup-container"></div>');
-            Aj.layerState = {};
-            curOnLayerLoad = [];
-            curOnLayerUnload = [];
-            if (result.lt) {
-              document.title = result.lt;
-            }
-            if (result.ls) {
-              $.extend(Aj.layerState, result.ls);
-            }
-            Aj.layer.html(result.l).appendTo(document.body);
-            if (result.j) {
-              window.execScript ? window.execScript(result.j) : eval(result.j);
-            }
-            layerLoaded();
-            return;
-          }
-          return changeLocation(url, push_state);
+            return changeLocation(url, push_state);
         }
-      
+
         function loadPage(link, push_state, state_go) {
-          var url = link.href;
-          var cur_url = curLocation.href;
-          var cur_ref = curLocation.origin + curLocation.pathname + curLocation.search;
-          if (link.origin != curLocation.origin) {
-            return false;
-          }
-          if (link.pathname == curLocation.pathname &&
-              link.search == curLocation.search &&
-              link.hash != curLocation.hash) {
-            return false;
-          }
-          if (url == cur_url) {
-            push_state = false;
-          }
-          var load_fn, interrupted = false;
-          load_fn = function() {
-            if (!push_state) {
-              if (interrupted) {
-                historyJump(state_go);
-              }
-              curLocation = loc(url);
-              layerCloseLocation = layerCloseLoc(url);
+            var url = link.href;
+            var cur_url = curLocation.href;
+            var cur_ref =
+                curLocation.origin + curLocation.pathname + curLocation.search;
+            if (link.origin != curLocation.origin) {
+                return false;
             }
-            if (interrupted && Aj.layer) {
-              var options = Aj.layer.data('options');
-              options.onBeforeClose = null;
+            if (
+                link.pathname == curLocation.pathname &&
+                link.search == curLocation.search &&
+                link.hash != curLocation.hash
+            ) {
+                return false;
             }
-            showProgress();
-            $.ajax(url, {
-              dataType: 'json',
-              xhrFields: {withCredentials: true},
-              headers: {'X-Aj-Referer': cur_ref},
-              success: function(result, t, xhr) {
-                onResult(url, xhr.status, result, push_state);
-              },
-              error: function(xhr) {
-                onResult(url, xhr.status, false, push_state);
-              }
-            });
-          };
-          interrupted = !checkBeforeUnload(load_fn);
-          if (interrupted && !push_state) {
-            historyJump(-state_go);
-          }
-          return true;
-        }
-      
-        function _location(href, replace) {
-          if (typeof href !== 'undefined') {
-            var url = loc(href);
-            var push_state = !replace;
-            if (!loadPage(url, push_state)) {
-              changeLocation(url, push_state);
+            if (url == cur_url) {
+                push_state = false;
             }
-          } else {
-            return loc(curLocation.href);
-          }
-        }
-      
-        function layerLocation(layer_url) {
-          if (typeof layer_url !== 'undefined') {
-            var layer_href = layerOpenHref(curLocation, layer_url);
-            loadPage(loc(layer_href), true);
-          } else {
-            return layerHref(curLocation.href);
-          }
-        }
-      
-        function setLocation(href, replace = false) {
-          var url = loc(href).href;
-          var short_url = layerUrlToShort(url) || url;
-          if (replace) {
-            history.replaceState({i: curHistoryState.i, u: url}, null, short_url);
-          } else {
-            history.pushState({i: curHistoryState.i + 1, u: url}, null, short_url);
-          }
-          curHistoryState = history.state;
-          curLocation = loc(curHistoryState.u);
-          layerCloseLocation = layerCloseLoc(curHistoryState.u);
-        }
-      
-        function setLayerLocation(layer_url) {
-          layer_url = layer_url.toString().replace(/^\/+|\/+$/g, '');
-          var layer_href = layerOpenHref(curLocation, layer_url);
-          var url = loc(layer_href).href;
-          var short_url = layerUrlToShort(url) || url;
-          history.pushState({i: curHistoryState.i + 1, u: url}, null, short_url);
-          curHistoryState = history.state;
-          curLocation = loc(curHistoryState.u);
-        }
-      
-        function reload() {
-          _location(_location(), true);
-        }
-      
-        function historyJump(delta) {
-          if (delta) {
-            skipPopState = true;
-            history.go(delta);
-          }
-        }
-      
-        function needAuth() {
-          if (Aj.unauth) {
-            openPopup('#login-popup-container');
+            var load_fn,
+                interrupted = false;
+            load_fn = function () {
+                if (!push_state) {
+                    if (interrupted) {
+                        historyJump(state_go);
+                    }
+                    curLocation = loc(url);
+                    layerCloseLocation = layerCloseLoc(url);
+                }
+                if (interrupted && Aj.layer) {
+                    var options = Aj.layer.data("options");
+                    options.onBeforeClose = null;
+                }
+                showProgress();
+                $.ajax(url, {
+                    dataType: "json",
+                    xhrFields: { withCredentials: true },
+                    headers: { "X-Aj-Referer": cur_ref },
+                    success: function (result, t, xhr) {
+                        onResult(url, xhr.status, result, push_state);
+                    },
+                    error: function (xhr) {
+                        onResult(url, xhr.status, false, push_state);
+                    },
+                });
+            };
+            interrupted = !checkBeforeUnload(load_fn);
+            if (interrupted && !push_state) {
+                historyJump(-state_go);
+            }
             return true;
-          }
-          return false;
         }
-      
-        function linkHandler(e) {
-          if (e.metaKey || e.ctrlKey) return true;
-          var href = this.href;
-          if (this.hasAttribute('data-unsafe') &&
-              href != $(this).text()) {
-            var $confirm = showConfirm(l('WEB_OPEN_LINK_CONFIRM', {url: cleanHTML(href)}, 'Do you want to open <b>{url}</b>?'), null, l('WEB_OPEN_LINK', 'Open'));
-            $('.popup-primary-btn', $confirm).attr({
-              href: href,
-              target: $(this).attr('target'),
-              rel: $(this).attr('rel')
-            });
+
+        function _location(href, replace) {
+            if (typeof href !== "undefined") {
+                var url = loc(href);
+                var push_state = !replace;
+                if (!loadPage(url, push_state)) {
+                    changeLocation(url, push_state);
+                }
+            } else {
+                return loc(curLocation.href);
+            }
+        }
+
+        function layerLocation(layer_url) {
+            if (typeof layer_url !== "undefined") {
+                var layer_href = layerOpenHref(curLocation, layer_url);
+                loadPage(loc(layer_href), true);
+            } else {
+                return layerHref(curLocation.href);
+            }
+        }
+
+        function setLocation(href, replace = false) {
+            var url = loc(href).href;
+            var short_url = layerUrlToShort(url) || url;
+            if (replace) {
+                history.replaceState(
+                    { i: curHistoryState.i, u: url },
+                    null,
+                    short_url
+                );
+            } else {
+                history.pushState(
+                    { i: curHistoryState.i + 1, u: url },
+                    null,
+                    short_url
+                );
+            }
+            curHistoryState = history.state;
+            curLocation = loc(curHistoryState.u);
+            layerCloseLocation = layerCloseLoc(curHistoryState.u);
+        }
+
+        function setLayerLocation(layer_url) {
+            layer_url = layer_url.toString().replace(/^\/+|\/+$/g, "");
+            var layer_href = layerOpenHref(curLocation, layer_url);
+            var url = loc(layer_href).href;
+            var short_url = layerUrlToShort(url) || url;
+            history.pushState(
+                { i: curHistoryState.i + 1, u: url },
+                null,
+                short_url
+            );
+            curHistoryState = history.state;
+            curLocation = loc(curHistoryState.u);
+        }
+
+        function reload() {
+            _location(_location(), true);
+        }
+
+        function historyJump(delta) {
+            if (delta) {
+                skipPopState = true;
+                history.go(delta);
+            }
+        }
+
+        function needAuth() {
+            if (Aj.unauth) {
+                openPopup("#login-popup-container");
+                return true;
+            }
             return false;
-          }
-          if ($(this).attr('target') == '_blank') return true;
-          if (this.hasAttribute('data-layer')) {
-            href = layerUrlToNav(href, curLocation);
-          }
-          if ($(this).hasClass('need-auth') && needAuth() ||
-              loadPage(loc(href), true)) {
-            e.preventDefault();
-          }
         }
-      
+
+        function linkHandler(e) {
+            if (e.metaKey || e.ctrlKey) return true;
+            var href = this.href;
+            if (this.hasAttribute("data-unsafe") && href != $(this).text()) {
+                var $confirm = showConfirm(
+                    l(
+                        "WEB_OPEN_LINK_CONFIRM",
+                        { url: cleanHTML(href) },
+                        "Do you want to open <b>{url}</b>?"
+                    ),
+                    null,
+                    l("WEB_OPEN_LINK", "Open")
+                );
+                $(".popup-primary-btn", $confirm).attr({
+                    href: href,
+                    target: $(this).attr("target"),
+                    rel: $(this).attr("rel"),
+                });
+                return false;
+            }
+            if ($(this).attr("target") == "_blank") return true;
+            if (this.hasAttribute("data-layer")) {
+                href = layerUrlToNav(href, curLocation);
+            }
+            if (
+                ($(this).hasClass("need-auth") && needAuth()) ||
+                loadPage(loc(href), true)
+            ) {
+                e.preventDefault();
+            }
+        }
+
         function beforeUnloadHandler(e) {
-          var message = null;
-          if (Aj.layer && curBeforeLayerUnload) {
-            message = curBeforeLayerUnload();
-          }
-          if (!message && curBeforeUnload) {
-            message = curBeforeUnload();
-          }
-          if (message) {
-            if (typeof e === 'undefined') e = window.e;
-            if (e) e.returnValue = message;
-            return message;
-          }
+            var message = null;
+            if (Aj.layer && curBeforeLayerUnload) {
+                message = curBeforeLayerUnload();
+            }
+            if (!message && curBeforeUnload) {
+                message = curBeforeUnload();
+            }
+            if (message) {
+                if (typeof e === "undefined") e = window.e;
+                if (e) e.returnValue = message;
+                return message;
+            }
         }
         function checkBeforeUnload(load_fn) {
-          var message = null;
-          if (Aj.layer && curBeforeLayerUnload) {
-            message = curBeforeLayerUnload();
-          }
-          if (!message && curBeforeUnload) {
-            message = curBeforeUnload();
-          }
-          var load_func = function() {
-            curBeforeLayerUnload = false;
-            curBeforeUnload = false;
-            load_fn();
-          };
-          if (message) {
-            var message_html = $('<div>').text(message).html();
-            showConfirm(message_html, load_func, l('WEB_LEAVE_PAGE', 'Leave'));
-            return false;
-          } else {
-            load_func();
-            return true;
-          }
+            var message = null;
+            if (Aj.layer && curBeforeLayerUnload) {
+                message = curBeforeLayerUnload();
+            }
+            if (!message && curBeforeUnload) {
+                message = curBeforeUnload();
+            }
+            var load_func = function () {
+                curBeforeLayerUnload = false;
+                curBeforeUnload = false;
+                load_fn();
+            };
+            if (message) {
+                var message_html = $("<div>").text(message).html();
+                showConfirm(
+                    message_html,
+                    load_func,
+                    l("WEB_LEAVE_PAGE", "Leave")
+                );
+                return false;
+            } else {
+                load_func();
+                return true;
+            }
         }
-      
-        $(document).on('click', 'a[href]', linkHandler);
-        $(document.body).removeClass('no-transition');
-      
-        $(window).on('popstate', function(e) {
-          var popstate = e.originalEvent.state;
-          var state_go = popstate ? (popstate.i - curHistoryState.i) : 0;
-          if (!popstate) {
-            popstate = {i: 0, u: location.href};
-          } else if (!popstate.u) {
-            popstate.u = location.href;
-          }
-          curHistoryState = popstate;
-          if (skipPopState) {
-            skipPopState = false;
-            return;
-          }
-          if (Aj._useScrollHack) {
-            freezeBody();
-          }
-          var link = loc(curHistoryState.u);
-          var loaded = loadPage(link, false, state_go);
-          if (!loaded && Aj._useScrollHack) {
-            unfreezeBody();
-          }
+
+        $(document).on("click", "a[href]", linkHandler);
+        $(document.body).removeClass("no-transition");
+
+        $(window).on("popstate", function (e) {
+            var popstate = e.originalEvent.state;
+            var state_go = popstate ? popstate.i - curHistoryState.i : 0;
+            if (!popstate) {
+                popstate = { i: 0, u: location.href };
+            } else if (!popstate.u) {
+                popstate.u = location.href;
+            }
+            curHistoryState = popstate;
+            if (skipPopState) {
+                skipPopState = false;
+                return;
+            }
+            if (Aj._useScrollHack) {
+                freezeBody();
+            }
+            var link = loc(curHistoryState.u);
+            var loaded = loadPage(link, false, state_go);
+            if (!loaded && Aj._useScrollHack) {
+                unfreezeBody();
+            }
         });
         window.onbeforeunload = beforeUnloadHandler;
-    }
-      
+    };
+
     window.OwnerAds = {
         init: function () {
             var cont = window.Aj.ajContainer;
@@ -1012,7 +1188,11 @@
                 state.$searchResults = $(".pr-table tbody");
                 Ads.fieldInit(state.$searchField);
                 cont.on("click.curPage", ".pr-cell-sort", OwnerAds.eSortList);
-                cont.on("click.curPage", ".pr-table-settings", OwnerAds.eSettingsOpen);
+                cont.on(
+                    "click.curPage",
+                    ".pr-table-settings",
+                    OwnerAds.eSettingsOpen
+                );
                 cont.on("click.curPage", ".js-clone-ad-btn", EditAd.eCloneAd);
                 cont.on("click.curPage", ".delete-ad-btn", EditAd.deleteAd);
                 state.$tableColumnsPopup = $(".js-table-columns-popup");
@@ -1066,167 +1246,229 @@
                             var promote_url = "#";
                             var promote_url_text = l("WEB_ADS_NO_TME_LINK");
                             var promote_link =
-                                '<span class="pr-no-tme-link">' + promote_url_text + "</span>";
+                                '<span class="pr-no-tme-link">' +
+                                promote_url_text +
+                                "</span>";
                         }
                         var actions =
-                            item.actions !== false ? formatNumber(item.actions) : "–";
-                        var opens = item.opens !== false ? formatNumber(item.opens) : "–";
+                            item.actions !== false
+                                ? formatNumber(item.actions)
+                                : "–";
+                        var opens =
+                            item.opens !== false
+                                ? formatNumber(item.opens)
+                                : "–";
                         var clicks =
-                            item.clicks !== false ? formatNumber(item.clicks) : "–";
+                            item.clicks !== false
+                                ? formatNumber(item.clicks)
+                                : "–";
                         var ctr = item.ctr !== false ? item.ctr + "%" : "–";
-                        var cpc = item.cpc !== false ? Ads.wrapAmount(item.cpc) : "–";
-                        var cps = item.cps !== false ? Ads.wrapAmount(item.cps) : "–";
-                        var cpa = item.cpa !== false ? Ads.wrapAmount(item.cpa) : "–";
+                        var cpc =
+                            item.cpc !== false ? Ads.wrapAmount(item.cpc) : "–";
+                        var cps =
+                            item.cps !== false ? Ads.wrapAmount(item.cps) : "–";
+                        var cpa =
+                            item.cpa !== false ? Ads.wrapAmount(item.cpa) : "–";
                         var daily_spent =
                             item.daily_spent !== false
-                                ? "<small><br>" + Ads.wrapAmount(item.daily_spent) + "</small>"
+                                ? "<small><br>" +
+                                  Ads.wrapAmount(item.daily_spent) +
+                                  "</small>"
                                 : "";
                         var daily_budget =
                             item.daily_budget !== false
                                 ? '<small><br><a href="' +
-                                item.base_url +
-                                '/edit_daily_budget" data-layer>' +
-                                Ads.wrapAmount(item.daily_budget) +
-                                "</a></small>"
+                                  item.base_url +
+                                  '/edit_daily_budget" data-layer>' +
+                                  Ads.wrapAmount(item.daily_budget) +
+                                  "</a></small>"
                                 : "";
-                        var sugges = item.score >= 80 ? '↑' : item.score >= 70 ? '-' : item.score > 50 ? '↓' : item.score <= 30 ? 'x' : ''
+                        var sugges =
+                            item.score >= 80
+                                ? "↑"
+                                : item.score >= 70
+                                ? "-"
+                                : item.score > 50
+                                ? "↓"
+                                : item.score <= 30
+                                ? "x"
+                                : "";
                         return `<td>
                             <div class="pr-cell pr-cell-title ${title_class}" style="position: relative; padding-left: 30px;">
                                 <span style="position: absolute; top: 7px; left: 18px;
-                                color: ${ ['x', '↑'].includes(sugges) ? 'red;' : sugges == '↓' ? 'green;' : ';'}">${sugges}</span>
-                                <a href="${item.base_url}" class="pr-link">${item.title}</a>
+                                color: ${
+                                    ["x", "↑"].includes(sugges)
+                                        ? "red;"
+                                        : sugges == "↓"
+                                        ? "green;"
+                                        : ";"
+                                }">${sugges}</span>
+                                <a href="${item.base_url}" class="pr-link">${
+                            item.title
+                        }</a>
                                 <small style="display:var(--coldp-url,inline)"><br>${promote_link}</small>
                             </div>
                         </td>
 
-                        ${accountAll?.[window.user]?.options?.length === 1 ? 
-                            `
-                                <td><div class="pr-cell score">${ item.score || "" }</div></td>
-                                <td><div class="pr-cell regs">${ item.regs || "" }</div></td>
-                                <td><div class="pr-cell pays">${ item.pays || "" }</div></td>
-                                <td><div class="pr-cell money">${ item.money || "" }</div></td>
+                        ${
+                            accountAll?.[window.user]?.options?.length === 1
+                                ? `
+                                <td><div class="pr-cell score">${
+                                    item.score || ""
+                                }</div></td>
+                                <td><div class="pr-cell regs">${
+                                    item.regs || ""
+                                }</div></td>
+                                <td><div class="pr-cell pays">${
+                                    item.pays || ""
+                                }</div></td>
+                                <td><div class="pr-cell money">${
+                                    item.money || ""
+                                }</div></td>
                             `
                                 : ""
-                            }
+                        }
                         
-                        <td><div class="pr-cell qviews" style="color: ${+item?.qviews < +minViews ? "green" : ""
-                            };">${formatNumber(item?.qviews) || ""}</div></td>
+                        <td><div class="pr-cell qviews" style="color: ${
+                            +item?.qviews < +minViews ? "green" : ""
+                        };">${formatNumber(item?.qviews) || ""}</div></td>
                         <td><div class="pr-cell pviews">${Ads.wrapAmount(
-                                item?.qspent
-                            )}</div></td>
-                        <td><div class="pr-cell pviews" style="color: ${+item?.pviews < +item?.qviews ? "red" : ""
-                            };">${formatNumber(item?.pviews) || ""}</div></td>
+                            item?.qspent
+                        )}</div></td>
+                        <td><div class="pr-cell pviews" style="color: ${
+                            +item?.pviews < +item?.qviews ? "red" : ""
+                        };">${formatNumber(item?.pviews) || ""}</div></td>
                         <td><div class="pr-cell pviews">${Ads.wrapAmount(
-                                item?.pspent
-                            )}</div></td>
+                            item?.pspent
+                        )}</div></td>
 
                         <td style="display:var(--coldp-views,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${formatNumber(
-                                item.views
-                            )}</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${formatNumber(
+                            item.views
+                        )}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-opens,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${opens}</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${opens}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-clicks,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${clicks}</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${clicks}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-actions,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${actions}</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${actions}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-ctr,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${ctr}</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${ctr}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-cpm,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/edit_cpm" data-layer>${Ads.wrapAmount(
-                                item.cpm
-                            )}</a>
+                                <a href="${
+                                    item.base_url
+                                }/edit_cpm" data-layer>${Ads.wrapAmount(
+                            item.cpm
+                        )}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-cpc,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${cpc}</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${cpc}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-cpa,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${cpa}</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${cpa}</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-spent,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/stats" class="pr-link">${Ads.wrapAmount(item.spent) + daily_spent
-                            }</a>
+                                <a href="${
+                                    item.base_url
+                                }/stats" class="pr-link">${
+                            Ads.wrapAmount(item.spent) + daily_spent
+                        }</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-budget,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }/edit_budget" data-layer>${Ads.wrapAmount(
-                                item.budget
-                            )}</a>
+                                <a href="${
+                                    item.base_url
+                                }/edit_budget" data-layer>${Ads.wrapAmount(
+                            item.budget
+                        )}</a>
                                 ${daily_budget}
                             </div>
                         </td>
                         <td style="display:var(--coldp-target,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url}" class="pr-link">${item.target
-                            }</a>
+                                <a href="${item.base_url}" class="pr-link">${
+                            item.target
+                        }</a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-status,table-cell)">
                             <div class="pr-cell">
                                 <a ${status_attrs}>
-                                ${[
-                                { status: "Active", label: "通过" },
-                                { status: "In Review", label: "审核中" },
-                                { status: "Declined", label: "拒绝" },
-                                { status: "On Hold", label: "暂停" },
-                                { status: "Stopped", label: "预算不足" },
-                            ].find((v) => v.status === item.status)
-                                ?.label || item.status
-                            }
+                                ${
+                                    [
+                                        { status: "Active", label: "通过" },
+                                        {
+                                            status: "In Review",
+                                            label: "审核中",
+                                        },
+                                        { status: "Declined", label: "拒绝" },
+                                        { status: "On Hold", label: "暂停" },
+                                        {
+                                            status: "Stopped",
+                                            label: "预算不足",
+                                        },
+                                    ].find((v) => v.status === item.status)
+                                        ?.label || item.status
+                                }
                                 </a>
                             </div>
                         </td>
                         <td style="display:var(--coldp-date,table-cell)">
                             <div class="pr-cell">
-                                <a href="${item.base_url
-                            }" class="pr-link">${date.formatCustomDate(
-                                item.date
-                            )}</a>
+                                <a href="${
+                                    item.base_url
+                                }" class="pr-link">${date.formatCustomDate(
+                            item.date
+                        )}</a>
                             </div>
                         </td>
                         <td>
                             <div class="pr-actions-cell">
                                 ${Aj.state.adsDropdownTpl
-                                .replace(/\{ad_id\}/g, item.ad_id)
-                                .replace(/\{promote_url\}/g, promote_url)
-                                .replace(
-                                    /\{promote_url_text\}/g,
-                                    promote_url_text
-                                )
-                                .replace(/\{ad_text\}/g, item.text)}
+                                    .replace(/\{ad_id\}/g, item.ad_id)
+                                    .replace(/\{promote_url\}/g, promote_url)
+                                    .replace(
+                                        /\{promote_url_text\}/g,
+                                        promote_url_text
+                                    )
+                                    .replace(/\{ad_text\}/g, item.text)}
                             </div>
                         </td>`;
                     },
@@ -1321,21 +1563,30 @@
                     var $sortEl = $(this);
                     var curSortBy = $sortEl.attr("data-sort-by");
                     $sortEl.toggleClass("sort-active", sortBy == curSortBy);
-                    $sortEl.toggleClass("sort-asc", sortAsc && sortBy == curSortBy);
+                    $sortEl.toggleClass(
+                        "sort-asc",
+                        sortAsc && sortBy == curSortBy
+                    );
                 });
                 Aj.state.adsList.sort(function (ad1, ad2) {
                     var v1 = sortAsc ? ad1 : ad2;
                     var v2 = sortAsc ? ad2 : ad1;
 
-                    return v1[sortBy] - v2[sortBy] || v2?.score - v1?.score || v2?.qviews - v1?.qviews || v1.date - v2.date;
+                    return (
+                        v1[sortBy] - v2[sortBy] ||
+                        v2?.score - v1?.score ||
+                        v2?.qviews - v1?.qviews ||
+                        v1.date - v2.date
+                    );
                 });
             }
         },
         processAdsList: async function (result, opts) {
             if (!$(".table > thead > tr .pviews")?.length) {
                 $(".table > thead > tr > th:first").after(`
-                    ${accountAll?.[window.user]?.options?.length === 1
-                        ? `
+                    ${
+                        accountAll?.[window.user]?.options?.length === 1
+                            ? `
                         <th width="65" style="display:var(--coldp-score,table-cell)">
                             <div class="score pr-cell pr-cell-sort" data-sort-by="score">评分<span class="pr-sort-marker"></span></div>
                         </th>
@@ -1349,7 +1600,7 @@
                             <div class="money pr-cell pr-cell-sort" data-sort-by="money">总充值<span class="pr-sort-marker"></span></div>
                         </th>
                         `
-                        : ""
+                            : ""
                     }
                         
                     <th width="65" style="display:var(--coldp-qviews,table-cell)">
@@ -1379,15 +1630,20 @@
                 let list = [];
                 for (var i = 0; i < result.items.length; i++) {
                     var item = result.items[i];
-                    let ads = getADSKey(item)
-                    let rowViews = viewList?.find?.(v => v?.ads === ads)
+                    let ads = getADSKey(item);
+                    let rowViews = viewList?.find?.((v) => v?.ads === ads);
                     let tviews = item?.views || 0; // 当前总浏览量
                     let pviews = rowViews?.[yesday]?.["views"] || 0; // 昨日总浏览量
                     let qviews = rowViews?.[qianday]?.["views"] || 0; // 前日总浏览量
-                    let pspent = ((+item?.spent) - (+rowViews?.[yesday]?.["spent"] || 0)).toFixed(2); // 当日花费
-                    let qspent = ((+rowViews?.[yesday]?.["spent"] || 0) - (+rowViews?.[qianday]?.["spent"] || 0)).toFixed(2); // 昨日花费
+                    let pspent = (
+                        +item?.spent - (+rowViews?.[yesday]?.["spent"] || 0)
+                    ).toFixed(2); // 当日花费
+                    let qspent = (
+                        (+rowViews?.[yesday]?.["spent"] || 0) -
+                        (+rowViews?.[qianday]?.["spent"] || 0)
+                    ).toFixed(2); // 昨日花费
 
-                    let post = window.postData?.find?.(v => v?.ads === ads)
+                    let post = window.postData?.find?.((v) => v?.ads === ads);
                     if (post) {
                         if (!loadADSFlag) {
                             loadADSFlag = true;
@@ -1414,9 +1670,9 @@
                         item["money"] = 0;
                         item["_title"] = item.title;
                     }
-                    let scoreInfo = scoreAd(item)
+                    let scoreInfo = scoreAd(item);
                     item["score"] = scoreInfo?.score?.toFixed(0) || 0;
-                    item["scoreDetails"] = scoreInfo?.details || {}
+                    item["scoreDetails"] = scoreInfo?.details || {};
                     item["suggestion"] = scoreInfo?.suggestion;
                     item.base_url = "/account/ad/" + item.ad_id;
                     item._values = [
@@ -1427,7 +1683,8 @@
                 }
                 Aj.state.adsList = [...Aj.state.adsList, ...list];
                 Aj.state.adsList.sort((a, b) => {
-                    const statusDiff = statusOrder[b.status] - statusOrder[a.status];
+                    const statusDiff =
+                        statusOrder[b.status] - statusOrder[a.status];
                     if (statusDiff !== 0) return statusDiff;
 
                     const aScore = a?.score || 0;
@@ -1442,7 +1699,7 @@
 
                     // 分数都为0，用 pays 字段排序（升序）
                     const aqviews = a?.qviews || 0;
-                    const bqviews= b?.qviews || 0;
+                    const bqviews = b?.qviews || 0;
 
                     return bqviews - aqviews;
 
@@ -1460,12 +1717,18 @@
                 Aj.state.$searchField.trigger("dataready");
 
                 // 空闲时获取花费
-                requestIdleCallback((deadline) => {
-                    getMonthTotal();
-                    $("#aj_content").css({ width: "89%" });
-                    $(".pr-container").css({ "max-width": maxWidth, margin: "0 20px", });
-                }, { timeout: 2000 });
-                
+                requestIdleCallback(
+                    (deadline) => {
+                        getMonthTotal();
+                        $("#aj_content").css({ width: "89%" });
+                        $(".pr-container").css({
+                            "max-width": maxWidth,
+                            margin: "0 20px",
+                        });
+                    },
+                    { timeout: 2000 }
+                );
+
                 window.isLoad = true;
             }
         },
@@ -1519,7 +1782,10 @@
             for (var i = 0; i < adsList.length; i++) {
                 if (ad.ad_id == adsList[i].ad_id) {
                     ad.base_url = "/account/ad/" + ad.ad_id;
-                    ad._values = [ad.title.toLowerCase(), ad.tme_path.toLowerCase()];
+                    ad._values = [
+                        ad.title.toLowerCase(),
+                        ad.tme_path.toLowerCase(),
+                    ];
                     adsList[i] = ad;
                     OwnerAds.updateAdsList();
                     Aj.state.$searchField.trigger("contentchange");
@@ -1608,7 +1874,8 @@
                     //     valueChange();
                     //   }, 50);
                     // } else {
-                    options.onInputBeforeChange && options.onInputBeforeChange(value);
+                    options.onInputBeforeChange &&
+                        options.onInputBeforeChange(value);
                     valueChange();
                     options.onInput && options.onInput(value);
                     open();
@@ -1668,9 +1935,11 @@
                 let isSort = $(".sort-active");
 
                 result.sort(function (a, b) {
-                    if (isSort.length) return a._score - b._score || a._i - b._i;
+                    if (isSort.length)
+                        return a._score - b._score || a._i - b._i;
 
-                    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+                    const statusDiff =
+                        statusOrder[a.status] - statusOrder[b.status];
                     if (statusDiff !== 0) return statusDiff;
 
                     const aScore = a?.score || 0;
@@ -1726,15 +1995,16 @@
                             "search-item" +
                             (options.itemClass ? " " + options.itemClass : "") +
                             (item.className ? " " + item.className : "");
-                        var item_html =
-                            `<${tagName} class="${className}" data-i="${i}">
+                        var item_html = `<${tagName} class="${className}" data-i="${i}">
                                 ${options.renderItem(item, query)}
                             </${tagName}>`;
                         html += item_html;
                     }
                     curRenderedIndex = i;
                 } else {
-                    html = options.renderNoItems ? options.renderNoItems(query) : "";
+                    html = options.renderNoItems
+                        ? options.renderNoItems(query)
+                        : "";
                     curRenderedIndex = 0;
                 }
                 if (curRenderedIndex >= result.length) {
@@ -1811,7 +2081,8 @@
                 var value = $field.value();
                 if (
                     curValue != value ||
-                    (options.searchEnabled() && options.getData(value) === false)
+                    (options.searchEnabled() &&
+                        options.getData(value) === false)
                 ) {
                     valueChange();
                 }
@@ -1861,7 +2132,10 @@
                         if (curResult.length && !options.enterEnabled()) {
                             index = 0;
                         }
-                        if (options.selectFullMatch && curResult.fullMatchIndex !== null) {
+                        if (
+                            options.selectFullMatch &&
+                            curResult.fullMatchIndex !== null
+                        ) {
                             index = curResult.fullMatchIndex;
                         }
                     } else {
@@ -1876,7 +2150,9 @@
             }
 
             function hover(i, adjust_scroll, middle) {
-                $(".search-item.selected", options.$results).removeClass("selected");
+                $(".search-item.selected", options.$results).removeClass(
+                    "selected"
+                );
                 curSelectedIndex = i;
                 if (curSelectedIndex !== false) {
                     var selectedEl = $(".search-item", options.$results).get(
@@ -1895,7 +2171,10 @@
                     }
                 }
                 if (options.$enter && options.enterEnabled()) {
-                    options.$enter.toggleClass("selected", curSelectedIndex === false);
+                    options.$enter.toggleClass(
+                        "selected",
+                        curSelectedIndex === false
+                    );
                 }
             }
 
@@ -1932,10 +2211,14 @@
             function updateScrollState() {
                 var results = options.$results.get(0);
                 if (results) {
-                    options.$results.toggleClass("topscroll", results.scrollTop > 0);
+                    options.$results.toggleClass(
+                        "topscroll",
+                        results.scrollTop > 0
+                    );
                     options.$results.toggleClass(
                         "bottomscroll",
-                        results.scrollTop < results.scrollHeight - results.clientHeight
+                        results.scrollTop <
+                            results.scrollHeight - results.clientHeight
                     );
                 }
             }
@@ -1951,7 +2234,10 @@
                         render(curResult, curValue, curRenderedIndex);
                     }
                 } else {
-                    if (this.scrollTop > this.scrollHeight - this.clientHeight - 1000) {
+                    if (
+                        this.scrollTop >
+                        this.scrollHeight - this.clientHeight - 1000
+                    ) {
                         render(curResult, curValue, curRenderedIndex);
                     }
                 }
@@ -1973,7 +2259,9 @@
                     contHeight = options.$results.height() || 300;
 
                 if (middle) {
-                    options.$results.scrollTop(itemTop - (contHeight - itemHeight) / 2);
+                    options.$results.scrollTop(
+                        itemTop - (contHeight - itemHeight) / 2
+                    );
                 } else if (itemTop < scrollTop) {
                     options.$results.scrollTop(itemTop);
                 } else if (itemBottom > scrollTop + contHeight) {
@@ -1987,8 +2275,16 @@
                 options.$enter.data("i", false);
             }
             options.$results.on("hover.search", ".search-item", onItemHover);
-            options.$results.on("mouseover.search", ".search-item", onItemMouseOver);
-            options.$results.on("mousedown.search", ".search-item", onItemClick);
+            options.$results.on(
+                "mouseover.search",
+                ".search-item",
+                onItemMouseOver
+            );
+            options.$results.on(
+                "mousedown.search",
+                ".search-item",
+                onItemClick
+            );
             if (options.resultsNotScrollable) {
                 $(window).on("scroll.search", onResultsScroll);
             } else {
@@ -2063,8 +2359,12 @@
         const $target = $(".pr-header-text");
         const text = `${M}月总消耗: ${mAmount}`;
         let $existing = $target.find(".mAmount");
-        $existing.length > 0 ? $existing.text(text) : $target.append(`<span class="mAmount" style="margin-left: 10px; color: red;">${text}</span>`);
-        return mAmount
+        $existing.length > 0
+            ? $existing.text(text)
+            : $target.append(
+                  `<span class="mAmount" style="margin-left: 10px; color: red;">${text}</span>`
+              );
+        return mAmount;
     };
 
     // 等待 jQuery 注入（页面加载）
@@ -2077,7 +2377,7 @@
     // 根据类型获取文案
     const getUserText = (value, text) => {
         let type = value || $(".select")?.val()?.split("?")?.[0] || "";
-        
+
         // 金貝供需单独处理
         if (type === "jbgq") {
             const classify = $(".GQClassify")?.val();
@@ -2091,8 +2391,8 @@
         }
 
         // 金貝飞投
-        if (type === 'JB7777_BOT') {
-            let emjo = `![😀](tg://emoji?id=6093793027988393802)![😀](tg://emoji?id=6091314909168012709)![😀](tg://emoji?id=6093901746495557133)![😀](tg://emoji?id=6093916216240377552) `
+        if (type === "JB7777_BOT") {
+            let emjo = `![😀](tg://emoji?id=6093793027988393802)![😀](tg://emoji?id=6091314909168012709)![😀](tg://emoji?id=6093901746495557133)![😀](tg://emoji?id=6093916216240377552) `;
             if (texts?.[type]?.length) {
                 return texts[type].map((v) => emjo + v);
             }
@@ -2102,33 +2402,40 @@
     };
 
     // 根据类型获取推广链接
-    const getUserUrl = () => {
+    const getUserUrl = (url) => {
         let tgname = $(".select")?.val();
 
         // 先区分账号, 在区分下拉框选项
-        if (fbtg?.includes?.(window.user)) {
-            // 正常推广金貝链接
+        if (fbtg?.includes?.(window.user) || tstg?.includes?.(window.user)) {
+            const platform = fbtg?.includes?.(window.user)
+                ? "JB7777_BOT"
+                : tstg?.includes?.(window.user)
+                ? "TSYL666bot"
+                : "";
+            const code = accountAll?.[window.user]?.["code"]; // 推广码
             const source = "ADS"; // 来源
-            const code = accountAll?.[window.user]?.['code'] ?? 53377; // 推广码
-            const browserNum = accountAll?.[window.user]?.['browser'] ?? "N"; // 浏览器编号 没有为N代替
-            const accountEN = accountAll?.[window.user]?.['en'] ?? "null"; // 推广账号
-            const postID = guid(); // 推广ID
-            return `t.me/JB7777_BOT?start=${code}_${source}-${accountEN}-${browserNum}${postID}`;
-        } else if (tstg?.includes?.(window.user)) {
-            // 正常推广天胜链接
-            const source = "ADS"; // 来源
-            const code = accountAll?.[window.user]?.['code'] ?? ''; // 推广码
-            const browserNum = accountAll?.[window.user]?.['browser'] ?? "N"; // 浏览器编号 没有为N代替
-            const accountEN = accountAll?.[window.user]?.['en'] ?? "null"; // 推广账号
-            const postID = guid(); // 推广ID
-            return `t.me/TSYL666bot?start=${code}_${source}-${accountEN}-${browserNum}${postID}`;
+            const accountEN = accountAll?.[window.user]?.["en"] ?? "null"; // 推广账号
+            let postID = ""; // 推广ID, 区分单链接(前6(频道用户名id) + 后4(随机文本)) 和 多链接(沿用之前的逻辑),
+            if (url?.length) {
+                const shortId = getShortId(url); // 6位数
+                const guid = guid(4); // 4位数
+                postID = `${shortId}${guid}`;
+            } else {
+                postID = guid(9);
+            }
+
+            if (!platform || !code) return false;
+            return `t.me/${platform}?start=${code}_${source}-${accountEN}-${postID}`;
         } else {
-            return `t.me/${tgname}`
+            return `t.me/${tgname}`;
         }
     };
 
     // 获取余额
-    const getMoney = () => $(".js-header_owner_budget .pr-link").text().match(/(\d+)(?=\s*\.)/)?.[0] || 0;
+    const getMoney = () =>
+        $(".js-header_owner_budget .pr-link")
+            .text()
+            .match(/(\d+)(?=\s*\.)/)?.[0] || 0;
 
     // 刷新
     const onRefresh = async () => {
@@ -2153,40 +2460,45 @@
     const getADSKey = (row) => {
         let tmp = row?.tme_path?.split("_") || [];
         let ads = tmp[tmp.length - 1] || "";
-            ads = ads?.toLowerCase()?.includes('ads') ? ads : `ADS-${accountAll?.[window.user]?.['en']}-${row?.ad_id}`;
+        ads = ads?.toLowerCase()?.includes("ads")
+            ? ads
+            : `ADS-${accountAll?.[window.user]?.["en"]}-${row?.ad_id}`;
         return ads;
-    }
+    };
 
     // 帖子同步
     const syncAds = async (arr) => {
-        const list = arr?.filter?.(v => {
-            if (!v?.ads?.toLowerCase()?.includes('ads')) return false;
-            return true
-        })
+        const list = arr?.filter?.((v) => {
+            if (!v?.ads?.toLowerCase()?.includes("ads")) return false;
+            return true;
+        });
 
-        if(list?.some(v => v?.ads === '' || v?.title === '')) {
-            return toast('部分帖子缺少必要参数, 同步失败')
-        } 
+        if (list?.some((v) => v?.ads === "" || v?.title === "")) {
+            return toast("部分帖子缺少必要参数, 同步失败");
+        }
 
-        const res = window.post('/ads/syncAds', { list })
+        const res = window.post("/ads/syncAds", { list });
         if (res) {
             toast("帖子同步成功");
         }
-    }
+    };
 
     // 同步所有帖子
     const syncAdsAll = async () => {
         let list = OwnerAds.getAdsList();
-        list = list?.map(v => ({ ads: getADSKey(v), title: v?._title || "" }))
+        list = list?.map((v) => ({
+            ads: getADSKey(v),
+            title: v?._title || "",
+        }));
         await syncAds(list);
-        return true
-    }
+        return true;
+    };
 
     // 单条广告增加预算
     const asyncAddAmount = async (row) => {
-        let owner_id = Aj.state.ownerId
-        let ad_id = row.ad_id
-        let amount = row.add_budget
+        let owner_id = Aj.state.ownerId;
+        let ad_id = row.ad_id;
+        let amount = row.add_budget;
         let params = { owner_id, ad_id, amount, popup: 1 };
         return new Promise((resolve) => {
             Aj.apiRequest("incrAdBudget", params, function (result) {
@@ -2200,7 +2512,9 @@
                 }
                 if (result.header_owner_budget) {
                     // 更新总金额
-                    $(".js-header_owner_budget").html(result.header_owner_budget);
+                    $(".js-header_owner_budget").html(
+                        result.header_owner_budget
+                    );
                 }
                 if (result.owner_budget) {
                     $(".js-owner_budget").html(result.owner_budget);
@@ -2212,7 +2526,7 @@
                 resolve(true);
             });
         });
-    }
+    };
 
     // 自动加预算
     const addMountFn = async () => {
@@ -2280,7 +2594,7 @@
             return false;
         }
 
-        if(getMoney() < 1){
+        if (getMoney() < 1) {
             clearInterval(timerID);
             timerID = null;
             toast("余额不足 !!!");
@@ -2290,12 +2604,12 @@
         Aj.showProgress();
 
         for (const row of list) {
-            let res = await asyncAddAmount(row)
-            if(res) {
+            let res = await asyncAddAmount(row);
+            if (res) {
                 toast(`${row.title}增加${row.add_budget}成功!`);
             }
 
-            if(getMoney() < 1){
+            if (getMoney() < 1) {
                 Aj.hideProgress();
                 clearInterval(timerID);
                 timerID = null;
@@ -2320,13 +2634,14 @@
                     return false;
                 } else {
                     let ads = getADSKey(item);
-                    const res = await window.post('/ads/recordCpm', {
-                        ads, cpm, 
+                    const res = await window.post("/ads/recordCpm", {
+                        ads,
+                        cpm,
                         float: (cpm - item.cpm).toFixed(2),
                         views: item?.views || 0,
                         clicks: item?.clicks || 0,
                         actions: item?.actions || 0,
-                    })
+                    });
 
                     if (result.ad) {
                         OwnerAds.updateAd(result.ad);
@@ -2360,9 +2675,9 @@
 
         let promiseArr = list.map(async (item) => {
             let romPrice = 0;
-            if (item?.qviews < (+minViews * 0.3)) {
+            if (item?.qviews < +minViews * 0.3) {
                 romPrice = (item.cpm * 0.1).toFixed(2);
-            } else if (item?.qviews < (+minViews * 0.5)) {
+            } else if (item?.qviews < +minViews * 0.5) {
                 romPrice = (item.cpm * 0.05).toFixed(2);
             } else {
                 romPrice = (item.cpm * 0.01).toFixed(2);
@@ -2386,7 +2701,11 @@
     const onProAddPrice = async () => {
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
-            if (v.status === "Active" && v.qviews > +minViews && v.qviews <= +minViews * 20) {
+            if (
+                v.status === "Active" &&
+                v.qviews > +minViews &&
+                v.qviews <= +minViews * 20
+            ) {
                 $(`a[href="/account/ad/${v.ad_id}"]`)
                     .first()
                     .parents("tr")
@@ -2404,9 +2723,9 @@
 
         let promiseArr = list.map(async (item) => {
             let romPrice = 0;
-            if (item?.qviews > (+minViews * 10)) {
+            if (item?.qviews > +minViews * 10) {
                 romPrice = (item.cpm * 0.01).toFixed(2);
-            } else if (item?.qviews > (+minViews * 5)) {
+            } else if (item?.qviews > +minViews * 5) {
                 romPrice = (item.cpm * 0.02).toFixed(2);
             } else {
                 romPrice = (item.cpm * 0.03).toFixed(2);
@@ -2424,13 +2743,18 @@
         Aj.hideProgress();
         toast(`加价完成：成功${successNum}条，失败${errorNum}条`);
         await onRefresh();
-    }
+    };
 
     // 筛选低评分帖子
     const onFilter = async () => {
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
-            if (v.status !== 'On Hold' && v.views > 2000 && v.ctr < 1 && v.cvr < 10) {
+            if (
+                v.status !== "On Hold" &&
+                v.views > 2000 &&
+                v.ctr < 1 &&
+                v.cvr < 10
+            ) {
                 $(`a[href="/account/ad/${v.ad_id}"]`)
                     .first()
                     .parents("tr")
@@ -2440,30 +2764,34 @@
             }
             return false;
         });
-    }
+    };
 
     // 设置单价
-    $("body").on("click", 'td[style="display:var(--coldp-cpm,table-cell)"] a', async function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    $("body").on(
+        "click",
+        'td[style="display:var(--coldp-cpm,table-cell)"] a',
+        async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-        let list = OwnerAds.getAdsList();
-        let ad_id = $(this).attr("href")?.split("/")?.[3];
-        if (!ad_id) return false;
+            let list = OwnerAds.getAdsList();
+            let ad_id = $(this).attr("href")?.split("/")?.[3];
+            if (!ad_id) return false;
 
-        const item = list?.find?.((v) => +v?.ad_id === +ad_id);
+            const item = list?.find?.((v) => +v?.ad_id === +ad_id);
 
-        const cpm = await prompt(item?._title || item?.title);
-        if (cpm <= 0) return false;
+            const cpm = await prompt(item?._title || item?.title);
+            if (cpm <= 0) return false;
 
-        Aj.showProgress();
-        let res = await editCPM(item, cpm);
-        Aj.hideProgress();
+            Aj.showProgress();
+            let res = await editCPM(item, cpm);
+            Aj.hideProgress();
 
-        if (!res) return toast("设置cpm失败 !");
+            if (!res) return toast("设置cpm失败 !");
 
-        await onRefresh();
-    });
+            await onRefresh();
+        }
+    );
 
     // 查询频道 / 机器人
     const searchChannel = (isBot, value) => {
@@ -2482,9 +2810,15 @@
                     if (result.ok) {
                         let item = {
                             val: isBot ? result.bot.id : result.channel.val,
-                            name: isBot ? result.bot.title : result.channel.name,
-                            photo: isBot ? result.bot.photo : result.channel.photo,
-                            username: isBot ? result.bot.username : result.channel.username,
+                            name: isBot
+                                ? result.bot.title
+                                : result.channel.name,
+                            photo: isBot
+                                ? result.bot.photo
+                                : result.channel.photo,
+                            username: isBot
+                                ? result.bot.username
+                                : result.channel.username,
                         };
                         resolve(item);
                     } else {
@@ -2502,10 +2836,13 @@
     // 关键字查询结果
     const onTargetQuerySearch = (query) => {
         return new Promise((resolve) => {
-            Aj.apiRequest("searchTargetQuery",{ query }, (result) => {
+            Aj.apiRequest("searchTargetQuery", { query }, (result) => {
                 if (result.error) return resolve(false);
                 if (result.query) {
-                    let html = new DOMParser().parseFromString(result?.query?.sample_results, "text/html");
+                    let html = new DOMParser().parseFromString(
+                        result?.query?.sample_results,
+                        "text/html"
+                    );
                     if ($(html).find(".empty").length > 0) {
                         resolve(false);
                     } else {
@@ -2517,7 +2854,7 @@
                         resolve(item);
                     }
                 }
-            })
+            });
         });
     };
 
@@ -2535,18 +2872,37 @@
             active: 1, // 开始投放
             device: undefined, // undefined
         };
-        const { title = '', text = '', promote_url = '', cpm = 0, budget = 0, target_type = '' } = params
-        if(!title || !text || !promote_url || !cpm) return toast("标题、文案、推广链接、CPM 不能为空");
+        const {
+            title = "",
+            text = "",
+            promote_url = "",
+            cpm = 0,
+            budget = 0,
+            target_type = "",
+        } = params;
+        if (!title || !text || !promote_url || !cpm)
+            return toast("标题、文案、推广链接、CPM 不能为空");
 
         return new Promise((resolve) => {
-            Aj.apiRequest("createAd", {...query, ...params}, async (result) => {
-                if (result.error) {
-                    resolve(false);
-                } else {
-                    await syncAds([{ ads: params?.promote_url?.split("_")?.pop() || "", title: params.title || "" }]);
-                    resolve(true);
+            Aj.apiRequest(
+                "createAd",
+                { ...query, ...params },
+                async (result) => {
+                    if (result.error) {
+                        resolve(false);
+                    } else {
+                        await syncAds([
+                            {
+                                ads:
+                                    params?.promote_url?.split("_")?.pop() ||
+                                    "",
+                                title: params.title || "",
+                            },
+                        ]);
+                        resolve(true);
+                    }
                 }
-            });
+            );
         });
     };
 
@@ -2555,20 +2911,23 @@
         // 获取文案
         let key = row.tme_path?.split?.("?")?.[0];
         const obj = {
-            'tsyl': 'TSYL666bot',   // 天胜
-            'tsyx': 'TSYL666bot',   // 天胜
-            'jbtb': 'JB7777_BOT',   // 金貝
-            'jbyx': 'JB7777_BOT',   // 金貝
-            'jbdp': 'JBYL_bot',     // 金博
-        }
-        let texts = getUserText((obj[key] || key), row.text);
-        if(!texts?.length) {
+            tsyl: "TSYL666bot", // 天胜
+            tsyx: "TSYL666bot", // 天胜
+            jbtb: "JB7777_BOT", // 金貝
+            jbyx: "JB7777_BOT", // 金貝
+            jbdp: "JBYL_bot", // 金博
+        };
+        let texts = getUserText(obj[key] || key, row.text);
+        if (!texts?.length) {
             return false;
         }
 
         // 根据ad_id获取图片id
-        let html = await getHTML(`https://ads.telegram.org/account/ad/${row.ad_id}`, "h");
-        let media = html.find('input[name="media"]')?.val() || ''
+        let html = await getHTML(
+            `https://ads.telegram.org/account/ad/${row.ad_id}`,
+            "h"
+        );
+        let media = html.find('input[name="media"]')?.val() || "";
 
         let data = {
             owner_id: Aj.state.ownerId,
@@ -2591,22 +2950,25 @@
             }
             return true;
         });
-    }
+    };
 
     // 删除广告
     const deleteAd = async (ad_id, owner_id = Aj.state.ownerId) => {
         return new Promise((resolve, reject) => {
-            
             Aj.apiRequest("deleteAd", { owner_id, ad_id }, (res1) => {
                 if (res1.error) return resolve(false);
 
-                Aj.apiRequest("deleteAd", { owner_id, ad_id, confirm_hash: res1.confirm_hash }, (res2) => {
-                    if (res2.ok) return resolve(true)
-                    return resolve(false);
-                });
+                Aj.apiRequest(
+                    "deleteAd",
+                    { owner_id, ad_id, confirm_hash: res1.confirm_hash },
+                    (res2) => {
+                        if (res2.ok) return resolve(true);
+                        return resolve(false);
+                    }
+                );
             });
-        })
-    }
+        });
+    };
 
     // 一键重审
     const onReview = async () => {
@@ -2622,10 +2984,10 @@
         if (!list.length) return toast("没有需要审核的广告 !!!");
 
         Aj.showProgress();
-        const submitArr = []
+        const submitArr = [];
         for (const row of list) {
-            let res = await editAd(row)
-            submitArr.push(res)
+            let res = await editAd(row);
+            submitArr.push(res);
         }
         let successNum = submitArr.filter((flag) => flag)?.length;
         let errorNum = submitArr.filter((flag) => !flag)?.length;
@@ -2634,80 +2996,7 @@
         toast(`审核完成：成功${successNum}条，失败${errorNum}条`);
 
         await onRefresh();
-    }
-
-    // 一键审核，搜索广告不重审
-    // const onReview1 = async () => {
-    //     await onRefresh();
-
-    //     let list = OwnerAds.getAdsList();
-    //     list = list.filter((v) => {
-    //         if (v.status !== "Declined") return false;
-    //         if (v.trg_type === "search") return false;
-    //         v["url"] = `${host}${v.base_url}`;
-
-    //         return true;
-    //     });
-
-    //     if (!list.length) {
-    //         toast("没有需要审核的广告 !!!");
-    //         return false;
-    //     }
-
-    //     let submitPromise = list.map((v, i) => {
-    //         let key = v.tme_path?.split?.("?")?.[0];
-    //         if(key === 'tsyl' || key === 'tsyx') {
-    //             key = 'TSYL666bot'
-    //         } else if (key === 'jbtb' || key === 'jbyx'){
-    //             key = 'JB7777_BOT'
-    //         } else if (key === 'jbdp') {
-    //             key = 'JBYL_bot'
-    //         }
-    //         let texts = getUserText(key, v.text);
-    //         if (texts?.length) {
-    //             return new Promise((resolve) => {
-    //                 let params = {
-    //                     owner_id: Aj.state.ownerId,
-    //                     ad_id: v.ad_id,
-    //                     title: v?.["_title"] || v?.title,
-    //                     text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-    //                     promote_url: `t.me/${v.tme_path}`, // 推广链接
-    //                     website_name: "",
-    //                     website_photo: "",
-    //                     media: "",
-    //                     ad_info: "",
-    //                     cpm: v.cpm,
-    //                     daily_budget: v.daily_budget || 0,
-    //                     active: 1,
-    //                     views_per_user: getRNum(1, 4), // 观看次数
-    //                 };
-    //                 Aj.apiRequest("editAd", params, function (result) {
-    //                     if (result.error) {
-    //                         resolve(false);
-    //                     }
-    //                     resolve(true);
-    //                 });
-    //             });
-    //         } else {
-    //             return false;
-    //         }
-    //     });
-
-    //     submitPromise = submitPromise?.filter?.((v) => v);
-
-    //     Aj.showProgress();
-
-    //     let submitArr = await Promise.all(submitPromise); // 等待所有任务完成
-
-    //     let successNum = submitArr.filter((flag) => flag)?.length;
-    //     let errorNum = submitArr.filter((flag) => !flag)?.length;
-
-    //     Aj.hideProgress();
-
-    //     toast(`审核完成：成功${successNum}条，失败${errorNum}条`);
-
-    //     await onRefresh();
-    // };
+    };
 
     // 替换文案
     const onReplace = async () => {
@@ -2726,11 +3015,11 @@
 
         let submitPromise = list.map((v, i) => {
             let key = v.tme_path?.split?.("?")?.[0];
-                if(key === 'tsyl' || key === 'tsyx') {
-                    key = 'TSYL666bot'
-                } else if (key === 'jbtb' || key === 'jbyx'){
-                    key = 'JB7777_BOT'
-                }
+            if (key === "tsyl" || key === "tsyx") {
+                key = "TSYL666bot";
+            } else if (key === "jbtb" || key === "jbyx") {
+                key = "JB7777_BOT";
+            }
             let texts = getUserText(key, v.text);
             return new Promise((resolve) => {
                 let params = {
@@ -2825,7 +3114,8 @@
             });
         });
 
-        if (!submitDelPromise.length) return toast("广告冷却中, 请稍后删除 !!!");
+        if (!submitDelPromise.length)
+            return toast("广告冷却中, 请稍后删除 !!!");
 
         Aj.showProgress();
 
@@ -2836,7 +3126,8 @@
         Aj.hideProgress();
 
         toast(
-            `删除广告：成功${successNum}条，失败${errorNum}条, ${list.length - successNum - errorNum
+            `删除广告：成功${successNum}条，失败${errorNum}条, ${
+                list.length - successNum - errorNum
             }条正在冷却`,
             async () => {
                 await onRefresh();
@@ -2858,10 +3149,12 @@
         if (!keys.length) return toast("已剔除不符合的关键词，剩余0条符合");
 
         keys = keys.length > 10 ? keys.slice(0, 10) : keys;
-        let keyPromise = keys.map(async (key) => await onTargetQuerySearch(key));
+        let keyPromise = keys.map(
+            async (key) => await onTargetQuerySearch(key)
+        );
         let searchArr = await Promise.all(keyPromise); // 查询所有的关键词
 
-        if(!searchArr.length) return toast("没有符合的关键词");
+        if (!searchArr.length) return toast("没有符合的关键词");
 
         // 随机设置单价
         let minPrice = parseFloat($("#minPrice").val());
@@ -2874,7 +3167,7 @@
         let title = [];
         let ids = [];
         searchArr.map((v) => {
-            title.push(v.name)
+            title.push(v.name);
             ids.push(v.val);
         });
 
@@ -2922,11 +3215,11 @@
         urls = urls.split(/\r?\n/);
 
         let texts = getUserText();
-        if(!texts?.length) return false
+        if (!texts?.length) return false;
 
         Aj.showProgress();
 
-        const sendArr = []
+        const sendArr = [];
         for (const url of urls) {
             let isBot = /bot$/i.test(url);
             let channelinfo = await searchChannel(isBot, url);
@@ -2935,8 +3228,8 @@
                 channelinfo = await searchChannel(isBot, url);
                 if (!channelinfo) {
                     toast(`${url}，发布失败！`);
-                    sendArr.push(false)
-                    continue;   // 进入下一次循环
+                    sendArr.push(false);
+                    continue; // 进入下一次循环
                 }
             }
 
@@ -2957,15 +3250,15 @@
             let params = {
                 title, // 标题
                 text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-                promote_url: getUserUrl(), // 推广链接
+                promote_url: getUserUrl(url), // 推广链接
                 cpm: getRNum(minPrice, maxPrice, 1), // 单价
                 budget: getRNum(minBudget, maxBudget), // 总预算
                 target_type: isBot ? "bots" : "channels", // bots
             };
-            isBot ? (params["bots"] = id) : (params["channels"] = id)
-            const isFlag = await createAd(params)
-            sendArr.push(isFlag)
-            if(isFlag){
+            isBot ? (params["bots"] = id) : (params["channels"] = id);
+            const isFlag = await createAd(params);
+            sendArr.push(isFlag);
+            if (isFlag) {
                 toast(`${title}，发布成功！`);
             } else {
                 toast(`${title}，发布失败！`);
@@ -2999,7 +3292,9 @@
         let isBot = /bot$/i.test(urls?.[0]);
 
         // 查询频道 或 帖子, 获取标题和ID
-        let channelPromise = urls.map(async (v) => await searchChannel(isBot, v));
+        let channelPromise = urls.map(
+            async (v) => await searchChannel(isBot, v)
+        );
         let channelArr = await Promise.all(channelPromise); // 查询所有通道
 
         let title = "";
@@ -3050,7 +3345,7 @@
         let list = OwnerAds.getAdsList();
         list = list.filter((v) => {
             if (v.status !== "Declined") return false;
-            if (v.trg_type === "search") return false
+            if (v.trg_type === "search") return false;
             v["url"] = `${host}${v.base_url}`;
             return true;
         });
@@ -3060,33 +3355,36 @@
             return false;
         }
         if (getMoney() < 2) return toast("余额过低");
-        const owner_id = Aj.state.ownerId
+        const owner_id = Aj.state.ownerId;
         for (const v of list) {
             Aj.showProgress();
 
-            const html = await getHTML(v.url, "h")
-            let ids = html.find(".select").data('value');
-            let isBot = v.trg_type === 'bot' ? true : false;
+            const html = await getHTML(v.url, "h");
+            let ids = html.find(".select").data("value");
+            let isBot = v.trg_type === "bot" ? true : false;
 
             let params = {
                 title: v.title, // 标题
                 text: v.text, // 文案
-                promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}`, // 推广链接
+                promote_url: `t.me/${v.tme_path?.replace(
+                    /JB6666_BOT/gi,
+                    "JB7777_BOT"
+                )}`, // 推广链接
                 cpm: v.cpm, // 单价
                 budget: 1, // 总预算
                 target_type: v.trg_type, // 类型
             };
-            isBot ? (params["bots"] = ids) : (params["channels"] = ids)
-            const isFlag = await createAd(params)
-            if(isFlag){
-                await deleteAd(v.ad_id, owner_id)
+            isBot ? (params["bots"] = ids) : (params["channels"] = ids);
+            const isFlag = await createAd(params);
+            if (isFlag) {
+                await deleteAd(v.ad_id, owner_id);
                 Aj.hideProgress();
-                toast(`${v.title}新建成功, 旧广告已删除!`)
+                toast(`${v.title}新建成功, 旧广告已删除!`);
             } else {
                 const result = [];
-                html?.find?.('.selected-item')?.each(function () {
-                    const dataVal = $(this).data('val');
-                    const label = $(this).find('.label').text().trim();
+                html?.find?.(".selected-item")?.each(function () {
+                    const dataVal = $(this).data("val");
+                    const label = $(this).find(".label").text().trim();
                     result.push({ id: dataVal, title: label });
                 });
 
@@ -3094,36 +3392,45 @@
                     let query = {
                         title: row.title, // 标题
                         text: v.text, // 文案
-                        promote_url: `t.me/${v.tme_path?.replace(/JB6666_BOT/ig, 'JB7777_BOT')}-${row.id}`, // 推广链接
+                        promote_url: `t.me/${v.tme_path?.replace(
+                            /JB6666_BOT/gi,
+                            "JB7777_BOT"
+                        )}-${row.id}`, // 推广链接
                         cpm: v.cpm, // 单价
                         budget: 1, // 总预算
                         target_type: isBot ? "bots" : "channels", // 类型
                     };
-                    isBot ? (params["bots"] = row.id) : (params["channels"] = row.id)
-                    await createAd(query)
+                    isBot
+                        ? (params["bots"] = row.id)
+                        : (params["channels"] = row.id);
+                    await createAd(query);
                 }
 
-                await deleteAd(v.ad_id, owner_id)
+                await deleteAd(v.ad_id, owner_id);
                 Aj.hideProgress();
-                toast(`${v.title}新建成功, 旧广告已删除!`)
+                toast(`${v.title}新建成功, 旧广告已删除!`);
             }
         }
 
         await onRefresh();
-    }
+    };
 
     // 查看哪些链接协议号注册多
     const onGetENFilter = async () => {
-        const res = await window.get('/ads/getAdsUEN', { ads: accountAll?.[window.user]?.['en'] })
-        console.log(res.data)
-    }
+        const res = await window.get("/ads/getAdsUEN", {
+            ads: accountAll?.[window.user]?.["en"],
+        });
+        console.log(res.data);
+    };
 
     // 获取今日数据
     const onGetTodayData = async () => {
-        await syncAdsAll()
-        const res = await window.get('/ads/getTodayData', { ads: accountAll?.[window.user]?.['en'] })
-        console.log(res.data)
-    }
+        await syncAdsAll();
+        const res = await window.get("/ads/getTodayData", {
+            ads: accountAll?.[window.user]?.["en"],
+        });
+        console.log(res.data);
+    };
 
     // 提取数据
     const extractMiddleMultiple = (str, start, end) => {
@@ -3155,7 +3462,15 @@
 
         // 如果不够当日8点, 往最后一天插入一个时间戳
         const now = new Date();
-        const eightAM = new Date(now.getFullYear(),now.getMonth(),now.getDate(),8,0,0,0);
+        const eightAM = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            8,
+            0,
+            0,
+            0
+        );
         if (now < eightAM) {
             const timestamp = eightAM.getTime();
             dates.push(timestamp);
@@ -3169,7 +3484,7 @@
             return toast("暂无数据 !!!");
         }
 
-        let tmp = await window.get('/ads/cpmList', { ads })
+        let tmp = await window.get("/ads/cpmList", { ads });
         let cpms = tmp?.data || [];
         console.log("cpms", cpms);
 
@@ -3221,8 +3536,9 @@
                 tableHtml += `
                         <div>
                             ${z.slice(0, 9)}
-                            <span style="color: ${+v.float[i] > 0 ? "red" : "green"
-                    };">
+                            <span style="color: ${
+                                +v.float[i] > 0 ? "red" : "green"
+                            };">
                             ${z.slice(10, z.length)}
                             </span>
                         </div>
@@ -3284,51 +3600,72 @@
     };
 
     // 双击展示报表
-    $("body").on("dblclick", "tbody>tr", function (event) {
-        let url = $(this)?.find('[style*="display:var(--coldp-views,table-cell)"] a')?.attr("href");
+    $("body")
+        .on("dblclick", "tbody>tr", function (event) {
+            let url = $(this)
+                ?.find('[style*="display:var(--coldp-views,table-cell)"] a')
+                ?.attr("href");
 
-        let href = $(this)?.find?.(".pr-cell-title small a")?.text?.();
-        let ads = href?.split("_");
-        ads = ads?.[ads?.length - 1];
-        showIframePopup(url, ads);
-    }).on("contextmenu", "tbody>tr .pr-cell-title", function (e) {
-        e?.preventDefault();
-        e?.stopPropagation();
-        let href = $(this)?.find?.("small a")?.text?.();
-        let ads = href?.split("_");
-        ads = ads?.[ads?.length - 1];
-        copyText(ads);
-    });
+            let href = $(this)?.find?.(".pr-cell-title small a")?.text?.();
+            let ads = href?.split("_");
+            ads = ads?.[ads?.length - 1];
+            showIframePopup(url, ads);
+        })
+        .on("contextmenu", "tbody>tr .pr-cell-title", function (e) {
+            e?.preventDefault();
+            e?.stopPropagation();
+            let href = $(this)?.find?.("small a")?.text?.();
+            let ads = href?.split("_");
+            ads = ads?.[ads?.length - 1];
+            copyText(ads);
+        });
 
     // 更新观看量
     const updatePviews = async (isRefresh = true, isLast = false) => {
         let arr = OwnerAds?.getAdsList?.() || [];
-        let ySpent = 0
-        const list = arr?.map?.(v => {
-            let ads = getADSKey(v)
-            ySpent = ySpent + (+(v?.qspent || 0))
-            return { ads, views: v?.views || 0, clicks: v?.clicks || 0, actions: v?.actions || 0, spent: v?.spent || 0 }
-        })
+        let ySpent = 0;
+        const list = arr?.map?.((v) => {
+            let ads = getADSKey(v);
+            ySpent = ySpent + +(v?.qspent || 0);
+            return {
+                ads,
+                views: v?.views || 0,
+                clicks: v?.clicks || 0,
+                actions: v?.actions || 0,
+                spent: v?.spent || 0,
+            };
+        });
         if (!list?.length) return false;
 
-        const params = { adsUser: window.user, list }
+        const params = { adsUser: window.user, list };
 
         // 不是刷新时才出来推送
-        if(!isRefresh){
-            const budget = $('.pr-header-auth .pr-header-text .js-header_owner_budget .pr-link')?.text()?.match?.(/[-+]?\d*\.?\d+/g)?.[0];
-            let totalBudget = await getMonthTotal()
-                totalBudget = parseInt(totalBudget?.match?.(/[-+]?\d{1,3}(?:,\d{3})*(?:\.\d+)?|[-+]?\d+(?:\.\d+)?/g)?.[0]?.replace(/,/g, '') || '', 10)
-            if(budget && budget < 10 && window.user?.includes('天胜')){
-                params['budget'] = budget   // 当前预算
-                params['ySpent'] = ySpent.toFixed(0)   // 昨日消耗
+        if (!isRefresh) {
+            const budget = $(
+                ".pr-header-auth .pr-header-text .js-header_owner_budget .pr-link"
+            )
+                ?.text()
+                ?.match?.(/[-+]?\d*\.?\d+/g)?.[0];
+            let totalBudget = await getMonthTotal();
+            totalBudget = parseInt(
+                totalBudget
+                    ?.match?.(
+                        /[-+]?\d{1,3}(?:,\d{3})*(?:\.\d+)?|[-+]?\d+(?:\.\d+)?/g
+                    )?.[0]
+                    ?.replace(/,/g, "") || "",
+                10
+            );
+            if (budget && budget < 10 && window.user?.includes("天胜")) {
+                params["budget"] = budget; // 当前预算
+                params["ySpent"] = ySpent.toFixed(0); // 昨日消耗
             }
-            if(isLast && totalBudget && window.user?.includes('天胜')){
-                params['totalBudget'] = totalBudget
+            if (isLast && totalBudget && window.user?.includes("天胜")) {
+                params["totalBudget"] = totalBudget;
             }
         }
 
-        const res = await window.post('/ads/recordViews', params);
-        if(res){
+        const res = await window.post("/ads/recordViews", params);
+        if (res) {
             console.log("观看量更新成功");
         }
     };
@@ -3348,7 +3685,7 @@
         // }
 
         await updatePviews(false, isLast);
-    }
+    };
 
     const loop = () => {
         animationFrameId = requestAnimationFrame(loop);
@@ -3364,13 +3701,13 @@
                 runMyTask(hours === 23 && min === 59);
             }
         }
-    }
+    };
     loop(); // 启动
 
     // 主动停止调用，执行取消
     const stopLoop = () => {
         cancelAnimationFrame(animationFrameId);
-    }
+    };
 
-    window.loadFinish = true
+    window.loadFinish = true;
 })();
