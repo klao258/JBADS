@@ -42,7 +42,7 @@
     var maxWidth = "100%";
     var loadADSFlag = false;
 
-    // 生成
+    // 生成用户名ID
     const getShortId = async (url) => {
         const BASE62 =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -433,6 +433,9 @@
             ),
             createButton("今日数据", "getTodayData", async () =>
                 onGetTodayData()
+            ),
+            createButton("机器人投放检测", "botVerify", async () =>
+                onBotVerify()
             ),
         ];
 
@@ -3431,6 +3434,58 @@
             ads: accountAll?.[window.user]?.["en"],
         });
         console.log(res.data);
+    };
+
+    // 机器人投放验证
+    const onBotVerify = async () => {
+        let urls = $(".urls").value();
+        if (!urls.length) return toast("请先设置机器人链接");
+
+        urls = urls.split(/\r?\n/);
+
+        const searchChannel = (isBot, value) => {
+            return new Promise((resolve, reject) => {
+                Aj.apiRequest(
+                    isBot ? "searchBot" : "searchChannel",
+                    {
+                        owner_id: Aj.state.ownerId,
+                        query: value,
+                    },
+                    (result) => {
+                        if (result.error) {
+                            resolve(result.error);
+                            return false;
+                        }
+                        if (result.ok) {
+                            let item = {
+                                val: isBot ? result.bot.id : result.channel.val,
+                                name: isBot
+                                    ? result.bot.title
+                                    : result.channel.name,
+                                photo: isBot
+                                    ? result.bot.photo
+                                    : result.channel.photo,
+                                username: isBot
+                                    ? result.bot.username
+                                    : result.channel.username,
+                            };
+                            resolve(item);
+                        } else {
+                            resolve(false);
+                        }
+                    },
+                    (err) => {
+                        resolve(err);
+                    }
+                );
+            });
+        };
+
+        const sendArr = [];
+        for (const url of urls) {
+            let res = await searchChannel(true, url);
+            console.log("res", res);
+        }
     };
 
     // 提取数据
