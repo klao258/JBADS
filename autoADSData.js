@@ -168,7 +168,7 @@ const autoADSData = {
         天胜7: { en: "TS7", browser: "", code: "22782", options: [...TS] }, // 安仔
         天胜8: { en: "TS8", browser: "", code: "22780", options: [...TS] }, // 大山
         天胜9: { en: "TS9", browser: "", code: "22780", options: [...TS] }, // 大山
-        天胜10: { en: "TS10", browser: "", code: "22782", options: [...TS] }, // 安仔
+        天胜10: { en: "TS10", browser: "", code: "68661", options: [...TS] }, // 八哥
         天胜11: { en: "TS11", browser: "", code: "68661", options: [...TS] }, // 八哥
         天胜12: { en: "TS12", browser: "", code: "68661", options: [...TS] }, // 八哥
 
