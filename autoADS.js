@@ -43,7 +43,7 @@
     var loadADSFlag = false;
 
     // 生成
-    const getShortId = (url) => {
+    const getShortId = async (url) => {
         const BASE62 =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -90,7 +90,8 @@
             return toBase62(num).slice(0, length);
         };
 
-        return generateShortIdFromString(url);
+        const shortId = await generateShortIdFromString(url);
+        return shortId;
     };
 
     // 按状态排序
@@ -2402,7 +2403,7 @@
     };
 
     // 根据类型获取推广链接
-    const getUserUrl = (url) => {
+    const getUserUrl = async (url) => {
         let tgname = $(".select")?.val();
 
         // 先区分账号, 在区分下拉框选项
@@ -2417,7 +2418,7 @@
             const accountEN = accountAll?.[window.user]?.["en"] ?? "null"; // 推广账号
             let postID = ""; // 推广ID, 区分单链接(前6(频道用户名id) + 后4(随机文本)) 和 多链接(沿用之前的逻辑),
             if (url?.length) {
-                const shortId = getShortId(url); // 6位数
+                const shortId = await getShortId(url); // 6位数
                 const guId = guid(4); // 4位数
                 postID = `${shortId}${guId}`;
             } else {
@@ -3180,7 +3181,7 @@
         let params = {
             title, // 标题
             text: "", // 文案
-            promote_url: getUserUrl(), // 推广频道链接
+            promote_url: await getUserUrl(), // 推广频道链接
             cpm: getRNum(minPrice, maxPrice, 1), // 单价
             budget: getRNum(minBudget, maxBudget), // 总预算
             target_type: "search",
@@ -3250,7 +3251,7 @@
             let params = {
                 title, // 标题
                 text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-                promote_url: getUserUrl(url), // 推广链接
+                promote_url: await getUserUrl(url), // 推广链接
                 cpm: getRNum(minPrice, maxPrice, 1), // 单价
                 budget: getRNum(minBudget, maxBudget), // 总预算
                 target_type: isBot ? "bots" : "channels", // bots
@@ -3312,7 +3313,7 @@
         let params = {
             title: title, // 标题
             text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-            promote_url: getUserUrl(), // 推广链接
+            promote_url: await getUserUrl(), // 推广链接
             cpm: getRNum(minPrice, maxPrice, 1), // 单价
             budget: getRNum(minBudget, maxBudget), // 总预算
             target_type: isBot ? "bots" : "channels", // bots
