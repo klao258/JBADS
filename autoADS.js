@@ -3453,11 +3453,16 @@
                     },
                     (result) => {
                         if (result.error) {
-                            resolve(result.error);
+                            resolve({
+                                code: 1,
+                                username: value,
+                                error: result.error,
+                            });
                             return false;
                         }
                         if (result.ok) {
                             let item = {
+                                code: 0,
                                 val: isBot ? result.bot.id : result.channel.val,
                                 name: isBot
                                     ? result.bot.title
@@ -3471,21 +3476,30 @@
                             };
                             resolve(item);
                         } else {
-                            resolve(false);
+                            resolve({ code: 1, username: value });
                         }
                     },
-                    (err) => {
-                        resolve(err);
+                    (error) => {
+                        resolve({ code: 1, username: value, error });
                     }
                 );
             });
         };
 
-        const sendArr = [];
+        const successList = [];
+        const failList = [];
         for (const url of urls) {
             let res = await searchChannel(true, url);
-            console.log("res", res);
+            if (res?.code === 0) {
+                successList.push(`${res?.name} - ${res?.username}`);
+            } else if (res?.code === 1) {
+                if (res?.error?.includes?.("1000+")) {
+                    failList.push(`${res?.username}`);
+                }
+            }
         }
+        successList.map((v) => console.log(v));
+        failList.map((v) => console.log(v));
     };
 
     // 提取数据
