@@ -3461,18 +3461,17 @@
                             return false;
                         }
                         if (result.ok) {
+                            let name = result.bot.title?.replace(
+                                /<[^>]+>/g,
+                                ""
+                            );
+                            name = name.replace(/[\u{1D400}-\u{1D7FF}]/gu, "");
+                            name =
+                                name?.length > 19 ? name?.slice(0, 19) : name;
                             let item = {
                                 code: 0,
-                                val: isBot ? result.bot.id : result.channel.val,
-                                name: isBot
-                                    ? result.bot.title
-                                    : result.channel.name,
-                                photo: isBot
-                                    ? result.bot.photo
-                                    : result.channel.photo,
-                                username: isBot
-                                    ? result.bot.username
-                                    : result.channel.username,
+                                name: name,
+                                username: value,
                             };
                             resolve(item);
                         } else {
