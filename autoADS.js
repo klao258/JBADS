@@ -3493,6 +3493,7 @@
                 tmpList.push({
                     code: 0,
                     shortId,
+                    isPlace: 1,
                     title: res?.name || "",
                     username: res?.username || "",
                 });
@@ -3501,6 +3502,7 @@
                     tmpList.push({
                         code: 1,
                         shortId,
+                        isPlace: 0,
                         title: res?.name || "",
                         username: res?.username || "",
                     });
@@ -3524,7 +3526,11 @@
         });
 
         // 记录是否符合投放
-        // const res = await window.post("/api/channel/batchUpdate", params);
+        const data = tmpList?.map?.(({ shortId, isPlace }) => ({
+            shortId,
+            isPlace,
+        }));
+        const res = await window.post("/api/channel/batchUpdate", data);
     };
 
     // 提取数据
