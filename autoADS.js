@@ -3485,22 +3485,41 @@
             });
         };
 
-        const successList = [];
-        const failList = [];
+        const tmpList = [];
         for (const url of urls) {
+            const shortId = await getShortId();
             let res = await searchChannel(true, url);
             if (res?.code === 0) {
-                successList.push(`${res?.name} - ${res?.username}`);
+                tmpList.push({
+                    code: 0,
+                    shortId,
+                    title: res?.name || "",
+                    username: res?.username || "",
+                });
             } else if (res?.code === 1) {
                 if (res?.error?.includes?.("1000+")) {
-                    failList.push(`${res?.username}`);
+                    tmpList.push({
+                        code: 1,
+                        shortId,
+                        title: res?.name || "",
+                        username: res?.username || "",
+                    });
                 }
             }
         }
-        successList.map((v) => console.log(`可投放：${v}`));
-        failList.map((v) =>
-            console.log(`日活跃不足：${v?.replace(/https:\/\/t.me\//, "")}`)
-        );
+        console.log("tmpList", tmpList);
+        tmpList.map((v) => {
+            if (v.code === 0) {
+                console.log(`可投放：${v.title} - ${v.username}`);
+            } else if (v.code === 1) {
+                console.log(
+                    `日活跃不足：${v.username?.replace(/https:\/\/t.me\//, "")}`
+                );
+            }
+        });
+
+        // 记录是否符合投放
+        // const res = await window.post("/api/channel/batchUpdate", params);
     };
 
     // 提取数据
