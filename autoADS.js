@@ -3498,8 +3498,10 @@
                 }
             }
         }
-        successList.map((v) => console.log(v));
-        failList.map((v) => console.log(v));
+        successList.map((v) => console.log(`可投放：${v}`));
+        failList.map((v) =>
+            console.log(`日活跃不足：${v?.replace(/https:\/\/t.me\//, "")}`)
+        );
     };
 
     // 提取数据
