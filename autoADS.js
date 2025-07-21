@@ -2949,6 +2949,7 @@
             views_per_user: getRNum(1, 4), // 观看次数
         };
         Aj.apiRequest("editAd", data, function (result) {
+            console.log("重审结果1", result);
             if (result.error) {
                 return false;
             }
@@ -2991,6 +2992,7 @@
         const submitArr = [];
         for (const row of list) {
             let res = await editAd(row);
+            console.log("重审结果", res);
             submitArr.push(res);
         }
         let successNum = submitArr.filter((flag) => flag)?.length;
