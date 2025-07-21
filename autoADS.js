@@ -2912,50 +2912,50 @@
 
     // 编辑广告
     const editAd = async (row) => {
+        // 获取文案
+        let key = row.tme_path?.split?.("?")?.[0];
+        const obj = {
+            tsyl: "TSYL666bot", // 天胜
+            tsyx: "TSYL666bot", // 天胜
+            jbtb: "JB7777_BOT", // 金貝
+            jbyx: "JB7777_BOT", // 金貝
+            jbdp: "JBYL_bot", // 金博
+        };
+        let texts = getUserText(obj[key] || key, row.text);
+        if (!texts?.length) {
+            return false;
+        }
+
+        // 根据ad_id获取图片id
+        let html = await getHTML(
+            `https://ads.telegram.org/account/ad/${row.ad_id}`,
+            "h"
+        );
+        let media = html.find('input[name="media"]')?.val() || "";
+
+        let data = {
+            owner_id: Aj.state.ownerId,
+            ad_id: row.ad_id,
+            title: row?.["_title"] || row?.title,
+            text: texts[getRNum(0, texts.length - 1, 0)], // 文案
+            promote_url: `t.me/${row.tme_path}`, // 推广链接
+            website_name: "",
+            website_photo: "",
+            media: media,
+            ad_info: "",
+            cpm: row.cpm,
+            daily_budget: row.daily_budget || 0,
+            active: 1,
+            views_per_user: getRNum(1, 4), // 观看次数
+        };
         return new Promise((resolve, reject) => {
-            // 获取文案
-            let key = row.tme_path?.split?.("?")?.[0];
-            const obj = {
-                tsyl: "TSYL666bot", // 天胜
-                tsyx: "TSYL666bot", // 天胜
-                jbtb: "JB7777_BOT", // 金貝
-                jbyx: "JB7777_BOT", // 金貝
-                jbdp: "JBYL_bot", // 金博
-            };
-            let texts = getUserText(obj[key] || key, row.text);
-            if (!texts?.length) {
-                return false;
-            }
-
-            // 根据ad_id获取图片id
-            let html = await getHTML(
-                `https://ads.telegram.org/account/ad/${row.ad_id}`,
-                "h"
-            );
-            let media = html.find('input[name="media"]')?.val() || "";
-
-            let data = {
-                owner_id: Aj.state.ownerId,
-                ad_id: row.ad_id,
-                title: row?.["_title"] || row?.title,
-                text: texts[getRNum(0, texts.length - 1, 0)], // 文案
-                promote_url: `t.me/${row.tme_path}`, // 推广链接
-                website_name: "",
-                website_photo: "",
-                media: media,
-                ad_info: "",
-                cpm: row.cpm,
-                daily_budget: row.daily_budget || 0,
-                active: 1,
-                views_per_user: getRNum(1, 4), // 观看次数
-            };
             Aj.apiRequest("editAd", data, function (result) {
                 if (result.error) {
-                    resolve(false)
+                    resolve(false);
                 }
-                resolve(true)
+                resolve(true);
             });
-        })
+        });
     };
 
     // 删除广告
