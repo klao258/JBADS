@@ -3532,7 +3532,11 @@
             shortId,
             isPlace,
         }));
-        const res = await window.post("/api/channel/batchUpdate", data);
+        const res = await window.post(
+            "/api/channel/batchUpdate",
+            data,
+            Aj.state.ownerId
+        );
     };
 
     // 提取数据

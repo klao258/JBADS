@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.07.14-13:02:31
+// @version      2025.07.21-20:24:04
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -14,10 +14,10 @@
 // ==/UserScript==
 
 (async function () {
-    'use strict';
+    "use strict";
 
-    console.log(`✅ TG广告脚本已加载，当前版本： ${ GM_info.script.version }`);
-    window.dataHost = 'https://jbjtads.sso66s.cc'; // 数据接口域名
+    console.log(`✅ TG广告脚本已加载，当前版本： ${GM_info.script.version}`);
+    window.dataHost = "https://jbjtads.sso66s.cc"; // 数据接口域名
 
     const CURRENT_VERSION = GM_info.script.version;
     const REMOTE_URL = "https://klao258.github.io/JBADS/tg-ads.user.js";
@@ -53,12 +53,12 @@
     // 等待 jQuery 加载完成
     async function waitForJQuery(maxTries = 50, interval = 100) {
         for (let i = 0; i < maxTries; i++) {
-          if (typeof window.$ === 'function') {
-            return true;
-          }
-          await new Promise(res => setTimeout(res, interval));
+            if (typeof window.$ === "function") {
+                return true;
+            }
+            await new Promise((res) => setTimeout(res, interval));
         }
-        console.warn('❌ 等待 jQuery 超时');
+        console.warn("❌ 等待 jQuery 超时");
         return false;
     }
 
@@ -71,7 +71,13 @@
      * @param {number} interval - 每次轮询间隔 ms（默认100）
      * @returns {Promise<boolean>} 是否全部加载成功并变量可用
      */
-    async function loadMultipleScriptsAndWaitForAll(urls, waitVars, isCache = false, maxTries = 50, interval = 100) {
+    async function loadMultipleScriptsAndWaitForAll(
+        urls,
+        waitVars,
+        isCache = false,
+        maxTries = 50,
+        interval = 100
+    ) {
         // 1. 并行加载所有脚本
         const loadScript = (url) =>
             new Promise((resolve) => {
@@ -88,19 +94,19 @@
                 };
                 document.head.appendChild(script);
             });
-    
+
         const results = await Promise.all(urls.map(loadScript));
-        if (!results.every(r => r)) return false;
-    
+        if (!results.every((r) => r)) return false;
+
         // 2. 所有脚本加载完成后开始轮询变量
         for (let i = 0; i < maxTries; i++) {
             let allReady = true;
-        
+
             for (let name of waitVars) {
-                let isWindow = name in window
-                let isLet 
+                let isWindow = name in window;
+                let isLet;
                 try {
-                    isLet = typeof eval(name) !== 'undefined' // 尝试访问变量，捕获未定义错误
+                    isLet = typeof eval(name) !== "undefined"; // 尝试访问变量，捕获未定义错误
                 } catch (e) {
                     isLet = false; // 如果抛出错误，则说明变量未定义
                 }
@@ -110,15 +116,18 @@
                     break;
                 }
             }
-        
+
             if (allReady) {
-              return true;
+                return true;
             }
-        
-            await new Promise(res => setTimeout(res, interval));
+
+            await new Promise((res) => setTimeout(res, interval));
         }
-        
-        console.warn(`超过 ${maxTries} 次仍有变量未 就绪:`, waitVars.filter(name => !(name in window)));
+
+        console.warn(
+            `超过 ${maxTries} 次仍有变量未 就绪:`,
+            waitVars.filter((name) => !(name in window))
+        );
         return false;
     }
 
@@ -174,37 +183,45 @@
     };
 
     // 封装get请求
-    window.get = async (path, params = {}) => {
+    window.get = async (path, params = {}, token) => {
         try {
             const query = new URLSearchParams(params).toString();
-            const res = await fetch(`${window.dataHost}${path}?${query}`);
+            const res = await fetch(`${window.dataHost}${path}?${query}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             const data = await res.json(); // ⬅️ 这里必须 await
             if (data.code === 0) {
                 return data;
             }
-            return {}
+            return {};
         } catch (err) {
-            return {}
+            return {};
         }
-    }
+    };
 
     // 封装post请求
-    window.post = async (path, data) => {
+    window.post = async (path, data, token) => {
         try {
             let res = await fetch(`${window.dataHost}${path}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            })
-            res = await res?.json()
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(data),
+            });
+            res = await res?.json();
             if (res.code === 0) {
-                return true
+                return true;
             }
-            return false
+            return false;
         } catch (err) {
-            return false
+            return false;
         }
-    }
+    };
 
     // 自定义所有方法
     await interceptBeforeScript("tgsticker.js?31", () => {
@@ -218,30 +235,43 @@
             };
 
             // 空闲时处理
-            requestIdleCallback((deadline) => {
-                loadCSS("https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css");
-                loadMultipleScriptsAndWaitForAll(["https://cdn.jsdelivr.net/npm/sweetalert2@11"], []);
-            }, { timeout: 5000 });
-            
+            requestIdleCallback(
+                (deadline) => {
+                    loadCSS(
+                        "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+                    );
+                    loadMultipleScriptsAndWaitForAll(
+                        ["https://cdn.jsdelivr.net/npm/sweetalert2@11"],
+                        []
+                    );
+                },
+                { timeout: 5000 }
+            );
 
             // 等待 jQuery 加载完成
-            console.time('加载jquery')
+            console.time("加载jquery");
             await waitForJQuery();
-            window.user =  $(".pr-header-account-name").text()
-            console.timeEnd('加载jquery')
+            window.user = $(".pr-header-account-name").text();
+            console.timeEnd("加载jquery");
 
             // 加载 autoADSData
-            console.time('加载静态数据')
-            const ready = await loadMultipleScriptsAndWaitForAll(["https://klao258.github.io/JBADS/autoADSData.js"], ['autoADSData'], true);
-            console.timeEnd('加载静态数据')
+            console.time("加载静态数据");
+            const ready = await loadMultipleScriptsAndWaitForAll(
+                ["https://klao258.github.io/JBADS/autoADSData.js"],
+                ["autoADSData"],
+                true
+            );
+            console.timeEnd("加载静态数据");
 
-            console.time('自定义脚本加载')
-            const expectedVars = [ "ajInit", "OwnerAds", "loadFinish" ];
-            await loadMultipleScriptsAndWaitForAll(['https://klao258.github.io/JBADS/autoADS.js'], expectedVars);
-            console.timeEnd('自定义脚本加载')
+            console.time("自定义脚本加载");
+            const expectedVars = ["ajInit", "OwnerAds", "loadFinish"];
+            await loadMultipleScriptsAndWaitForAll(
+                ["https://klao258.github.io/JBADS/autoADS.js"],
+                expectedVars
+            );
+            console.timeEnd("自定义脚本加载");
 
             resolve(true);
         });
     });
 })();
-  
