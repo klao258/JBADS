@@ -183,13 +183,13 @@
     };
 
     // 封装get请求
-    window.get = async (path, params = {}, token) => {
+    window.get = async (path, params = {}) => {
         try {
             const query = new URLSearchParams(params).toString();
             const res = await fetch(`${window.dataHost}${path}?${query}`, {
                 method: "GET",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${Aj.state.ownerId}`,
                 },
             });
             const data = await res.json(); // ⬅️ 这里必须 await
@@ -203,13 +203,13 @@
     };
 
     // 封装post请求
-    window.post = async (path, data, token) => {
+    window.post = async (path, data) => {
         try {
             let res = await fetch(`${window.dataHost}${path}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${Aj.state.ownerId}`,
                 },
                 body: JSON.stringify(data),
             });
