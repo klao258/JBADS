@@ -18,7 +18,6 @@
     const cpms_store = window.cpms_store; // 记录单价
     const pviews_store = window.pviews_store; // 记录展示量
 
-    console.log(123, Aj.state.ownerId);
     const postDate = await window.get("/user/getAccoutPost", {
         ads: autoADSData?.["accountAll"]?.[window.user]?.["en"],
     });
