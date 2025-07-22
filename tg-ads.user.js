@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG广告发布自动化脚本
 // @namespace    https://klao258.github.io/
-// @version      2025.07.22-14:54:31
+// @version      2025.07.22-15:10:41
 // @description  Telegram ADS 自动发布辅助工具，支持结构注入、页面监听、数据联动等功能
 // @author       You
 // @match        https://ads.telegram.org/*
@@ -186,8 +186,15 @@
     window.get = async (path, params = {}, token) => {
         try {
             const query = new URLSearchParams(params).toString();
+            const headers = {};
+
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+
             const res = await fetch(`${window.dataHost}${path}?${query}`, {
                 method: "GET",
+                headers,
             });
             const data = await res.json(); // ⬅️ 这里必须 await
             if (data.code === 0) {
@@ -202,11 +209,17 @@
     // 封装post请求
     window.post = async (path, data, token) => {
         try {
+            const headers = {
+                "Content-Type": "application/json",
+            };
+
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+
             let res = await fetch(`${window.dataHost}${path}`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify(data),
             });
             res = await res?.json();
