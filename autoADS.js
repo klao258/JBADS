@@ -3423,18 +3423,26 @@
 
     // 查看哪些链接协议号注册多
     const onGetENFilter = async () => {
-        const res = await window.get("/ads/getAdsUEN", {
-            ads: accountAll?.[window.user]?.["en"],
-        });
+        const res = await window.get(
+            "/ads/getAdsUEN",
+            {
+                ads: accountAll?.[window.user]?.["en"],
+            },
+            Aj.state.ownerId
+        );
         console.log(res.data);
     };
 
     // 获取今日数据
     const onGetTodayData = async () => {
         await syncAdsAll();
-        const res = await window.get("/ads/getTodayData", {
-            ads: accountAll?.[window.user]?.["en"],
-        });
+        const res = await window.get(
+            "/ads/getTodayData",
+            {
+                ads: accountAll?.[window.user]?.["en"],
+            },
+            Aj.state.ownerId
+        );
         console.log(res.data);
     };
 
