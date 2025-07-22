@@ -188,9 +188,6 @@
             const query = new URLSearchParams(params).toString();
             const res = await fetch(`${window.dataHost}${path}?${query}`, {
                 method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
             });
             const data = await res.json(); // ⬅️ 这里必须 await
             if (data.code === 0) {
@@ -209,7 +206,6 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(data),
             });
