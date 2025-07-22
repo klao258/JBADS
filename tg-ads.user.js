@@ -183,13 +183,16 @@
     };
 
     // 封装get请求
-    window.get = async (path, params = {}) => {
+    window.get = async (path, params = {}, token) => {
         try {
             const query = new URLSearchParams(params).toString();
             const headers = {};
-
+            if (token) {
+                headers["token"] = token;
+            }
             const res = await fetch(`${window.dataHost}${path}?${query}`, {
                 method: "GET",
+                headers,
             });
             const data = await res.json(); // ⬅️ 这里必须 await
             if (data.code === 0) {
@@ -202,12 +205,14 @@
     };
 
     // 封装post请求
-    window.post = async (path, data) => {
+    window.post = async (path, data, token) => {
         try {
             const headers = {
                 "Content-Type": "application/json",
             };
-
+            if (token) {
+                headers["token"] = token;
+            }
             let res = await fetch(`${window.dataHost}${path}`, {
                 method: "POST",
                 headers,
