@@ -75,6 +75,7 @@ const autoADSData = {
         "天胜10",
         "天胜11",
         "天胜12",
+        "天胜13",
     ],
 
     // 账号信息
@@ -184,6 +185,7 @@ const autoADSData = {
         天胜10: { en: "TS10", browser: "", code: "68661", options: [...TS] }, // 八哥
         天胜11: { en: "TS11", browser: "", code: "68661", options: [...TS] }, // 八哥
         天胜12: { en: "TS12", browser: "", code: "68661", options: [...TS] }, // 八哥
+        天胜13: { en: "TS13", browser: "", code: "68661", options: [...TS] }, // 八哥
 
         /** 金貝机器人、频道 */
         金貝频道: {
