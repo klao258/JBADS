@@ -80,7 +80,7 @@ const autoADSData = {
     // 账号信息
     accountAll: {
         /** 金貝推广 */
-        "金貝招商 @jbdb（请直奔主题） 没有时间闲聊": {
+        "金貝招商444 （请直奔主题）@jbqb金貝担保": {
             en: "ZhaoShang",
             browser: 0,
             code: "64777",
@@ -98,7 +98,13 @@ const autoADSData = {
             code: "64777",
             options: [...FB],
         },
-        "ads 可可": { en: "KeKe", browser: 9, code: "64777", options: [...FB] },
+        "Violetta Lucia": {
+            // ads 可可
+            en: "KeKe",
+            browser: 9,
+            code: "64777",
+            options: [...FB],
+        },
 
         "ads 菲菲": {
             en: "FeiFei",
@@ -132,7 +138,8 @@ const autoADSData = {
             options: [...FB],
         },
 
-        "ads 晶晶": {
+        "Darlene Dino": {
+            // ads 晶晶
             en: "JingJing",
             browser: 1,
             code: "64782",
@@ -144,7 +151,13 @@ const autoADSData = {
             code: "64782",
             options: [...FB],
         },
-        "ads 妮妮": { en: "NiNi", browser: 7, code: "64782", options: [...FB] },
+        "Ila David": {
+            // ads 妮妮
+            en: "NiNi",
+            browser: 7,
+            code: "64782",
+            options: [...FB],
+        },
 
         "金貝推广-七月": {
             en: "GZQiQi",
