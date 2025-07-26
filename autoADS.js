@@ -3306,8 +3306,9 @@
         let title = "";
         let ids = [];
         channelArr.map((v) => {
+            if (!v) return false;
             if (!title.length) {
-                let name = v.name.replace(/<[^>]+>/g, "");
+                let name = v?.name?.replace(/<[^>]+>/g, "");
                 title = name.length > 19 ? name.slice(0, 19) : name;
             }
             ids.push(v.val);
