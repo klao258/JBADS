@@ -1589,11 +1589,10 @@
             }
         },
         processAdsList: async function (result, opts) {
-            if (!$(".table > thead > tr .pviews")?.length) {
+            if (!$(".table > thead > tr .pviews")?.length && isShowData) {
                 $(".table > thead > tr > th:first").after(`
                     ${
-                        accountAll?.[window.user]?.options?.length === 1 &&
-                        isShowData
+                        accountAll?.[window.user]?.options?.length === 1
                             ? `
                         <th width="65" style="display:var(--coldp-score,table-cell)">
                             <div class="score pr-cell pr-cell-sort" data-sort-by="score">评分<span class="pr-sort-marker"></span></div>
