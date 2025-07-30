@@ -21,7 +21,7 @@
     const postDate = await window.get("/user/getAccoutPost", {
         ads: autoADSData?.["accountAll"]?.[window.user]?.["en"],
     });
-    window.postData = postDate?.data || [];
+    window.postData = []; // postDate?.data || [];
 
     // 获取近3日的浏览数据
     const viewListTmp = await window.get("/ads/getAdsDailyStats", {
