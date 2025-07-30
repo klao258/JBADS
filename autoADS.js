@@ -24,7 +24,7 @@
 
     // 数据
     let isShowData = true; // 是否展示数据
-    window.postData = []; // postDate?.data || [];
+    window.postData = isShowData ? postDate?.data || [] : [];
 
     // 获取近3日的浏览数据
     const viewListTmp = await window.get("/ads/getAdsDailyStats", {
@@ -1318,7 +1318,8 @@
                         </td>
 
                         ${
-                            accountAll?.[window.user]?.options?.length === 1
+                            accountAll?.[window.user]?.options?.length === 1 &&
+                            isShowData
                                 ? `
                                 <td><div class="pr-cell score">${
                                     item.score || ""
