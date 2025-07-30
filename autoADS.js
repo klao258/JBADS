@@ -21,6 +21,9 @@
     const postDate = await window.get("/user/getAccoutPost", {
         ads: autoADSData?.["accountAll"]?.[window.user]?.["en"],
     });
+
+    // 数据
+    let isShowData = false; // 是否展示数据
     window.postData = []; // postDate?.data || [];
 
     // 获取近3日的浏览数据
@@ -1589,7 +1592,8 @@
             if (!$(".table > thead > tr .pviews")?.length) {
                 $(".table > thead > tr > th:first").after(`
                     ${
-                        accountAll?.[window.user]?.options?.length === 1
+                        accountAll?.[window.user]?.options?.length === 1 &&
+                        isShowData
                             ? `
                         <th width="65" style="display:var(--coldp-score,table-cell)">
                             <div class="score pr-cell pr-cell-sort" data-sort-by="score">评分<span class="pr-sort-marker"></span></div>
