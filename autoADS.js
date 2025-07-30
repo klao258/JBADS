@@ -23,7 +23,7 @@
     });
 
     // 数据
-    let isShowData = false; // 是否展示数据
+    let isShowData = true; // 是否展示数据
     window.postData = []; // postDate?.data || [];
 
     // 获取近3日的浏览数据
