@@ -4,6 +4,7 @@
   "description": "JB旗下ADS专用，油猴脚本1234",
   "main": "autoADS.js",
   "scripts": {
+    "build": "node minify.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
