@@ -257,7 +257,7 @@
             // 加载 autoADSData
             console.time("加载静态数据");
             const ready = await loadMultipleScriptsAndWaitForAll(
-                ["https://klao258.github.io/JBADS/autoADSData.js"],
+                ["https://klao258.github.io/JBADS/autoADSData.min.js"],
                 ["autoADSData"],
                 true
             );
@@ -266,7 +266,7 @@
             console.time("自定义脚本加载");
             const expectedVars = ["ajInit", "OwnerAds", "loadFinish"];
             await loadMultipleScriptsAndWaitForAll(
-                ["https://klao258.github.io/JBADS/autoADS.js"],
+                ["https://klao258.github.io/JBADS/autoADS.min.js"],
                 expectedVars
             );
             console.timeEnd("自定义脚本加载");
