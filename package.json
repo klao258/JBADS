@@ -1,0 +1,23 @@
+{
+  "name": "jbads",
+  "version": "1.0.0",
+  "description": "JB旗下ADS专用，油猴脚本1234",
+  "main": "autoADS.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/klao258/JBADS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/klao258/JBADS/issues"
+  },
+  "homepage": "https://github.com/klao258/JBADS#readme",
+  "devDependencies": {
+    "uglify-js": "^3.19.3"
+  }
+}

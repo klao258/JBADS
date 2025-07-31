@@ -14,3 +14,7 @@ pids/
 *.session
 *.session-journal
 python/python.session-journal
+
+
+autoADS.js
+autoADSData.js
